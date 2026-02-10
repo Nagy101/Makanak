@@ -9,6 +9,8 @@ import LoginPage from "./features/auth/pages/LoginPage";
 import RegisterPage from "./features/auth/pages/RegisterPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ProfilePage from "./features/auth/pages/ProfilePage";
+import PropertiesPage from "./features/properties/pages/PropertiesPage";
+import PropertyDetailsPage from "./features/properties/pages/PropertyDetailsPage";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/properties" element={<PropertiesPage />} />
+          <Route path="/properties/:id" element={<PropertyDetailsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

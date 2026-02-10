@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Building2, ArrowRight } from 'lucide-react';
+import { Building2, ArrowRight, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
@@ -19,12 +19,14 @@ const Index = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild size="lg" className="h-12 px-8 font-semibold">
-            <Link to="/login">
-              Sign In <ArrowRight className="ml-2 h-4 w-4" />
+            <Link to="/properties">
+              <Search className="mr-2 h-4 w-4" /> Browse Properties
             </Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="h-12 px-8 font-semibold">
-            <Link to="/register">Create Account</Link>
+            <Link to="/login">
+              Sign In <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </div>
