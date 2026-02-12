@@ -14,7 +14,7 @@ const api = axios.create({
 
 // Attach token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('makanak_token');
+  const token = localStorage.getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });

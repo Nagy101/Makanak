@@ -12,14 +12,14 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  token: localStorage.getItem('makanak_token'),
+  token: localStorage.getItem('token'),
   setAuth: (user, token) => {
-    localStorage.setItem('makanak_token', token);
+    localStorage.setItem('token', token);
     set({ user, token });
   },
   setUser: (user) => set({ user }),
   clearAuth: () => {
-    localStorage.removeItem('makanak_token');
+    localStorage.removeItem('token');
     set({ user: null, token: null });
   },
   isAuthenticated: () => !!get().token,

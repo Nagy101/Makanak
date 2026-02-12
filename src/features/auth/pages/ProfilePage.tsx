@@ -1,10 +1,12 @@
 import { useState, useRef } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import {
   Building2, Camera, CheckCircle2, Clock, Loader2, LogOut,
-  Mail, Phone, Shield, Upload, User, XCircle, KeyRound,
+  Mail, Phone, Shield, Upload, User, XCircle, KeyRound, Calendar, Lock,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -31,12 +33,13 @@ const identitySchema = z.object({
 });
 
 const emailChangeSchema = z.object({
-  newEmail: z.string().email('Enter a valid email'),
+  Email: z.string().email('Enter a valid email'),
+  currentPassword: z.string().min(6, 'Password is required'),
 });
 
 const confirmEmailSchema = z.object({
   otp: z.string().min(4, 'OTP required'),
-  newEmail: z.string().min(1).email(),
+  Email: z.string().min(1).email(),
 });
 
 
@@ -65,6 +68,16 @@ const ProfilePage = () => {
     values: { Name: user?.name ?? '', PhoneNumber: user?.phoneNumber ?? '' },
   });
 
+  // Set initial preview for identity images if they exist and are verified
+  React.useEffect(() => {
+    if (user?.nationalIdImageFrontUrl && !frontIdPreview) {
+      setFrontIdPreview(user.nationalIdImageFrontUrl);
+    }
+    if (user?.nationalIdImageBackUrl && !backIdPreview) {
+      setBackIdPreview(user.nationalIdImageBackUrl);
+    }
+  }, [user?.nationalIdImageFrontUrl, user?.nationalIdImageBackUrl, frontIdPreview, backIdPreview]);
+
   const identityForm = useForm<z.infer<typeof identitySchema>>({
     resolver: zodResolver(identitySchema),
     values: { NationalId: user?.nationalId ?? '' },
@@ -76,7 +89,7 @@ const ProfilePage = () => {
 
   const confirmEmailForm = useForm<z.infer<typeof confirmEmailSchema>>({
     resolver: zodResolver(confirmEmailSchema),
-    defaultValues: { newEmail: '', otp: '' },
+    defaultValues: { Email: '', otp: '' },
   });
 
   const handleFilePreview = (
@@ -108,15 +121,29 @@ const ProfilePage = () => {
   });
 
   const handleEmailInitiate = emailForm.handleSubmit((d) => {
-    setPendingEmail(d.newEmail);
-    confirmEmailForm.setValue('newEmail', d.newEmail);
-    initiateEmail.mutate({ newEmail: d.newEmail }, {
+    setPendingEmail(d.Email);
+    confirmEmailForm.setValue('Email', d.Email);
+    initiateEmail.mutate({ newEmail: d.Email, currentPassword: d.currentPassword }, {
       onSuccess: () => setEmailStep('confirm'),
     });
   });
 
   const handleEmailConfirm = confirmEmailForm.handleSubmit((d) => {
-    confirmEmail.mutate({ otp: d.otp!, newEmail: d.newEmail! }, { onSuccess: () => setEmailStep('initiate') });
+    confirmEmail.mutate({ otp: d.otp!, Email: d.Email! }, {
+      onSuccess: () => {
+        toast.success('Email changed successfully! Logging out...');
+        setTimeout(() => {
+          // Hard logout - clear all auth data
+          localStorage.removeItem('token');
+          sessionStorage.clear();
+          // Hard refresh to clear all state
+          window.location.href = '/login';
+        }, 1500);
+      },
+      onError: (error: any) => {
+        toast.error(error?.response?.data?.message || 'Failed to confirm email change. Please try again.');
+      }
+    });
   });
 
   if (isLoading) {
@@ -166,9 +193,9 @@ const ProfilePage = () => {
               {/* Avatar */}
               <div className="relative group">
                 <div className="h-28 w-28 rounded-full border-4 border-card bg-muted overflow-hidden shadow-lg">
-                  {avatarPreview || user?.profilePicture ? (
+                  {avatarPreview || user?.profilePictureUrl ? (
                     <img
-                      src={avatarPreview || user?.profilePicture}
+                      src={avatarPreview || user?.profilePictureUrl}
                       alt="Profile"
                       className="h-full w-full object-cover"
                     />
@@ -201,7 +228,7 @@ const ProfilePage = () => {
                 <p className="text-muted-foreground">{user?.email}</p>
               </div>
               <div className="flex gap-2 flex-wrap">
-                {user?.isIdentityVerified ? (
+                {user?.userStatus === 'Active' ? (
                   <Badge className="bg-success text-success-foreground gap-1"><CheckCircle2 className="h-3 w-3" /> Verified</Badge>
                 ) : (
                   <Badge variant="secondary" className="gap-1"><Clock className="h-3 w-3" /> Unverified</Badge>
@@ -253,6 +280,33 @@ const ProfilePage = () => {
                       </div>
                     </div>
                   </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input id="email" type="email" className="pl-10 bg-muted" value={user?.email ?? ''} disabled />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="userType">Account Type</Label>
+                      <Input id="userType" className="bg-muted" value={user?.userType ?? ''} disabled />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="age">Age</Label>
+                      <Input id="age" type="number" className="bg-muted" value={user?.age ?? ''} disabled />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="address">Address</Label>
+                      <Input id="address" className="bg-muted" value={user?.address ?? ''} disabled />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="joinAt">Member Since</Label>
+                    <Input id="joinAt" className="bg-muted" value={user?.joinAt ? new Date(user.joinAt).toLocaleDateString() : ''} disabled />
+                  </div>
                   <Separator />
                   <div className="flex justify-end">
                     <Button type="submit" disabled={updateProfile.isPending}>
@@ -271,23 +325,51 @@ const ProfilePage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   Identity Verification
-                  {user?.isIdentityVerified ? (
+                  {user?.userStatus === 'Active' ? (
                     <Badge className="bg-success text-success-foreground gap-1"><CheckCircle2 className="h-3 w-3" /> Verified</Badge>
                   ) : (
                     <Badge variant="outline" className="gap-1 text-muted-foreground"><XCircle className="h-3 w-3" /> Not Verified</Badge>
                   )}
                 </CardTitle>
-                <CardDescription>Upload your national ID to verify your identity</CardDescription>
+                <CardDescription>Your national ID information and verification status</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleIdentitySubmit} className="space-y-5">
-                  <div className="space-y-2">
-                    <Label htmlFor="nationalId">National ID Number</Label>
-                    <Input id="nationalId" placeholder="Enter your national ID" {...identityForm.register('NationalId')} />
-                    {identityForm.formState.errors.NationalId && (
-                      <p className="text-sm text-destructive">{identityForm.formState.errors.NationalId.message}</p>
-                    )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="nationalId">National ID Number</Label>
+                      {user?.userStatus === 'Active' ? (
+                        <Input id="nationalId" className="bg-muted" value={user?.nationalId ?? ''} disabled />
+                      ) : (
+                        <>
+                          <Input id="nationalId" placeholder="Enter your national ID" {...identityForm.register('NationalId')} />
+                          {identityForm.formState.errors.NationalId && (
+                            <p className="text-sm text-destructive">{identityForm.formState.errors.NationalId.message}</p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="verificationStatus">Verification Status</Label>
+                      <Input id="verificationStatus" className="bg-muted" value={user?.userStatus ?? 'Pending'} disabled />
+                    </div>
                   </div>
+
+                  {user?.strikeCount !== undefined && (
+                    <div className="space-y-2">
+                      <Label htmlFor="strikeCount">Strike Count</Label>
+                      <Input id="strikeCount" type="number" className="bg-muted" value={user.strikeCount} disabled />
+                    </div>
+                  )}
+
+                  {user?.rejectedReason && (
+                    <div className="space-y-2">
+                      <Label>Rejection Reason</Label>
+                      <div className="p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
+                        {user.rejectedReason}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {/* Front ID */}
@@ -295,58 +377,76 @@ const ProfilePage = () => {
                       <Label>ID Front</Label>
                       <button
                         type="button"
-                        onClick={() => frontIdRef.current?.click()}
-                        className="w-full h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors overflow-hidden"
+                        onClick={() => user?.userStatus !== 'Active' && frontIdRef.current?.click()}
+                        disabled={user?.userStatus === 'Active'}
+                        className={`w-full h-56 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-colors overflow-auto bg-muted/50 ${
+                          user?.userStatus === 'Active'
+                            ? 'text-muted-foreground cursor-not-allowed'
+                            : 'text-muted-foreground hover:border-primary hover:text-primary cursor-pointer'
+                        }`}
                       >
                         {frontIdPreview ? (
-                          <img src={frontIdPreview} alt="Front ID" className="h-full w-full object-cover" />
+                          <img src={frontIdPreview} alt="Front ID" className="max-h-full max-w-full object-contain" />
                         ) : (
                           <>
                             <Upload className="h-8 w-8" />
-                            <span className="text-sm font-medium">Upload front side</span>
+                            <span className="text-sm font-medium">{user?.userStatus === 'Active' ? 'Verified' : 'Upload front side'}</span>
                           </>
                         )}
                       </button>
-                      <input ref={frontIdRef} type="file" accept="image/*" className="hidden"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) handleFilePreview(f, setFrontIdPreview, setFrontIdFile);
-                        }}
-                      />
+                      {user?.userStatus !== 'Active' && (
+                        <input ref={frontIdRef} type="file" accept="image/*" className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleFilePreview(f, setFrontIdPreview, setFrontIdFile);
+                          }}
+                        />
+                      )}
                     </div>
                     {/* Back ID */}
                     <div className="space-y-2">
                       <Label>ID Back</Label>
                       <button
                         type="button"
-                        onClick={() => backIdRef.current?.click()}
-                        className="w-full h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors overflow-hidden"
+                        onClick={() => user?.userStatus !== 'Active' && backIdRef.current?.click()}
+                        disabled={user?.userStatus === 'Active'}
+                        className={`w-full h-56 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-colors overflow-auto bg-muted/50 ${
+                          user?.userStatus === 'Active'
+                            ? 'text-muted-foreground cursor-not-allowed'
+                            : 'text-muted-foreground hover:border-primary hover:text-primary cursor-pointer'
+                        }`}
                       >
                         {backIdPreview ? (
-                          <img src={backIdPreview} alt="Back ID" className="h-full w-full object-cover" />
+                          <img src={backIdPreview} alt="Back ID" className="max-h-full max-w-full object-contain" />
                         ) : (
                           <>
                             <Upload className="h-8 w-8" />
-                            <span className="text-sm font-medium">Upload back side</span>
+                            <span className="text-sm font-medium">{user?.userStatus === 'Active' ? 'Verified' : 'Upload back side'}</span>
                           </>
                         )}
                       </button>
-                      <input ref={backIdRef} type="file" accept="image/*" className="hidden"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) handleFilePreview(f, setBackIdPreview, setBackIdFile);
-                        }}
-                      />
+                      {user?.userStatus !== 'Active' && (
+                        <input ref={backIdRef} type="file" accept="image/*" className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleFilePreview(f, setBackIdPreview, setBackIdFile);
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
 
-                  <Separator />
-                  <div className="flex justify-end">
-                    <Button type="submit" disabled={verifyIdentity.isPending || !frontIdFile || !backIdFile}>
-                      {verifyIdentity.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                      Submit Verification
-                    </Button>
-                  </div>
+                  {user?.userStatus !== 'Active' && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-end">
+                        <Button type="submit" disabled={verifyIdentity.isPending || !frontIdFile || !backIdFile || !identityForm.getValues('NationalId')}>
+                          {verifyIdentity.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                          Submit Verification
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </form>
               </CardContent>
             </Card>
@@ -357,7 +457,7 @@ const ProfilePage = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Change Email</CardTitle>
-                <CardDescription>A verification code will be sent to your new email address</CardDescription>
+                <CardDescription>Manage your account security and email settings</CardDescription>
               </CardHeader>
               <CardContent>
                 {emailStep === 'initiate' ? (
@@ -367,13 +467,23 @@ const ProfilePage = () => {
                       <Input value={user?.email ?? ''} disabled className="bg-muted" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="newEmail">New Email</Label>
+                      <Label htmlFor="Email">New Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="newEmail" type="email" placeholder="newemail@example.com" className="pl-10" {...emailForm.register('newEmail')} />
+                        <Input id="Email" type="email" placeholder="email@example.com" className="pl-10" {...emailForm.register('Email')} />
                       </div>
-                      {emailForm.formState.errors.newEmail && (
-                        <p className="text-sm text-destructive">{emailForm.formState.errors.newEmail.message}</p>
+                      {emailForm.formState.errors.Email && (
+                        <p className="text-sm text-destructive">{emailForm.formState.errors.Email.message}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input id="currentPassword" type="password" placeholder="Enter your password" className="pl-10" {...emailForm.register('currentPassword')} />
+                      </div>
+                      {emailForm.formState.errors.currentPassword && (
+                        <p className="text-sm text-destructive">{emailForm.formState.errors.currentPassword.message}</p>
                       )}
                     </div>
                     <div className="flex justify-end">

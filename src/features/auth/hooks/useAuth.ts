@@ -31,7 +31,7 @@ export function useLogin() {
   const navigate = useNavigate();
   return useMutation({
     mutationFn: (data: LoginRequest) => authService.login(data),
-    onSuccess: (res) => {
+    onSuccess: (res: any) => {
       setAuth(res.user, res.token);
       toast.success('Welcome back!');
       navigate('/profile');
@@ -46,7 +46,7 @@ export function useRegister() {
   const navigate = useNavigate();
   return useMutation({
     mutationFn: (data: RegisterRequest) => authService.register(data),
-    onSuccess: (res) => {
+    onSuccess: (res: any) => {
       setAuth(res.user, res.token);
       toast.success('Account created successfully!');
       navigate('/profile');
@@ -75,8 +75,11 @@ export function useLogout() {
 export function useForgotPassword() {
   return useMutation({
     mutationFn: (data: ForgotPasswordRequest) => authService.forgotPassword(data),
-    onSuccess: () => toast.success('OTP sent to your email.'),
-    onError: () => toast.error('Could not send OTP. Check your email.'),
+    onSuccess: () => toast.success('OTP sent to your email. Please check your inbox.'),
+    onError: (error: any) => {
+      const errorMsg = error?.response?.data?.message || error?.response?.data?.errors?.[Object.keys(error.response.data.errors)[0]]?.[0];
+      toast.error(errorMsg || 'Could not send OTP. Please check your email address and try again.');
+    },
   });
 }
 

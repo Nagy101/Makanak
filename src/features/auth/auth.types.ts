@@ -4,10 +4,17 @@ export interface User {
   name: string;
   email: string;
   phoneNumber?: string;
-  profilePicture?: string;
+  profilePictureUrl?: string;
+  address?: string;
+  age?: number;
   nationalId?: string;
   nationalIdImageFrontUrl?: string;
   nationalIdImageBackUrl?: string;
+  strikeCount?: number;
+  userType?: string;
+  userStatus?: string;
+  rejectedReason?: string;
+  joinAt?: string;
   isIdentityVerified?: boolean;
   emailVerified?: boolean;
   role?: string;
@@ -19,9 +26,22 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface LoginResponse {
+export interface AuthData {
+  message: string;
+  name: string;
+  email: string;
+  isAuthenticated: boolean;
   token: string;
-  user: User;
+  expiresOn: string;
+  roles: string[];
+}
+
+export interface LoginResponse {
+  statusCode: number;
+  isSuccess: boolean;
+  message: string;
+  data: AuthData;
+  errors: null | any;
 }
 
 export interface RegisterRequest {
@@ -30,11 +50,16 @@ export interface RegisterRequest {
   password: string;
   confirmPassword: string;
   phoneNumber?: string;
+  userType: 'Tenant' | 'Owner';
+  dateOfBirth: string;
 }
 
 export interface RegisterResponse {
-  token: string;
-  user: User;
+  statusCode: number;
+  isSuccess: boolean;
+  message: string;
+  data: AuthData;
+  errors: null | any;
 }
 
 export interface LogoutResponse {
@@ -75,11 +100,12 @@ export interface VerifyIdentityRequest {
 // ── Email Change ──
 export interface InitiateEmailChangeRequest {
   newEmail: string;
+  currentPassword: string;
 }
 
 export interface ConfirmEmailChangeRequest {
   otp: string;
-  newEmail: string;
+  Email: string;
 }
 
 // ── Generic API Response ──

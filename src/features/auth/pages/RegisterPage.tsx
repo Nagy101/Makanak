@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Loader2, Mail, Lock, User, Phone } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Mail, Lock, User, Phone, Home, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,8 @@ const schema = z.object({
   phoneNumber: z.string().optional(),
   password: z.string().min(6, 'At least 6 characters'),
   confirmPassword: z.string().min(1),
+  userType: z.enum(['Tenant', 'Owner'], { message: 'Please select a user type' }),
+  dateOfBirth: z.string().min(1, 'Date of birth is required'),
 }).refine(d => d.password === d.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
@@ -25,10 +27,11 @@ type RegisterFormData = z.output<typeof schema>;
 const RegisterPage = () => {
   const [showPw, setShowPw] = useState(false);
   const { mutate, isPending } = useRegister();
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<RegisterFormData>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', email: '', phoneNumber: '', password: '', confirmPassword: '' },
+    defaultValues: { name: '', email: '', phoneNumber: '', password: '', confirmPassword: '', userType: 'Tenant', dateOfBirth: '' },
   });
+  const selectedUserType = watch('userType');
 
   return (
     <AuthLayout title="Create your account" subtitle="Join Makanak and start exploring properties">
@@ -57,6 +60,51 @@ const RegisterPage = () => {
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input id="phone" placeholder="+1 234 567 890" className="pl-10" {...register('phoneNumber')} />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Choose Your Account Type</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <label className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition ${
+              selectedUserType === 'Tenant' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+            }`}>
+              <input
+                type="radio"
+                value="Tenant"
+                {...register('userType')}
+                className="w-4 h-4"
+              />
+              <div className="flex items-center space-x-2">
+                <Users className="h-5 w-5" />
+                <span className="font-medium">Tenant</span>
+              </div>
+            </label>
+            <label className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition ${
+              selectedUserType === 'Owner' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+            }`}>
+              <input
+                type="radio"
+                value="Owner"
+                {...register('userType')}
+                className="w-4 h-4"
+              />
+              <div className="flex items-center space-x-2">
+                <Home className="h-5 w-5" />
+                <span className="font-medium">Owner</span>
+              </div>
+            </label>
+          </div>
+          {errors.userType && <p className="text-sm text-destructive">{errors.userType.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="dateOfBirth">Date of Birth</Label>
+          <Input
+            id="dateOfBirth"
+            type="date"
+            {...register('dateOfBirth')}
+          />
+          {errors.dateOfBirth && <p className="text-sm text-destructive">{errors.dateOfBirth.message}</p>}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
