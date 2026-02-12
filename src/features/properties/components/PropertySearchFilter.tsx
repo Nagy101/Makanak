@@ -79,7 +79,6 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
             <SelectValue placeholder="All Locations" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Locations</SelectItem>
             {GOVERNORATES.map((g) => (
               <SelectItem key={g.id} value={g.id.toString()}>{g.nameEn}</SelectItem>
             ))}
@@ -130,7 +129,6 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
                 <Select value={draft.Type || ''} onValueChange={(v) => setDraft({ ...draft, Type: v || undefined })}>
                   <SelectTrigger><SelectValue placeholder="Any type" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any type</SelectItem>
                     {PROPERTY_TYPES.map((t) => (
                       <SelectItem key={t} value={t}>{t}</SelectItem>
                     ))}
@@ -249,7 +247,6 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
                 >
                   <SelectTrigger><SelectValue placeholder="All Locations" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Locations</SelectItem>
                     {GOVERNORATES.map((g) => (
                       <SelectItem key={g.id} value={g.id.toString()}>{g.nameEn}</SelectItem>
                     ))}

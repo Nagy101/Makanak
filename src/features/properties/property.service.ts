@@ -8,7 +8,7 @@ import type {
 } from './property.types';
 
 const api = axios.create({
-  baseURL: '/api/Property',
+  baseURL: 'https://localhost:7148/api/Property',
   headers: { 'Content-Type': 'application/json' },
 });
 

@@ -10,12 +10,12 @@ import { Building2, ChevronLeft, ChevronRight, SearchX } from 'lucide-react';
 export default function PropertiesPage() {
   const [params, setParams] = useState<PropertySearchParams>({
     PageIndex: 1,
-    PageSize: 12,
+    PageSize: 6,
   });
 
   const { data, isLoading, isFetching } = useProperties(params);
 
-  const totalPages = data ? Math.ceil(data.totalCount / (params.PageSize || 12)) : 0;
+  const totalPages = data ? Math.ceil(data.totalCount / (params.PageSize || 6)) : 0;
   const currentPage = params.PageIndex || 1;
 
   return (

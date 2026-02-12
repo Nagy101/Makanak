@@ -4,7 +4,7 @@ import type { PropertySearchParams } from './property.types';
 
 export function useProperties(params: PropertySearchParams) {
   return useQuery({
-    queryKey: ['properties', params],
+    queryKey: ['property', params],
     queryFn: () => propertyService.getProperties(params),
     placeholderData: keepPreviousData,
     staleTime: 2 * 60 * 1000,
