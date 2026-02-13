@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +16,7 @@ const schema = z.object({
 });
 type LoginFormData = z.output<typeof schema>;
 
-const LoginPage = () => {
+const LoginPage = memo(() => {
   const [showPw, setShowPw] = useState(false);
   const { mutate, isPending } = useLogin();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
@@ -24,9 +24,17 @@ const LoginPage = () => {
     defaultValues: { email: '', password: '' },
   });
 
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPw(prev => !prev);
+  }, []);
+
+  const onSubmit = useCallback((d: LoginFormData) => {
+    mutate(d as any);
+  }, [mutate]);
+
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to your Makanak account">
-      <form onSubmit={handleSubmit((d) => mutate(d as any))} className="space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
@@ -60,7 +68,7 @@ const LoginPage = () => {
             />
             <button
               type="button"
-              onClick={() => setShowPw(!showPw)}
+              onClick={togglePasswordVisibility}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               aria-label={showPw ? 'Hide password' : 'Show password'}
             >
@@ -83,6 +91,7 @@ const LoginPage = () => {
       </form>
     </AuthLayout>
   );
-};
+});
 
+LoginPage.displayName = 'LoginPage';
 export default LoginPage;

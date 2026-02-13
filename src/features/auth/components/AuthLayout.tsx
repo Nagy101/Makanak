@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Building2 } from 'lucide-react';
+import { memo } from 'react';
 import authHero from '@/assets/auth-hero.jpg';
 
 interface AuthLayoutProps {
@@ -8,7 +9,7 @@ interface AuthLayoutProps {
   subtitle?: string;
 }
 
-const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
+const AuthLayout = memo(({ children, title, subtitle }: AuthLayoutProps) => {
   return (
     <div className="flex min-h-screen">
       {/* Left: Hero Image */}
@@ -17,6 +18,8 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
           src={authHero}
           alt="Luxury real estate"
           className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/30 to-transparent" />
         <div className="relative z-10 flex flex-col justify-end p-12 text-primary-foreground">
@@ -51,6 +54,7 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
       </div>
     </div>
   );
-};
+});
 
+AuthLayout.displayName = 'AuthLayout';
 export default AuthLayout;

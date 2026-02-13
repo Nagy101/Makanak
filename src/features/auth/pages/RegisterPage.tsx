@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Loader2, Mail, Lock, User, Phone, Home, Users } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +24,7 @@ const schema = z.object({
 });
 type RegisterFormData = z.output<typeof schema>;
 
-const RegisterPage = () => {
+const RegisterPage = memo(() => {
   const [showPw, setShowPw] = useState(false);
   const { mutate, isPending } = useRegister();
   const { register, handleSubmit, formState: { errors }, watch } = useForm<RegisterFormData>({
@@ -33,9 +33,17 @@ const RegisterPage = () => {
   });
   const selectedUserType = watch('userType');
 
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPw(prev => !prev);
+  }, []);
+
+  const onSubmit = useCallback((d: RegisterFormData) => {
+    mutate(d as any);
+  }, [mutate]);
+
   return (
     <AuthLayout title="Create your account" subtitle="Join Makanak and start exploring properties">
-      <form onSubmit={handleSubmit((d) => mutate(d as any))} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">Full Name</Label>
           <div className="relative">
@@ -121,7 +129,7 @@ const RegisterPage = () => {
               />
               <button
                 type="button"
-                onClick={() => setShowPw(!showPw)}
+                onClick={togglePasswordVisibility}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 aria-label={showPw ? 'Hide password' : 'Show password'}
               >
@@ -160,6 +168,7 @@ const RegisterPage = () => {
       </form>
     </AuthLayout>
   );
-};
+});
 
+RegisterPage.displayName = 'RegisterPage';
 export default RegisterPage;

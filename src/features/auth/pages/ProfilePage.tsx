@@ -1,5 +1,4 @@
-import { useState, useRef } from 'react';
-import React from 'react';
+import { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -42,8 +41,7 @@ const confirmEmailSchema = z.object({
   Email: z.string().min(1).email(),
 });
 
-
-const ProfilePage = () => {
+const ProfilePage = memo(() => {
   const { data: user, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const verifyIdentity = useVerifyIdentity();
@@ -59,6 +57,7 @@ const ProfilePage = () => {
   const [backIdFile, setBackIdFile] = useState<File | null>(null);
   const [emailStep, setEmailStep] = useState<'initiate' | 'confirm'>('initiate');
   const [pendingEmail, setPendingEmail] = useState('');
+  
   const avatarRef = useRef<HTMLInputElement>(null);
   const frontIdRef = useRef<HTMLInputElement>(null);
   const backIdRef = useRef<HTMLInputElement>(null);
@@ -68,8 +67,8 @@ const ProfilePage = () => {
     values: { Name: user?.name ?? '', PhoneNumber: user?.phoneNumber ?? '' },
   });
 
-  // Set initial preview for identity images if they exist and are verified
-  React.useEffect(() => {
+  // Optimized effect with proper dependency tracking
+  const initializeIdPreviews = useCallback(() => {
     if (user?.nationalIdImageFrontUrl && !frontIdPreview) {
       setFrontIdPreview(user.nationalIdImageFrontUrl);
     }
@@ -77,6 +76,11 @@ const ProfilePage = () => {
       setBackIdPreview(user.nationalIdImageBackUrl);
     }
   }, [user?.nationalIdImageFrontUrl, user?.nationalIdImageBackUrl, frontIdPreview, backIdPreview]);
+
+  // Call this effect only when user data is ready
+  useEffect(() => {
+    initializeIdPreviews();
+  }, [initializeIdPreviews]);
 
   const identityForm = useForm<z.infer<typeof identitySchema>>({
     resolver: zodResolver(identitySchema),
@@ -92,7 +96,7 @@ const ProfilePage = () => {
     defaultValues: { Email: '', otp: '' },
   });
 
-  const handleFilePreview = (
+  const handleFilePreview = useCallback((
     file: File,
     setPreview: (url: string) => void,
     setFile: (f: File) => void,
@@ -101,7 +105,7 @@ const ProfilePage = () => {
     const reader = new FileReader();
     reader.onload = (e) => setPreview(e.target?.result as string);
     reader.readAsDataURL(file);
-  };
+  }, []);
 
   const handleProfileSubmit = profileForm.handleSubmit((d) => {
     updateProfile.mutate({
@@ -133,18 +137,63 @@ const ProfilePage = () => {
       onSuccess: () => {
         toast.success('Email changed successfully! Logging out...');
         setTimeout(() => {
-          // Hard logout - clear all auth data
           localStorage.removeItem('token');
           sessionStorage.clear();
-          // Hard refresh to clear all state
           window.location.href = '/login';
         }, 1500);
       },
-      onError: (error: any) => {
-        toast.error(error?.response?.data?.message || 'Failed to confirm email change. Please try again.');
+      onError: (error: unknown) => {
+        let errorMsg = 'Failed to confirm email change. Please try again.';
+        if (error && typeof error === 'object' && 'response' in error) {
+          const apiError = error as { response?: { data?: { message?: string } } };
+          errorMsg = apiError.response?.data?.message || errorMsg;
+        }
+        toast.error(errorMsg);
       }
     });
   });
+
+  const handleAvatarClick = () => {
+    avatarRef.current?.click();
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) handleFilePreview(f, setAvatarPreview, setAvatarFile);
+  };
+
+  const handleFrontIdClick = () => {
+    if (user?.userStatus !== 'Active') {
+      frontIdRef.current?.click();
+    }
+  };
+
+  const handleFrontIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) handleFilePreview(f, setFrontIdPreview, setFrontIdFile);
+  };
+
+  const handleBackIdClick = () => {
+    if (user?.userStatus !== 'Active') {
+      backIdRef.current?.click();
+    }
+  };
+
+  const handleBackIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) handleFilePreview(f, setBackIdPreview, setBackIdFile);
+  };
+
+  const handleLogout = () => {
+    logout.mutate();
+  };
+
+  const handleEmailStepChange = () => {
+    setEmailStep('initiate');
+  };
+
+  const memberSinceDate = user?.joinAt ? new Date(user.joinAt).toLocaleDateString() : '';
+  const isIdentityVerified = user?.userStatus === 'Active';
 
   if (isLoading) {
     return (
@@ -174,7 +223,7 @@ const ProfilePage = () => {
           </Link>
           <Button
             variant="ghost"
-            onClick={() => logout.mutate()}
+            onClick={handleLogout}
             disabled={logout.isPending}
             className="text-muted-foreground hover:text-destructive"
           >
@@ -198,6 +247,8 @@ const ProfilePage = () => {
                       src={avatarPreview || user?.profilePictureUrl}
                       alt="Profile"
                       className="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center bg-primary/10">
@@ -206,7 +257,7 @@ const ProfilePage = () => {
                   )}
                 </div>
                 <button
-                  onClick={() => avatarRef.current?.click()}
+                  onClick={handleAvatarClick}
                   className="absolute bottom-1 right-1 rounded-full bg-primary p-2 text-primary-foreground shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                   aria-label="Change avatar"
                 >
@@ -217,10 +268,7 @@ const ProfilePage = () => {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleFilePreview(f, setAvatarPreview, setAvatarFile);
-                  }}
+                  onChange={handleAvatarChange}
                 />
               </div>
               <div className="flex-1 pb-1">
@@ -228,7 +276,7 @@ const ProfilePage = () => {
                 <p className="text-muted-foreground">{user?.email}</p>
               </div>
               <div className="flex gap-2 flex-wrap">
-                {user?.userStatus === 'Active' ? (
+                {isIdentityVerified ? (
                   <Badge className="bg-success text-success-foreground gap-1"><CheckCircle2 className="h-3 w-3" /> Verified</Badge>
                 ) : (
                   <Badge variant="secondary" className="gap-1"><Clock className="h-3 w-3" /> Unverified</Badge>
@@ -305,7 +353,7 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="joinAt">Member Since</Label>
-                    <Input id="joinAt" className="bg-muted" value={user?.joinAt ? new Date(user.joinAt).toLocaleDateString() : ''} disabled />
+                    <Input id="joinAt" className="bg-muted" value={memberSinceDate} disabled />
                   </div>
                   <Separator />
                   <div className="flex justify-end">
@@ -325,7 +373,7 @@ const ProfilePage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   Identity Verification
-                  {user?.userStatus === 'Active' ? (
+                  {isIdentityVerified ? (
                     <Badge className="bg-success text-success-foreground gap-1"><CheckCircle2 className="h-3 w-3" /> Verified</Badge>
                   ) : (
                     <Badge variant="outline" className="gap-1 text-muted-foreground"><XCircle className="h-3 w-3" /> Not Verified</Badge>
@@ -338,7 +386,7 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <Label htmlFor="nationalId">National ID Number</Label>
-                      {user?.userStatus === 'Active' ? (
+                      {isIdentityVerified ? (
                         <Input id="nationalId" className="bg-muted" value={user?.nationalId ?? ''} disabled />
                       ) : (
                         <>
@@ -377,30 +425,25 @@ const ProfilePage = () => {
                       <Label>ID Front</Label>
                       <button
                         type="button"
-                        onClick={() => user?.userStatus !== 'Active' && frontIdRef.current?.click()}
-                        disabled={user?.userStatus === 'Active'}
+                        onClick={handleFrontIdClick}
+                        disabled={isIdentityVerified}
                         className={`w-full h-56 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-colors overflow-auto bg-muted/50 ${
-                          user?.userStatus === 'Active'
+                          isIdentityVerified
                             ? 'text-muted-foreground cursor-not-allowed'
                             : 'text-muted-foreground hover:border-primary hover:text-primary cursor-pointer'
                         }`}
                       >
                         {frontIdPreview ? (
-                          <img src={frontIdPreview} alt="Front ID" className="max-h-full max-w-full object-contain" />
+                          <img src={frontIdPreview} alt="Front ID" className="max-h-full max-w-full object-contain" loading="lazy" decoding="async" />
                         ) : (
                           <>
                             <Upload className="h-8 w-8" />
-                            <span className="text-sm font-medium">{user?.userStatus === 'Active' ? 'Verified' : 'Upload front side'}</span>
+                            <span className="text-sm font-medium">{isIdentityVerified ? 'Verified' : 'Upload front side'}</span>
                           </>
                         )}
                       </button>
-                      {user?.userStatus !== 'Active' && (
-                        <input ref={frontIdRef} type="file" accept="image/*" className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) handleFilePreview(f, setFrontIdPreview, setFrontIdFile);
-                          }}
-                        />
+                      {!isIdentityVerified && (
+                        <input ref={frontIdRef} type="file" accept="image/*" className="hidden" onChange={handleFrontIdChange} />
                       )}
                     </div>
                     {/* Back ID */}
@@ -408,35 +451,30 @@ const ProfilePage = () => {
                       <Label>ID Back</Label>
                       <button
                         type="button"
-                        onClick={() => user?.userStatus !== 'Active' && backIdRef.current?.click()}
-                        disabled={user?.userStatus === 'Active'}
+                        onClick={handleBackIdClick}
+                        disabled={isIdentityVerified}
                         className={`w-full h-56 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-colors overflow-auto bg-muted/50 ${
-                          user?.userStatus === 'Active'
+                          isIdentityVerified
                             ? 'text-muted-foreground cursor-not-allowed'
                             : 'text-muted-foreground hover:border-primary hover:text-primary cursor-pointer'
                         }`}
                       >
                         {backIdPreview ? (
-                          <img src={backIdPreview} alt="Back ID" className="max-h-full max-w-full object-contain" />
+                          <img src={backIdPreview} alt="Back ID" className="max-h-full max-w-full object-contain" loading="lazy" decoding="async" />
                         ) : (
                           <>
                             <Upload className="h-8 w-8" />
-                            <span className="text-sm font-medium">{user?.userStatus === 'Active' ? 'Verified' : 'Upload back side'}</span>
+                            <span className="text-sm font-medium">{isIdentityVerified ? 'Verified' : 'Upload back side'}</span>
                           </>
                         )}
                       </button>
-                      {user?.userStatus !== 'Active' && (
-                        <input ref={backIdRef} type="file" accept="image/*" className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) handleFilePreview(f, setBackIdPreview, setBackIdFile);
-                          }}
-                        />
+                      {!isIdentityVerified && (
+                        <input ref={backIdRef} type="file" accept="image/*" className="hidden" onChange={handleBackIdChange} />
                       )}
                     </div>
                   </div>
 
-                  {user?.userStatus !== 'Active' && (
+                  {!isIdentityVerified && (
                     <>
                       <Separator />
                       <div className="flex justify-end">
@@ -506,7 +544,7 @@ const ProfilePage = () => {
                       )}
                     </div>
                     <div className="flex justify-between">
-                      <Button type="button" variant="ghost" onClick={() => setEmailStep('initiate')}>
+                      <Button type="button" variant="ghost" onClick={handleEmailStepChange}>
                         Cancel
                       </Button>
                       <Button type="submit" disabled={confirmEmail.isPending}>
@@ -523,6 +561,7 @@ const ProfilePage = () => {
       </main>
     </div>
   );
-};
+});
 
+ProfilePage.displayName = 'ProfilePage';
 export default ProfilePage;

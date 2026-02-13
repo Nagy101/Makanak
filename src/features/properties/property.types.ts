@@ -12,7 +12,7 @@ export interface PropertySearchParams {
   PageIndex?: number;
   PageSize?: number;
   Search?: string;
-  Sort?: string;
+  Sort?: number;  // Numeric Sort ID matching backend SortingOptionsEnum
   Latitude?: number;
   Longitude?: number;
   MaxDistance?: number;
@@ -27,8 +27,10 @@ export interface PropertyImage {
 // ── Amenity ──
 export interface Amenity {
   id: number;
-  name: string;
-  icon: string;
+  name?: string;
+  nameEn?: string;
+  nameAr?: string;
+  icon?: string;
 }
 
 // ── Listing (summary in search results) ──

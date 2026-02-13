@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -22,7 +22,7 @@ const resetSchema = z.object({
   message: "Passwords don't match", path: ['confirmPassword'],
 });
 
-const ForgotPasswordPage = () => {
+const ForgotPasswordPage = memo(() => {
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -34,18 +34,22 @@ const ForgotPasswordPage = () => {
   const emailForm = useForm<z.output<typeof emailSchema>>({ resolver: zodResolver(emailSchema), defaultValues: { email: '' } });
   const resetForm = useForm<z.output<typeof resetSchema>>({ resolver: zodResolver(resetSchema), defaultValues: { newPassword: '', confirmPassword: '' } });
 
-  const handleEmailSubmit = emailForm.handleSubmit((d) => {
+  const handleEmailSubmit = useCallback(emailForm.handleSubmit((d) => {
     setEmail(d.email);
     forgot.mutate({ email: d.email }, { onSuccess: () => setStep('otp') });
-  });
+  }), [emailForm, forgot]);
 
-  const handleOtpSubmit = () => {
+  const handleOtpSubmit = useCallback(() => {
     verify.mutate({ otp, email }, { onSuccess: () => setStep('reset') });
-  };
+  }, [verify, otp, email]);
 
-  const handleResetSubmit = resetForm.handleSubmit((d) => {
+  const handleResetSubmit = useCallback(resetForm.handleSubmit((d) => {
     reset.mutate({ confirmPassword: d.confirmPassword!, newPassword: d.newPassword!, email, otp });
-  });
+  }), [resetForm, reset, email, otp]);
+
+  const handleChangeEmail = useCallback(() => {
+    setStep('email');
+  }, []);
 
   const titles: Record<Step, { title: string; subtitle: string }> = {
     email: { title: 'Forgot password?', subtitle: "Enter your email and we'll send you a code" },
@@ -95,7 +99,7 @@ const ForgotPasswordPage = () => {
           <Button onClick={handleOtpSubmit} className="w-full h-12 font-semibold" disabled={otp.length < 6 || verify.isPending}>
             {verify.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Verify Code'}
           </Button>
-          <button onClick={() => setStep('email')} className="flex items-center justify-center gap-2 w-full text-sm text-muted-foreground hover:text-foreground">
+          <button onClick={handleChangeEmail} className="flex items-center justify-center gap-2 w-full text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Change email
           </button>
         </div>
@@ -130,6 +134,7 @@ const ForgotPasswordPage = () => {
       )}
     </AuthLayout>
   );
-};
+});
 
+ForgotPasswordPage.displayName = 'ForgotPasswordPage';
 export default ForgotPasswordPage;

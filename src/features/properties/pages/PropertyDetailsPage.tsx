@@ -196,10 +196,11 @@ export default function PropertyDetailsPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {property.amenities.map((amenity) => {
                     const Icon = mapIcon(amenity.icon);
+                    const label = amenity.name || amenity.nameEn || amenity.nameAr || 'Unknown';
                     return (
                       <div key={amenity.id} className="flex items-center gap-3 rounded-lg border bg-card p-3">
                         <Icon className="h-5 w-5 text-primary shrink-0" />
-                        <span className="text-sm text-foreground">{amenity.name}</span>
+                        <span className="text-sm text-foreground">{label}</span>
                       </div>
                     );
                   })}

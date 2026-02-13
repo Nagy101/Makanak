@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { GOVERNORATES, AMENITIES, PROPERTY_TYPES, SORT_OPTIONS } from '@/data/staticLookups';
+import { useGovernorates, useAmenities, usePropertyTypes, useSortingOptions } from '@/features/lookup';
 import type { PropertySearchParams } from '../property.types';
 
 interface Props {
@@ -20,6 +20,11 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
   const [localSearch, setLocalSearch] = useState(params.Search || '');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [draft, setDraft] = useState<PropertySearchParams>({ ...params });
+
+  // Load lookups from backend
+  const { governorates, loading: loadingGov } = useGovernorates();
+  const { amenities, loading: loadingAmenities } = useAmenities();
+  const { propertyTypes, loading: loadingTypes } = usePropertyTypes();
 
   const activeFilterCount = [
     draft.Type,
@@ -73,32 +78,25 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
         <Select
           value={params.GovernorateId?.toString() || ''}
           onValueChange={(v) => onParamsChange({ ...params, GovernorateId: v ? Number(v) : undefined, PageIndex: 1 })}
+          disabled={loadingGov}
         >
           <SelectTrigger className="w-[180px] h-11 hidden md:flex">
             <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-            <SelectValue placeholder="All Locations" />
+            <SelectValue placeholder={loadingGov ? "Loading..." : "All Locations"} />
           </SelectTrigger>
           <SelectContent>
-            {GOVERNORATES.map((g) => (
-              <SelectItem key={g.id} value={g.id.toString()}>{g.nameEn}</SelectItem>
+            {governorates.map((g) => (
+              <SelectItem key={g.id} value={g.id.toString()}>{g.nameEn || g.nameAr || 'Unknown'}</SelectItem>
             ))}
           </SelectContent>
         </Select>
 
         {/* Sort */}
-        <Select
-          value={params.Sort || ''}
-          onValueChange={(v) => onParamsChange({ ...params, Sort: v || undefined, PageIndex: 1 })}
-        >
-          <SelectTrigger className="w-[170px] h-11 hidden lg:flex">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((s) => (
-              <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Sorting options come from backend */}
+        <SortSelect
+          params={params}
+          onParamsChange={onParamsChange}
+        />
 
         {/* Search button */}
         <Button onClick={handleSearch} size="lg" className="h-11 px-6 font-semibold">
@@ -126,11 +124,15 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
               {/* Property Type */}
               <div className="space-y-3">
                 <Label className="text-sm font-semibold text-foreground">Property Type</Label>
-                <Select value={draft.Type || ''} onValueChange={(v) => setDraft({ ...draft, Type: v || undefined })}>
-                  <SelectTrigger><SelectValue placeholder="Any type" /></SelectTrigger>
+                <Select 
+                  value={draft.Type || ''} 
+                  onValueChange={(v) => setDraft({ ...draft, Type: v || undefined })}
+                  disabled={loadingTypes}
+                >
+                  <SelectTrigger><SelectValue placeholder={loadingTypes ? "Loading..." : "Any type"} /></SelectTrigger>
                   <SelectContent>
-                    {PROPERTY_TYPES.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    {propertyTypes.map((t) => (
+                      <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -222,20 +224,24 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
               {/* Amenities */}
               <div className="space-y-3">
                 <Label className="text-sm font-semibold text-foreground">Amenities</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {AMENITIES.map((a) => (
-                    <label
-                      key={a.id}
-                      className="flex items-center gap-2.5 rounded-lg border p-3 cursor-pointer hover:bg-accent/5 transition-colors"
-                    >
-                      <Checkbox
-                        checked={(draft.AmenityIds || []).includes(a.id)}
-                        onCheckedChange={() => toggleAmenity(a.id)}
-                      />
-                      <span className="text-sm">{a.name}</span>
-                    </label>
-                  ))}
-                </div>
+                {loadingAmenities ? (
+                  <p className="text-sm text-muted-foreground">Loading amenities...</p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {amenities.map((a) => (
+                      <label
+                        key={a.id}
+                        className="flex items-center gap-2.5 rounded-lg border p-3 cursor-pointer hover:bg-accent/5 transition-colors"
+                      >
+                        <Checkbox
+                          checked={(draft.AmenityIds || []).includes(a.id)}
+                          onCheckedChange={() => toggleAmenity(a.id)}
+                        />
+                        <span className="text-sm">{a.nameEn || a.name || a.nameAr || 'Unknown'}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Governorate (mobile) */}
@@ -244,11 +250,12 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
                 <Select
                   value={draft.GovernorateId?.toString() || ''}
                   onValueChange={(v) => setDraft({ ...draft, GovernorateId: v ? Number(v) : undefined })}
+                  disabled={loadingGov}
                 >
-                  <SelectTrigger><SelectValue placeholder="All Locations" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={loadingGov ? "Loading..." : "All Locations"} /></SelectTrigger>
                   <SelectContent>
-                    {GOVERNORATES.map((g) => (
-                      <SelectItem key={g.id} value={g.id.toString()}>{g.nameEn}</SelectItem>
+                    {governorates.map((g) => (
+                      <SelectItem key={g.id} value={g.id.toString()}>{g.nameEn || g.nameAr || 'Unknown'}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -268,5 +275,36 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
         </Sheet>
       </div>
     </div>
+  );
+}
+
+/**
+ * SortSelect Component
+ * Renders a Select dropdown for sorting options fetched from the backend.
+ * Sends numeric Sort ID (matching SortingOptionsEnum on backend).
+ */
+interface SortSelectProps {
+  params: PropertySearchParams;
+  onParamsChange: (params: PropertySearchParams) => void;
+}
+
+function SortSelect({ params, onParamsChange }: SortSelectProps) {
+  const { sortingOptions, loading: loadingSortingOptions } = useSortingOptions();
+
+  return (
+    <Select
+      value={params.Sort?.toString() || ''}
+      onValueChange={(v) => onParamsChange({ ...params, Sort: v ? Number(v) : undefined, PageIndex: 1 })}
+      disabled={loadingSortingOptions}
+    >
+      <SelectTrigger className="w-[170px] h-11 hidden lg:flex">
+        <SelectValue placeholder={loadingSortingOptions ? "Loading..." : "Sort by"} />
+      </SelectTrigger>
+      <SelectContent>
+        {sortingOptions.map((s) => (
+          <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
