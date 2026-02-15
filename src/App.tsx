@@ -18,6 +18,12 @@ const ProfilePage = lazy(() => import("./features/auth/pages/ProfilePage"));
 const PropertiesPage = lazy(() => import("./features/properties/pages/PropertiesPage"));
 const PropertyDetailsPage = lazy(() => import("./features/properties/pages/PropertyDetailsPage"));
 
+// Lazy load admin pages
+const AdminLayout = lazy(() => import("./features/admin/components/AdminLayout"));
+const AdminDashboardPage = lazy(() => import("./features/admin/pages/AdminDashboardPage"));
+const AdminUsersPage = lazy(() => import("./features/admin/pages/AdminUsersPage"));
+const AdminPropertiesPage = lazy(() => import("./features/admin/pages/AdminPropertiesPage"));
+
 // Loading fallback component for lazy routes
 const PageLoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -86,6 +92,40 @@ const AppContent = () => {
             </Suspense>
           }
         />
+        {/* Admin routes */}
+        <Route
+          path="/admin"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <AdminLayout />
+            </Suspense>
+          }
+        >
+          <Route
+            index
+            element={
+              <Suspense fallback={<PageLoadingFallback />}>
+                <AdminDashboardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <Suspense fallback={<PageLoadingFallback />}>
+                <AdminUsersPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="properties"
+            element={
+              <Suspense fallback={<PageLoadingFallback />}>
+                <AdminPropertiesPage />
+              </Suspense>
+            }
+          />
+        </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
