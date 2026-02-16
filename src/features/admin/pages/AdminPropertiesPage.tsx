@@ -1,5 +1,5 @@
 import { memo, useState, useCallback, useMemo } from 'react';
-import { Search, ChevronLeft, ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, CheckCircle2, XCircle, Eye, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,39 +28,77 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useProperties } from '@/features/properties/useProperties';
-import { useUpdatePropertyStatus } from '../useAdmin';
+import { useUpdatePropertyStatus, useAdminProperties } from '../useAdmin';
+import { usePropertyTypes, usePropertyStatuses, useGovernorates, useSortingOptions } from '@/features/lookup';
+import PropertyDetailsModal from '../components/PropertyDetailsModal';
 import type { PropertySearchParams, PropertyListing } from '@/features/properties/property.types';
+import type { AdminPropertySearchParams, AdminPropertyListing, PropertyStatus } from '../admin.types';
 import { toast } from 'sonner';
 
 const PAGE_SIZE = 10;
+
+// Mapping from SortingOption id to backend enum names
+const SORT_ID_TO_ENUM: Record<number, string> = {
+  1: 'NameAsc',
+  2: 'NameDesc',
+  3: 'DateCreatedAsc',
+  4: 'DateCreatedDesc',
+  5: 'PriceAsc',
+  6: 'PriceDesc',
+};
 
 const statusColor: Record<string, string> = {
   Pending: 'bg-warning/10 text-warning border-warning/20',
   Accepted: 'bg-success/10 text-success border-success/20',
   Rejected: 'bg-destructive/10 text-destructive border-destructive/20',
+  Banned: 'bg-destructive/10 text-destructive border-destructive/20',
 };
 
 const AdminPropertiesPage = memo(() => {
-  const [params, setParams] = useState<PropertySearchParams>({
+  const [params, setParams] = useState<AdminPropertySearchParams>({
     PageIndex: 1,
     PageSize: PAGE_SIZE,
   });
   const [searchInput, setSearchInput] = useState('');
 
-  // Reuse existing property hook
-  const { data, isLoading } = useProperties(params);
+  // Use admin-specific property endpoint
+  const { data, isLoading } = useAdminProperties(params);
   const mutation = useUpdatePropertyStatus();
+
+  // Get lookups
+  const { propertyTypes } = usePropertyTypes();
+  const { propertyStatuses } = usePropertyStatuses();
+  const { governorates } = useGovernorates();
+  const { sortingOptions } = useSortingOptions();
 
   // Reject dialog state
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [selectedPropertyId, setSelectedPropertyId] = useState<number | null>(null);
 
   const handleSearch = useCallback(() => {
     setParams((p) => ({ ...p, Search: searchInput || undefined, PageIndex: 1 }));
   }, [searchInput]);
 
   const handleStatusFilter = useCallback((val: string) => {
+    setParams((p) => ({ ...p, Status: val === 'all' ? undefined : (val as PropertyStatus), PageIndex: 1 }));
+  }, []);
+
+  const handleTypeFilter = useCallback((val: string) => {
     setParams((p) => ({ ...p, Type: val === 'all' ? undefined : val, PageIndex: 1 }));
+  }, []);
+
+  const handleGovernorateFilter = useCallback((val: string) => {
+    setParams((p) => ({ ...p, GovernorateId: val === 'all' ? undefined : Number(val), PageIndex: 1 }));
+  }, []);
+
+  const handleSortChange = useCallback((val: string) => {
+    if (val === 'none') {
+      setParams((p) => ({ ...p, Sort: undefined, PageIndex: 1 }));
+    } else {
+      const enumName = SORT_ID_TO_ENUM[Number(val)];
+      setParams((p) => ({ ...p, Sort: enumName, PageIndex: 1 }));
+    }
   }, []);
 
   const totalPages = useMemo(
@@ -117,13 +155,54 @@ const AdminPropertiesPage = memo(() => {
         </div>
         <Select onValueChange={handleStatusFilter} defaultValue="all">
           <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            {propertyStatuses.map((status) => (
+              <SelectItem key={status.id} value={status.name}>
+                {status.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select onValueChange={handleTypeFilter} defaultValue="all">
+          <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="Apartment">Apartment</SelectItem>
-            <SelectItem value="Chalet">Chalet</SelectItem>
-            <SelectItem value="Villa">Villa</SelectItem>
+            {propertyTypes.map((type) => (
+              <SelectItem key={type.id} value={type.name}>
+                {type.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select onValueChange={handleGovernorateFilter} defaultValue="all">
+          <SelectTrigger className="w-[170px]">
+            <SelectValue placeholder="Governorate" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Governorates</SelectItem>
+            {governorates.map((gov) => (
+              <SelectItem key={gov.id} value={gov.id.toString()}>
+                {gov.nameEn || gov.nameAr}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select onValueChange={handleSortChange} defaultValue="none">
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Default Sort</SelectItem>
+            {sortingOptions.map((option) => (
+              <SelectItem key={option.id} value={option.id.toString()}>
+                {option.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Button onClick={handleSearch} size="sm">Search</Button>
@@ -150,11 +229,12 @@ const AdminPropertiesPage = memo(() => {
                 <TableHead>Price/Night</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="hidden md:table-cell">Location</TableHead>
+                <TableHead className="hidden lg:table-cell">Created</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.data.map((p: PropertyListing) => (
+              {data.data.map((p: AdminPropertyListing) => (
                 <TableRow key={p.id}>
                   <TableCell className="font-medium max-w-[200px] truncate">{p.title}</TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground text-xs">
@@ -174,8 +254,23 @@ const AdminPropertiesPage = memo(() => {
                   <TableCell className="hidden md:table-cell text-muted-foreground text-xs">
                     {p.governorateName}
                   </TableCell>
+                  <TableCell className="hidden lg:table-cell text-muted-foreground text-xs">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {new Date(p.createdAt).toLocaleDateString()}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary hover:text-primary"
+                        onClick={() => setSelectedPropertyId(p.id)}
+                        title="View details"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -229,6 +324,9 @@ const AdminPropertiesPage = memo(() => {
           </div>
         </div>
       )}
+
+      {/* Property Details Modal */}
+      <PropertyDetailsModal propertyId={selectedPropertyId} onClose={() => setSelectedPropertyId(null)} />
 
       {/* Reject Dialog */}
       <Dialog open={rejectTarget !== null} onOpenChange={() => setRejectTarget(null)}>

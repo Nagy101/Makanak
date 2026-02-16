@@ -7,7 +7,7 @@ import {
   Building2, Camera, CheckCircle2, Clock, Loader2, LogOut,
   Mail, Phone, Shield, Upload, User, XCircle, KeyRound, Calendar, Lock,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -188,6 +188,9 @@ const ProfilePage = memo(() => {
     logout.mutate();
   };
 
+  const navigate = useNavigate();
+  const isAdmin = ((user?.role || user?.userType) ?? '').toString().toLowerCase() === 'admin';
+
   const handleEmailStepChange = () => {
     setEmailStep('initiate');
   };
@@ -221,15 +224,30 @@ const ProfilePage = memo(() => {
             <Building2 className="h-6 w-6 text-primary" />
             <span className="text-lg font-bold text-foreground">Makanak</span>
           </Link>
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            disabled={logout.isPending}
-            className="text-muted-foreground hover:text-destructive"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  // guard will still protect; this is a convenience link for admins
+                  if (isAdmin) navigate('/admin');
+                  else toast.error('You do not have permission to access admin panel.');
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Admin Panel
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+              disabled={logout.isPending}
+              className="text-muted-foreground hover:text-destructive"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -280,6 +298,21 @@ const ProfilePage = memo(() => {
                   <Badge className="bg-success text-success-foreground gap-1"><CheckCircle2 className="h-3 w-3" /> Verified</Badge>
                 ) : (
                   <Badge variant="secondary" className="gap-1"><Clock className="h-3 w-3" /> Unverified</Badge>
+                )}
+                {user?.userStatus && (
+                  <Badge
+                    className={`gap-1 ${
+                      user.userStatus === 'Active'
+                        ? 'bg-success text-success-foreground'
+                        : user.userStatus === 'Banned'
+                          ? 'bg-destructive text-destructive-foreground'
+                          : user.userStatus === 'Pending'
+                            ? 'bg-warning text-warning-foreground'
+                            : 'bg-primary/10 text-primary'
+                    }`}
+                  >
+                    {user.userStatus}
+                  </Badge>
                 )}
               </div>
             </div>
@@ -363,6 +396,70 @@ const ProfilePage = memo(() => {
                     </Button>
                   </div>
                 </form>
+              </CardContent>
+            </Card>
+
+            {/* Account Status Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" />
+                  Account Status
+                </CardTitle>
+                <CardDescription>Your current account status and verification information</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Status</Label>
+                    <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                      <Badge
+                        className={`${
+                          user?.userStatus === 'Active'
+                            ? 'bg-success text-success-foreground'
+                            : user?.userStatus === 'Banned'
+                              ? 'bg-destructive text-destructive-foreground'
+                              : user?.userStatus === 'Pending'
+                                ? 'bg-warning text-warning-foreground'
+                                : 'bg-primary/10 text-primary'
+                        }`}
+                      >
+                        {user?.userStatus ?? 'Unknown'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Strike Count</Label>
+                    <Input
+                      type="number"
+                      className="bg-muted"
+                      value={user?.strikeCount ?? 0}
+                      disabled
+                    />
+                  </div>
+                </div>
+                {user?.userStatus === 'Banned' && (
+                  <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                    <p className="text-sm text-destructive font-medium">Account Suspended</p>
+                    <p className="text-sm text-destructive/80 mt-1">
+                      Your account has been suspended. Please contact support for more information.
+                    </p>
+                  </div>
+                )}
+                {user?.userStatus === 'Rejected' && user?.rejectedReason && (
+                  <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                    <p className="text-sm text-destructive font-medium">Verification Rejected</p>
+                    <p className="text-sm text-destructive/80 mt-1">{user.rejectedReason}</p>
+                  </div>
+                )}
+                {user?.userStatus === 'Pending' && (
+                  <div className="p-3 bg-warning/10 rounded-lg border border-warning/20">
+                    <p className="text-sm text-warning font-medium">Verification Pending</p>
+                    <p className="text-sm text-warning/80 mt-1">
+                      Your account verification is in progress. We'll notify you once it's complete.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

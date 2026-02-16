@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as adminService from './admin.service';
-import type { AdminUserSearchParams, UpdateUserStatusRequest, UpdatePropertyStatusRequest } from './admin.types';
+import type { AdminUserSearchParams, UpdateUserStatusRequest, UpdatePropertyStatusRequest, AdminPropertySearchParams } from './admin.types';
 
 // ── Stats ──
 export function useAdminStats() {
@@ -49,6 +49,17 @@ export function useUpdatePropertyStatus() {
     mutationFn: (data: UpdatePropertyStatusRequest) => adminService.updatePropertyStatus(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['property'] });
+      qc.invalidateQueries({ queryKey: ['admin', 'properties'] });
     },
+  });
+}
+
+// ── Admin Properties ──
+export function useAdminProperties(params: AdminPropertySearchParams) {
+  return useQuery({
+    queryKey: ['admin', 'properties', params],
+    queryFn: () => adminService.getAdminProperties(params),
+    placeholderData: (prev) => prev,
+    staleTime: 30 * 1000,
   });
 }

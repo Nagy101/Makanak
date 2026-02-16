@@ -57,7 +57,7 @@ export interface UpdateUserStatusRequest {
 }
 
 // ── Property Status Update ──
-export type PropertyStatus = 'Pending' | 'Accepted' | 'Rejected';
+export type PropertyStatus = 'Pending' | 'Accepted' | 'Rejected' | 'Banned';
 
 export interface UpdatePropertyStatusRequest {
   propertyId: number;
@@ -81,4 +81,28 @@ export interface UserVerificationDetails {
   userType: UserType;
   userStatus: UserStatus;
   joinAt: string;
+}
+
+// ── Admin Property Management ──
+export interface AdminPropertyListing {
+  id: number;
+  title: string;
+  mainImageUrl: string;
+  pricePerNight: number;
+  governorateName: string;
+  propertyStatus: string;
+  propertyType: string;
+  averageRating: number;
+  createdAt: string;
+  isAvailable: boolean;
+}
+
+export interface AdminPropertySearchParams {
+  Status?: PropertyStatus;
+  Type?: string;
+  GovernorateId?: number;
+  PageIndex?: number;
+  PageSize?: number;
+  Search?: string;
+  Sort?: string;
 }

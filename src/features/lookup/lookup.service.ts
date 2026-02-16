@@ -14,7 +14,7 @@ import type {
 } from './lookup.types';
 
 const api = axios.create({
-  baseURL: 'https://localhost:7148/api/Lookup',
+  baseURL: '/api/Lookup',
   headers: { 'Content-Type': 'application/json' },
 });
 

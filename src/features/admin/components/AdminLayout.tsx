@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { useLogout } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -21,14 +22,14 @@ const NAV_ITEMS = [
 
 const AdminLayout = memo(() => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const clearAuth = useAuthStore((s) => s.clearAuth);
   const userName = useAuthStore((s) => s.user?.name ?? 'Admin');
   const navigate = useNavigate();
+  const logout = useLogout();
 
   const handleLogout = useCallback(() => {
-    clearAuth();
-    navigate('/login');
-  }, [clearAuth, navigate]);
+    // useLogout will clear auth state and react-query cache on success
+    logout.mutate();
+  }, [logout]);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 

@@ -131,16 +131,18 @@ const UserVerificationModal = memo<UserVerificationModalProps>(({ userId, onClos
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground">Front</p>
                   {data.nationalIdImageFrontUrl ? (
-                    <img
-                      src={data.nationalIdImageFrontUrl}
-                      alt="ID Front"
-                      className="h-32 w-full rounded-lg border border-border object-cover"
-                      loading="lazy"
-                      width={200}
-                      height={128}
-                    />
+                    <a href={data.nationalIdImageFrontUrl} target="_blank" rel="noreferrer">
+                      <img
+                        src={data.nationalIdImageFrontUrl}
+                        alt="ID Front"
+                        className="h-48 w-full rounded-lg border border-border object-contain bg-black/5"
+                        loading="lazy"
+                        width={400}
+                        height={256}
+                      />
+                    </a>
                   ) : (
-                    <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
+                    <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
                       Not provided
                     </div>
                   )}
@@ -148,16 +150,18 @@ const UserVerificationModal = memo<UserVerificationModalProps>(({ userId, onClos
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground">Back</p>
                   {data.nationalIdImageBackUrl ? (
-                    <img
-                      src={data.nationalIdImageBackUrl}
-                      alt="ID Back"
-                      className="h-32 w-full rounded-lg border border-border object-cover"
-                      loading="lazy"
-                      width={200}
-                      height={128}
-                    />
+                    <a href={data.nationalIdImageBackUrl} target="_blank" rel="noreferrer">
+                      <img
+                        src={data.nationalIdImageBackUrl}
+                        alt="ID Back"
+                        className="h-48 w-full rounded-lg border border-border object-contain bg-black/5"
+                        loading="lazy"
+                        width={400}
+                        height={256}
+                      />
+                    </a>
                   ) : (
-                    <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
+                    <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
                       Not provided
                     </div>
                   )}

@@ -10,7 +10,7 @@ import type {
 } from './auth.types';
 
 const api = axios.create({
-  baseURL: 'https://localhost:7148/api/Auth',
+  baseURL: '/api/Auth',
   headers: { 'Content-Type': 'application/json' },
 });
 

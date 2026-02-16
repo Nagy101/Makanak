@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
+import AuthGuard from "@/components/AuthGuard";
 import { useAllLookups } from "@/features/lookup";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -97,7 +98,9 @@ const AppContent = () => {
           path="/admin"
           element={
             <Suspense fallback={<PageLoadingFallback />}>
-              <AdminLayout />
+              <AuthGuard>
+                <AdminLayout />
+              </AuthGuard>
             </Suspense>
           }
         >

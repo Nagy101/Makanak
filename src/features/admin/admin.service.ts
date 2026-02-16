@@ -8,16 +8,19 @@ import type {
   UpdateUserStatusRequest,
   UpdatePropertyStatusRequest,
   UserVerificationDetails,
+  AdminPropertyListing,
+  AdminPropertySearchParams,
 } from './admin.types';
 
 const api = axios.create({
-  baseURL: 'https://localhost:7148/api',
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (!config.headers) config.headers = {} as Record<string, any>;
+  if (token) (config.headers as Record<string, any>).Authorization = `Bearer ${token}`;
   return config;
 });
 
@@ -42,4 +45,10 @@ export const getUserVerificationDetails = (userId: string) =>
 
 // ── Property Status ──
 export const updatePropertyStatus = (data: UpdatePropertyStatusRequest) =>
-  api.put<AdminApiResponse<null>>('/Property', data).then((r) => r.data);
+  api.put<AdminApiResponse<null>>('/Admin/properties/status', data).then((r) => r.data);
+
+// ── Admin Properties ──
+export const getAdminProperties = (params: AdminPropertySearchParams) =>
+  api
+    .get<AdminApiResponse<PaginatedData<AdminPropertyListing>>>('/Property/admin-all', { params })
+    .then((r) => r.data.data);
