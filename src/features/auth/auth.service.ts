@@ -21,6 +21,23 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Intercept responses to catch banned user errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Check if the error is due to banned/suspended account
+    const message = error?.response?.data?.message || '';
+    if (message.toLowerCase().includes('banned') || 
+        message.toLowerCase().includes('suspended') ||
+        message.toLowerCase().includes('deactivated')) {
+      // Clear auth state if user is banned
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+    return Promise.reject(error);
+  }
+);
+
 function toFormData(data: Record<string, any>): FormData {
   const fd = new FormData();
   Object.entries(data).forEach(([key, val]) => {

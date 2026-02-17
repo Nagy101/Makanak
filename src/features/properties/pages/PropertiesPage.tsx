@@ -6,6 +6,7 @@ import PropertyCard from '../components/PropertyCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Building2, ChevronLeft, ChevronRight, SearchX } from 'lucide-react';
+import UserNavbar from '@/components/UserNavbar';
 
 export default function PropertiesPage() {
   const [params, setParams] = useState<PropertySearchParams>({
@@ -20,6 +21,7 @@ export default function PropertiesPage() {
 
   return (
     <div className="min-h-screen bg-secondary/30">
+      <UserNavbar />
       <PropertySearchFilter params={params} onParamsChange={setParams} />
 
       <main className="container mx-auto px-4 py-8">

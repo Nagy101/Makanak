@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import AuthGuard from "@/components/AuthGuard";
 import { useAllLookups } from "@/features/lookup";
+import { useBannedUserCheck } from "@/features/auth/hooks/useAuth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -37,13 +38,13 @@ const PageLoadingFallback = () => (
 
 const queryClient = new QueryClient();
 
-const AppContent = () => {
-  // Load all lookups on app initialization
-  useAllLookups();
+// Component inside Router to use navigation hooks
+const RouterContent = () => {
+  // Monitor banned user status (needs to be inside Router)
+  useBannedUserCheck();
 
   return (
-    <BrowserRouter>
-      <Routes>
+    <Routes>
         <Route path="/" element={<Index />} />
         <Route
           path="/login"
@@ -131,6 +132,16 @@ const AppContent = () => {
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
+  );
+};
+
+const AppContent = () => {
+  // Load all lookups on app initialization
+  useAllLookups();
+
+  return (
+    <BrowserRouter>
+      <RouterContent />
     </BrowserRouter>
   );
 };

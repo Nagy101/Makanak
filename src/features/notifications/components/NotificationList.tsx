@@ -18,9 +18,9 @@ const NotificationList = memo(() => {
   );
 
   return (
-    <div className="w-80 sm:w-96">
+    <div className="w-80 sm:w-96 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
         <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
         <div className="flex gap-1">
           <button
@@ -48,34 +48,36 @@ const NotificationList = memo(() => {
         </div>
       </div>
 
-      {/* List */}
-      <ScrollArea className="max-h-[360px]">
-        {isLoading && (
-          <div className="p-6 flex justify-center">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          </div>
-        )}
+      {/* List with ScrollArea */}
+      <ScrollArea className="h-[400px]">
+        <div className="flex flex-col">
+          {isLoading && (
+            <div className="p-6 flex justify-center">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          )}
 
-        {!isLoading && notifications.length === 0 && (
-          <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground">
-            <Bell className="h-8 w-8 opacity-30" />
-            <p className="text-sm">No notifications</p>
-          </div>
-        )}
+          {!isLoading && notifications.length === 0 && (
+            <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground">
+              <Bell className="h-8 w-8 opacity-30" />
+              <p className="text-sm">No notifications</p>
+            </div>
+          )}
 
-        {!isLoading &&
-          notifications.map((n) => (
-            <NotificationItem
-              key={n.id}
-              id={n.id}
-              title={n.title}
-              message={n.message}
-              senderName={n.senderName}
-              createdAt={n.createdAt}
-              isRead={n.isRead}
-              onClick={handleClick}
-            />
-          ))}
+          {!isLoading &&
+            notifications.map((n) => (
+              <NotificationItem
+                key={n.id}
+                id={n.id}
+                title={n.title}
+                message={n.message}
+                senderName={n.senderName}
+                createdAt={n.createdAt}
+                isRead={n.isRead}
+                onClick={handleClick}
+              />
+            ))}
+        </div>
       </ScrollArea>
     </div>
   );

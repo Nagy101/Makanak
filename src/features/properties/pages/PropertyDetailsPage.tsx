@@ -11,6 +11,7 @@ import {
   ChevronLeft, ChevronRight, Calendar,
 } from 'lucide-react';
 import { useState } from 'react';
+import UserNavbar from '@/components/UserNavbar';
 
 export default function PropertyDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ export default function PropertyDetailsPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-secondary/30">
+        <UserNavbar />
         <div className="container mx-auto px-4 py-8">
           <Skeleton className="h-8 w-48 mb-6" />
           <Skeleton className="aspect-[16/9] w-full rounded-xl mb-8" />
@@ -38,11 +40,14 @@ export default function PropertyDetailsPage() {
 
   if (!property) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-secondary/30">
-        <h2 className="text-xl font-semibold mb-2">Property not found</h2>
-        <Button asChild variant="outline">
-          <Link to="/properties"><ArrowLeft className="h-4 w-4 mr-2" /> Back to listings</Link>
-        </Button>
+      <div className="min-h-screen bg-secondary/30">
+        <UserNavbar />
+        <div className="flex flex-col items-center justify-center flex-1 py-20">
+          <h2 className="text-xl font-semibold mb-2">Property not found</h2>
+          <Button asChild variant="outline">
+            <Link to="/properties"><ArrowLeft className="h-4 w-4 mr-2" /> Back to listings</Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -54,7 +59,8 @@ export default function PropertyDetailsPage() {
 
   return (
     <div className="min-h-screen bg-secondary/30">
-      {/* Top bar */}
+      <UserNavbar />
+      {/* Back button bar */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-3">
           <Button asChild variant="ghost" size="sm">

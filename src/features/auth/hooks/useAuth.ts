@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useEffect } from 'react';
 import * as authService from '../auth.service';
 import { useAuthStore } from '../store/authStore';
 import type {
@@ -9,6 +10,17 @@ import type {
   UpdateProfileRequest, VerifyIdentityRequest,
   InitiateEmailChangeRequest, ConfirmEmailChangeRequest,
 } from '../auth.types';
+
+// Type for auth response
+interface AuthResponse {
+  token: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role?: string;
+  };
+}
 
 // ── Profile Query ──
 export function useProfile() {
@@ -27,16 +39,71 @@ export function useProfile() {
 
 // ── Login ──
 export function useLogin() {
-  const { setAuth } = useAuthStore();
+  const { setAuth, clearAuth } = useAuthStore();
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  
   return useMutation({
     mutationFn: (data: LoginRequest) => authService.login(data),
-    onSuccess: (res: any) => {
+    onSuccess: async (res: AuthResponse) => {
+      // First set the auth to get the token for profile request
       setAuth(res.user, res.token);
-      toast.success('Welcome back!');
-      navigate('/profile');
+      
+      // Immediately fetch profile to check user status
+      try {
+        const profile = await authService.getProfile();
+        const userStatus = (profile?.userStatus || '').toString().toLowerCase();
+        
+        // Check if user is banned
+        if (userStatus === 'banned' || userStatus === 'suspended' || userStatus === 'deactivated') {
+          clearAuth();
+          qc.clear();
+          toast.error('Your account has been banned. Please contact support.');
+          return;
+        }
+        
+        // User is not banned, proceed with login
+        toast.success('Welcome back!');
+        navigate('/profile');
+      } catch (error) {
+        // If profile fetch fails, still allow login but log the error
+        console.error('Failed to fetch profile:', error);
+        toast.success('Welcome back!');
+        navigate('/profile');
+      }
     },
-    onError: () => toast.error('Invalid email or password.'),
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { data?: { message?: string; errors?: Record<string, string[]>; isSuccess?: boolean } } };
+      const message = axiosError?.response?.data?.message || '';
+      const isSuccess = axiosError?.response?.data?.isSuccess;
+      
+      // If backend explicitly says not successful, check for banned keywords
+      if (isSuccess === false && message) {
+        if (message.toLowerCase().includes('banned') || 
+            message.toLowerCase().includes('suspended') ||
+            message.toLowerCase().includes('deactivated')) {
+          toast.error('Your account has been banned. Please contact support.');
+          return;
+        }
+      }
+      
+      // Check if user is banned in error message
+      if (message.toLowerCase().includes('banned') || 
+          message.toLowerCase().includes('suspended') ||
+          message.toLowerCase().includes('deactivated')) {
+        toast.error('Your account has been banned. Please contact support.');
+        return;
+      }
+      
+      // Show backend error message if available
+      if (message) {
+        toast.error(message);
+        return;
+      }
+      
+      // Default error
+      toast.error('Invalid email or password.');
+    },
   });
 }
 
@@ -46,7 +113,7 @@ export function useRegister() {
   const navigate = useNavigate();
   return useMutation({
     mutationFn: (data: RegisterRequest) => authService.register(data),
-    onSuccess: (res: any) => {
+    onSuccess: (res: AuthResponse) => {
       setAuth(res.user, res.token);
       toast.success('Account created successfully!');
       navigate('/profile');
@@ -76,8 +143,10 @@ export function useForgotPassword() {
   return useMutation({
     mutationFn: (data: ForgotPasswordRequest) => authService.forgotPassword(data),
     onSuccess: () => toast.success('OTP sent to your email. Please check your inbox.'),
-    onError: (error: any) => {
-      const errorMsg = error?.response?.data?.message || error?.response?.data?.errors?.[Object.keys(error.response.data.errors)[0]]?.[0];
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } };
+      const errorMsg = axiosError?.response?.data?.message || 
+        axiosError?.response?.data?.errors?.[Object.keys(axiosError.response?.data?.errors || {})[0]]?.[0];
       toast.error(errorMsg || 'Could not send OTP. Please check your email address and try again.');
     },
   });
@@ -152,4 +221,26 @@ export function useConfirmEmailChange() {
     },
     onError: () => toast.error('Could not confirm email change.'),
   });
+}
+
+// ── Monitor Banned User Status ──
+export function useBannedUserCheck() {
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+  const clearAuth = useAuthStore((s) => s.clearAuth);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+
+    const userStatus = (user?.userStatus || '').toString().toLowerCase();
+    
+    if (userStatus === 'banned' || userStatus === 'suspended' || userStatus === 'deactivated') {
+      toast.error('Your account has been banned. Please contact support.', {
+        duration: 5000,
+      });
+      clearAuth();
+      navigate('/login', { replace: true });
+    }
+  }, [user?.userStatus, isAuthenticated, user, clearAuth, navigate]);
 }

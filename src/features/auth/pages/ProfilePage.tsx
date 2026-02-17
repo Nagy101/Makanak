@@ -20,6 +20,7 @@ import {
   useProfile, useUpdateProfile, useVerifyIdentity,
   useLogout, useInitiateEmailChange, useConfirmEmailChange,
 } from '../hooks/useAuth';
+import NotificationBell from '@/features/notifications/components/NotificationBell';
 
 // ── Schemas ──
 const profileSchema = z.object({
@@ -225,6 +226,7 @@ const ProfilePage = memo(() => {
             <span className="text-lg font-bold text-foreground">Makanak</span>
           </Link>
           <div className="flex items-center gap-2">
+            <NotificationBell />
             {isAdmin && (
               <Button
                 variant="ghost"
