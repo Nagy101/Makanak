@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useLogout } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import NotificationBell from '@/features/notifications/components/NotificationBell';
 import { useState } from 'react';
 
 const NAV_ITEMS = [
@@ -116,6 +117,7 @@ const AdminLayout = memo(() => {
           </Button>
           <h2 className="text-sm font-medium text-muted-foreground">Admin Panel</h2>
           <div className="ml-auto flex items-center gap-3">
+            <NotificationBell />
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
               {userName.charAt(0).toUpperCase()}
             </div>
