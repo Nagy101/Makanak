@@ -26,6 +26,10 @@ const AdminDashboardPage = lazy(() => import("./features/admin/pages/AdminDashbo
 const AdminUsersPage = lazy(() => import("./features/admin/pages/AdminUsersPage"));
 const AdminPropertiesPage = lazy(() => import("./features/admin/pages/AdminPropertiesPage"));
 
+// Lazy load owner pages
+const OwnerLayout = lazy(() => import("./features/owner/components/OwnerLayout"));
+const OwnerDashboardPage = lazy(() => import("./features/owner/pages/OwnerDashboardPage"));
+const AddEditPropertyPage = lazy(() => import("./features/owner/pages/AddEditPropertyPage"));
 // Loading fallback component for lazy routes
 const PageLoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -126,6 +130,40 @@ const RouterContent = () => {
             element={
               <Suspense fallback={<PageLoadingFallback />}>
                 <AdminPropertiesPage />
+              </Suspense>
+            }
+          />
+        </Route>
+        {/* Owner routes */}
+        <Route
+          path="/owner"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <OwnerLayout />
+            </Suspense>
+          }
+        >
+          <Route
+            index
+            element={
+              <Suspense fallback={<PageLoadingFallback />}>
+                <OwnerDashboardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="properties/new"
+            element={
+              <Suspense fallback={<PageLoadingFallback />}>
+                <AddEditPropertyPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="properties/:id/edit"
+            element={
+              <Suspense fallback={<PageLoadingFallback />}>
+                <AddEditPropertyPage />
               </Suspense>
             }
           />

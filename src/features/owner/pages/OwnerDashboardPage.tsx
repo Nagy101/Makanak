@@ -1,0 +1,221 @@
+import { useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Search, ChevronLeft, ChevronRight, SearchX } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useMyProperties, useDeleteProperty } from '../useOwnerProperties';
+import OwnerPropertyCard from '../components/OwnerPropertyCard';
+import type { MyPropertiesParams } from '../owner.types';
+
+const STATUS_TABS = ['All', 'Pending', 'Accepted', 'Rejected', 'Banned'] as const;
+
+const SORT_OPTIONS = [
+  { value: 'DateCreatedDesc', label: 'Newest First' },
+  { value: 'DateCreatedAsc', label: 'Oldest First' },
+  { value: 'PriceAsc', label: 'Price: Low → High' },
+  { value: 'PriceDesc', label: 'Price: High → Low' },
+  { value: 'NameAsc', label: 'Name: A → Z' },
+  { value: 'NameDesc', label: 'Name: Z → A' },
+];
+
+export default function OwnerDashboardPage() {
+  const navigate = useNavigate();
+  const [params, setParams] = useState<MyPropertiesParams>({ PageIndex: 1, PageSize: 6 });
+  const [localSearch, setLocalSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<string>('All');
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+
+  const { data, isLoading, isFetching } = useMyProperties(params);
+  const deleteMutation = useDeleteProperty();
+
+  const totalPages = useMemo(() => (data ? Math.ceil(data.totalCount / (params.PageSize || 6)) : 0), [data, params.PageSize]);
+  const currentPage = params.PageIndex || 1;
+
+  const handleSearch = useCallback(() => {
+    setParams((p) => ({ ...p, Search: localSearch, PageIndex: 1 }));
+  }, [localSearch]);
+
+  const handleTabChange = useCallback((tab: string) => {
+    setActiveTab(tab);
+    setParams((p) => ({ ...p, FilterStatus: tab === 'All' ? undefined : tab, PageIndex: 1 }));
+  }, []);
+
+  const handleSort = useCallback((value: string) => {
+    setParams((p) => ({ ...p, Sort: value, PageIndex: 1 }));
+  }, []);
+
+  const handleEdit = useCallback((id: number) => {
+    navigate(`/owner/properties/${id}/edit`);
+  }, [navigate]);
+
+  const handleDelete = useCallback((id: number) => {
+    setDeleteTarget(id);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (deleteTarget !== null) {
+      deleteMutation.mutate(deleteTarget);
+      setDeleteTarget(null);
+    }
+  }, [deleteTarget, deleteMutation]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setParams((p) => ({ ...p, PageIndex: page }));
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">My Properties</h1>
+          {data && (
+            <p className="text-sm text-muted-foreground mt-1">{data.totalCount} total properties</p>
+          )}
+        </div>
+        <Button onClick={() => navigate('/owner/properties/new')} className="font-semibold">
+          <Plus className="h-4 w-4 mr-2" /> Add New Property
+        </Button>
+      </div>
+
+      {/* Status tabs */}
+      <div className="flex flex-wrap gap-2">
+        {STATUS_TABS.map((tab) => (
+          <Button
+            key={tab}
+            variant={activeTab === tab ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => handleTabChange(tab)}
+          >
+            {tab}
+          </Button>
+        ))}
+      </div>
+
+      {/* Search & Sort */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search properties…"
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            className="pl-10 h-10"
+          />
+        </div>
+        <Select value={params.Sort || ''} onValueChange={handleSort}>
+          <SelectTrigger className="w-[200px] h-10">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button onClick={handleSearch} className="h-10">
+          <Search className="h-4 w-4 mr-2" /> Search
+        </Button>
+        {isFetching && !isLoading && (
+          <span className="self-center text-sm text-muted-foreground animate-pulse">Updating…</span>
+        )}
+      </div>
+
+      {/* Loading */}
+      {isLoading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl border bg-card overflow-hidden">
+              <Skeleton className="aspect-[4/3] w-full" />
+              <div className="p-4 space-y-3">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-5 w-1/3" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty */}
+      {!isLoading && data && data.data.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="rounded-2xl bg-muted p-6 mb-6">
+            <SearchX className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <h2 className="text-xl font-semibold text-foreground mb-2">No properties found</h2>
+          <p className="text-muted-foreground max-w-md">
+            {activeTab === 'All'
+              ? "You haven't listed any properties yet. Add your first property to get started."
+              : `No properties with "${activeTab}" status.`}
+          </p>
+          {activeTab === 'All' && (
+            <Button className="mt-6" onClick={() => navigate('/owner/properties/new')}>
+              <Plus className="h-4 w-4 mr-2" /> Add Property
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Grid */}
+      {!isLoading && data && data.data.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {data.data.map((p) => (
+              <OwnerPropertyCard key={p.id} property={p} onEdit={handleEdit} onDelete={handleDelete} />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <Button variant="outline" size="sm" disabled={currentPage <= 1} onClick={() => handlePageChange(currentPage - 1)}>
+                <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => handlePageChange(currentPage + 1)}>
+                Next <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Delete confirmation */}
+      <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Property</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this property? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
