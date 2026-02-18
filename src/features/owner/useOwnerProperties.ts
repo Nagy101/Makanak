@@ -1,0 +1,52 @@
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import * as ownerService from './owner.service';
+import type { MyPropertiesParams, CreatePropertyPayload, EditPropertyPayload } from './owner.types';
+import { toast } from 'sonner';
+
+const OWNER_KEY = ['owner', 'properties'] as const;
+
+export function useMyProperties(params: MyPropertiesParams) {
+  return useQuery({
+    queryKey: [...OWNER_KEY, params],
+    queryFn: () => ownerService.getMyProperties(params),
+    placeholderData: keepPreviousData,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useCreateProperty() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreatePropertyPayload) => ownerService.createProperty(payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: OWNER_KEY });
+      toast.success('Property created successfully!');
+    },
+    onError: () => toast.error('Failed to create property.'),
+  });
+}
+
+export function useUpdateProperty() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: EditPropertyPayload }) =>
+      ownerService.updateProperty(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: OWNER_KEY });
+      toast.success('Property updated successfully!');
+    },
+    onError: () => toast.error('Failed to update property.'),
+  });
+}
+
+export function useDeleteProperty() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => ownerService.deleteProperty(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: OWNER_KEY });
+      toast.success('Property deleted.');
+    },
+    onError: () => toast.error('Failed to delete property.'),
+  });
+}
