@@ -31,8 +31,10 @@ export function useUpdateProperty() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: EditPropertyPayload }) =>
       ownerService.updateProperty(id, payload),
-    onSuccess: () => {
+    onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: OWNER_KEY });
+      // Invalidate the individual property detail cache so navigating back shows fresh data
+      qc.invalidateQueries({ queryKey: ['property', id] });
       toast.success('Property updated successfully!');
     },
     onError: () => toast.error('Failed to update property.'),

@@ -13,7 +13,8 @@ interface NotificationItemProps {
 
 const NotificationItem = memo(
   ({ id, title, message, senderName, createdAt, isRead, onClick }: NotificationItemProps) => {
-    const timeAgo = formatDistanceToNow(new Date(createdAt), { addSuffix: true });
+    // The API returns createdAt without a timezone suffix — append 'Z' to treat it as UTC
+    const timeAgo = formatDistanceToNow(new Date(createdAt.endsWith('Z') ? createdAt : createdAt + 'Z'), { addSuffix: true });
 
     return (
       <button

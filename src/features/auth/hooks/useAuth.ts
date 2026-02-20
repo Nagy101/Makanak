@@ -49,7 +49,7 @@ export function useLogin() {
       // First set the auth to get the token for profile request
       setAuth(res.user, res.token);
       
-      // Immediately fetch profile to check user status
+      // Fetch full profile to get userType, userStatus, etc.
       try {
         const profile = await authService.getProfile();
         const userStatus = (profile?.userStatus || '').toString().toLowerCase();
@@ -62,7 +62,9 @@ export function useLogin() {
           return;
         }
         
-        // User is not banned, proceed with login
+        // Store full profile data (includes userType: "Owner" / "Tenant")
+        setAuth(profile, res.token);
+        
         toast.success('Welcome back!');
         navigate('/profile');
       } catch (error) {

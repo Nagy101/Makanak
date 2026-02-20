@@ -80,29 +80,58 @@ export default function AddEditPropertyPage() {
   const lat = watch('Latitude');
   const lng = watch('Longitude');
 
-  // Pre-fill on edit
+  // Pre-fill on edit — run once when property data arrives
   useEffect(() => {
-    if (isEdit && existingProperty) {
-      reset({
-        Title: existingProperty.title,
-        Description: existingProperty.description,
-        PropertyType: existingProperty.propertyType,
-        AreaName: existingProperty.areaName || '',
-        Address: existingProperty.address || '',
-        PricePerNight: existingProperty.pricePerNight,
-        Area: existingProperty.area,
-        Bedrooms: existingProperty.bedrooms,
-        Bathrooms: existingProperty.bathrooms,
-        MaxGuests: existingProperty.maxGuests,
-        GovernorateId: 0, // will be set from governorate name matching
-        Latitude: 30.0444,
-        Longitude: 31.2357,
-      });
-      setMainImagePreview(existingProperty.mainImageUrl);
-      setExistingGallery(existingProperty.propertyImages || []);
-      setSelectedAmenities(existingProperty.amenities?.map((a) => a.id) || []);
-    }
-  }, [isEdit, existingProperty, reset]);
+    if (!isEdit || !existingProperty) return;
+
+    // Try to resolve GovernorateId immediately if the lookup is already loaded
+    const govMatch = governorates.find(
+      (g) => g.nameEn?.toLowerCase() === existingProperty.governorateName?.toLowerCase() ||
+             g.nameAr?.toLowerCase() === existingProperty.governorateName?.toLowerCase(),
+    );
+
+    // Try to resolve PropertyType name to match what the Select items use
+    const typeMatch = propertyTypes.find(
+      (t) => t.name?.toLowerCase() === existingProperty.propertyType?.toLowerCase(),
+    );
+
+    reset({
+      Title: existingProperty.title,
+      Description: existingProperty.description,
+      PropertyType: typeMatch?.name ?? existingProperty.propertyType,
+      AreaName: existingProperty.areaName || '',
+      Address: existingProperty.address || '',
+      PricePerNight: existingProperty.pricePerNight,
+      Area: existingProperty.area,
+      Bedrooms: existingProperty.bedrooms,
+      Bathrooms: existingProperty.bathrooms,
+      MaxGuests: existingProperty.maxGuests,
+      GovernorateId: govMatch?.id ?? 0,
+      Latitude: 30.0444,
+      Longitude: 31.2357,
+    });
+    setMainImagePreview(existingProperty.mainImageUrl);
+    setExistingGallery(existingProperty.propertyImages || []);
+    setSelectedAmenities(existingProperty.amenities?.map((a) => a.id) || []);
+  }, [isEdit, existingProperty, reset]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fallback: if lookups arrived AFTER the property reset, re-sync the dropdowns
+  useEffect(() => {
+    if (!isEdit || !existingProperty || governorates.length === 0) return;
+    const match = governorates.find(
+      (g) => g.nameEn?.toLowerCase() === existingProperty.governorateName?.toLowerCase() ||
+             g.nameAr?.toLowerCase() === existingProperty.governorateName?.toLowerCase(),
+    );
+    if (match) setValue('GovernorateId', match.id);
+  }, [isEdit, existingProperty, governorates, setValue]);
+
+  useEffect(() => {
+    if (!isEdit || !existingProperty || propertyTypes.length === 0) return;
+    const match = propertyTypes.find(
+      (t) => t.name?.toLowerCase() === existingProperty.propertyType?.toLowerCase(),
+    );
+    if (match) setValue('PropertyType', match.name);
+  }, [isEdit, existingProperty, propertyTypes, setValue]);
 
   const handleMainImage = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -266,7 +295,7 @@ export default function AddEditPropertyPage() {
             {/* Map */}
             <div className="space-y-2">
               <Label>Pin Location on Map</Label>
-              <div className="rounded-lg border overflow-hidden" style={{ height: 350 }}>
+              <div className="rounded-lg border overflow-hidden" style={{ height: 350, isolation: 'isolate' }}>
                 <Suspense fallback={<div className="h-full flex items-center justify-center bg-muted text-muted-foreground text-sm">Loading map…</div>}>
                   <MapPicker lat={lat} lng={lng} onChange={handleMapChange} />
                 </Suspense>

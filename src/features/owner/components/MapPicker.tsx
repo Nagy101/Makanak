@@ -1,4 +1,15 @@
-import { useCallback, useRef, memo } from 'react';
+import { memo, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix Leaflet's default icon paths broken by Vite's asset handling
+delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href,
+  iconUrl: new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href,
+  shadowUrl: new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href,
+});
 
 interface MapPickerProps {
   lat: number;
@@ -6,52 +17,51 @@ interface MapPickerProps {
   onChange: (lat: number, lng: number) => void;
 }
 
-/**
- * Lightweight map picker using OpenStreetMap tiles via an iframe approach.
- * No external map library required — uses a simple interactive pin via click events.
- */
-const MapPicker = memo(({ lat, lng, onChange }: MapPickerProps) => {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const markerRef = useRef<HTMLDivElement>(null);
+/** Syncs the map view when lat/lng change externally (e.g. governorate selection) */
+function MapSync({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([lat, lng], map.getZoom(), { animate: true });
+  }, [lat, lng, map]);
+  return null;
+}
 
-  // We use a simple embedded tile view + click-to-place-pin approach
-  // This avoids heavy dependencies like Leaflet
-  const tileUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.05}%2C${lat - 0.05}%2C${lng + 0.05}%2C${lat + 0.05}&layer=mapnik&marker=${lat}%2C${lng}`;
-
-  const handleMapClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!mapRef.current) return;
-      const rect = mapRef.current.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-
-      // Convert pixel position to approximate lat/lng offset
-      const newLng = lng - 0.05 + x * 0.1;
-      const newLat = lat + 0.05 - y * 0.1;
-      onChange(Number(newLat.toFixed(6)), Number(newLng.toFixed(6)));
+/** Registers click events on the map to place the marker */
+function ClickHandler({ onChange }: { onChange: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) {
+      onChange(Number(e.latlng.lat.toFixed(6)), Number(e.latlng.lng.toFixed(6)));
     },
-    [lat, lng, onChange],
-  );
+  });
+  return null;
+}
 
+const MapPicker = memo(({ lat, lng, onChange }: MapPickerProps) => {
   return (
-    <div ref={mapRef} className="relative h-full w-full cursor-crosshair" onClick={handleMapClick}>
-      <iframe
-        title="Map"
-        src={tileUrl}
-        className="h-full w-full border-0 pointer-events-none"
-        loading="lazy"
+    <MapContainer
+      center={[lat, lng]}
+      zoom={13}
+      scrollWheelZoom
+      className="h-full w-full rounded-lg"
+      style={{ cursor: 'crosshair' }}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {/* Pin indicator overlay */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div ref={markerRef} className="flex flex-col items-center">
-          <div className="h-6 w-6 rounded-full bg-primary border-2 border-primary-foreground shadow-lg" />
-          <div className="h-3 w-0.5 bg-primary" />
-        </div>
-      </div>
-      <div className="absolute bottom-2 left-2 rounded bg-card/90 px-2 py-1 text-xs text-muted-foreground shadow">
-        Click to set location
-      </div>
-    </div>
+      <MapSync lat={lat} lng={lng} />
+      <ClickHandler onChange={onChange} />
+      <Marker
+        position={[lat, lng]}
+        draggable
+        eventHandlers={{
+          dragend(e) {
+            const { lat: newLat, lng: newLng } = (e.target as L.Marker).getLatLng();
+            onChange(Number(newLat.toFixed(6)), Number(newLng.toFixed(6)));
+          },
+        }}
+      />
+    </MapContainer>
   );
 });
 

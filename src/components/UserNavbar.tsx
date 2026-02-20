@@ -3,9 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Building2, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/features/auth/store/authStore';
-import { useLogout } from '@/features/auth/hooks/useAuth';
+import { useLogout, useProfile } from '@/features/auth/hooks/useAuth';
 import NotificationBell from '@/features/notifications/components/NotificationBell';
-import { toast } from 'sonner';
 
 interface UserNavbarProps {
   className?: string;
@@ -14,9 +13,20 @@ interface UserNavbarProps {
 const UserNavbar = memo(({ className = '' }: UserNavbarProps) => {
   const navigate = useNavigate();
   const logout = useLogout();
-  const user = useAuthStore((s) => s.user);
-  const isAdmin = user?.role?.toLowerCase() === 'admin';
-  const isAuthenticated = !!user;
+  const token = useAuthStore((s) => s.token);
+
+  // Call useProfile here so the navbar always has fresh user data.
+  // React Query deduplicates the request — no extra network call.
+  const { data: profileData } = useProfile();
+
+  // profileData (from query) is the authoritative source; Zustand user is the fallback
+  const storeUser = useAuthStore((s) => s.user);
+  const user = profileData ?? storeUser;
+
+  const userTypeStr = (user?.role || user?.userType || '').toLowerCase();
+  const isAdmin = userTypeStr === 'admin';
+  const isOwner = userTypeStr === 'owner';
+  const isAuthenticated = !!token;
 
   const handleLogout = () => {
     logout.mutate();
@@ -42,14 +52,21 @@ const UserNavbar = memo(({ className = '' }: UserNavbarProps) => {
               >
                 Profile
               </Button>
+              {isOwner && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/owner')}
+                  className="text-muted-foreground hover:text-foreground hidden sm:flex"
+                >
+                  My Properties
+                </Button>
+              )}
               {isAdmin && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    if (isAdmin) navigate('/admin');
-                    else toast.error('You do not have permission to access admin panel.');
-                  }}
+                  onClick={() => navigate('/admin')}
                   className="text-muted-foreground hover:text-foreground hidden sm:flex"
                 >
                   Admin Panel

@@ -190,7 +190,8 @@ const ProfilePage = memo(() => {
   };
 
   const navigate = useNavigate();
-  const isAdmin = ((user?.role || user?.userType) ?? '').toString().toLowerCase() === 'admin';
+  const isAdmin = (user?.role ?? '').toString().toLowerCase() === 'admin';
+  const isOwner = (user?.userType ?? '').toString().toLowerCase() === 'owner';
 
   const handleEmailStepChange = () => {
     setEmailStep('initiate');
@@ -227,14 +228,19 @@ const ProfilePage = memo(() => {
           </Link>
           <div className="flex items-center gap-2">
             <NotificationBell />
+            {isOwner && (
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/owner')}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                My Properties
+              </Button>
+            )}
             {isAdmin && (
               <Button
                 variant="ghost"
-                onClick={() => {
-                  // guard will still protect; this is a convenience link for admins
-                  if (isAdmin) navigate('/admin');
-                  else toast.error('You do not have permission to access admin panel.');
-                }}
+                onClick={() => navigate('/admin')}
                 className="text-muted-foreground hover:text-foreground"
               >
                 Admin Panel

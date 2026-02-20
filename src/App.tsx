@@ -5,8 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import AuthGuard from "@/components/AuthGuard";
+import OwnerGuard from "@/components/OwnerGuard";
 import { useAllLookups } from "@/features/lookup";
-import { useBannedUserCheck } from "@/features/auth/hooks/useAuth";
+import { useBannedUserCheck, useProfile } from "@/features/auth/hooks/useAuth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -46,6 +47,8 @@ const queryClient = new QueryClient();
 const RouterContent = () => {
   // Monitor banned user status (needs to be inside Router)
   useBannedUserCheck();
+  // Hydrate user profile from token on every page load / refresh
+  useProfile();
 
   return (
     <Routes>
@@ -139,7 +142,9 @@ const RouterContent = () => {
           path="/owner"
           element={
             <Suspense fallback={<PageLoadingFallback />}>
-              <OwnerLayout />
+              <OwnerGuard>
+                <OwnerLayout />
+              </OwnerGuard>
             </Suspense>
           }
         >
