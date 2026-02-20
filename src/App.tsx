@@ -31,6 +31,10 @@ const AdminPropertiesPage = lazy(() => import("./features/admin/pages/AdminPrope
 const OwnerLayout = lazy(() => import("./features/owner/components/OwnerLayout"));
 const OwnerDashboardPage = lazy(() => import("./features/owner/pages/OwnerDashboardPage"));
 const AddEditPropertyPage = lazy(() => import("./features/owner/pages/AddEditPropertyPage"));
+
+// Lazy load booking pages
+const TenantBookingsPage = lazy(() => import("./features/bookings/pages/TenantBookingsPage"));
+const OwnerIncomingBookingsPage = lazy(() => import("./features/bookings/pages/OwnerIncomingBookingsPage"));
 // Loading fallback component for lazy routes
 const PageLoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -172,7 +176,24 @@ const RouterContent = () => {
               </Suspense>
             }
           />
+          <Route
+            path="bookings"
+            element={
+              <Suspense fallback={<PageLoadingFallback />}>
+                <OwnerIncomingBookingsPage />
+              </Suspense>
+            }
+          />
         </Route>
+        {/* Tenant bookings */}
+        <Route
+          path="/my-bookings"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <TenantBookingsPage />
+            </Suspense>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
   );

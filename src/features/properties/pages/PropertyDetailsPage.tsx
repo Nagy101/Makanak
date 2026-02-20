@@ -8,10 +8,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import {
   Star, MapPin, Bed, Bath, Users, Maximize2, ArrowLeft,
-  ChevronLeft, ChevronRight, Calendar,
+  ChevronLeft, ChevronRight,
 } from 'lucide-react';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import UserNavbar from '@/components/UserNavbar';
+
+const CreateBookingWidget = lazy(() => import('@/features/bookings/components/CreateBookingWidget'));
 
 export default function PropertyDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -216,64 +218,19 @@ export default function PropertyDetailsPage() {
           </div>
 
           {/* Booking card */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-24 shadow-lg border-0 ring-1 ring-border">
-              <CardContent className="p-6 space-y-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-primary">
-                    {property.pricePerNight.toLocaleString()} EGP
-                  </span>
-                  <span className="text-muted-foreground">/ night</span>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-1 block">CHECK-IN</label>
-                      <div className="flex items-center gap-2 rounded-lg border px-3 py-2.5">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <input type="date" className="text-sm bg-transparent outline-none w-full" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-1 block">CHECK-OUT</label>
-                      <div className="flex items-center gap-2 rounded-lg border px-3 py-2.5">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <input type="date" className="text-sm bg-transparent outline-none w-full" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground mb-1 block">GUESTS</label>
-                    <div className="flex items-center gap-2 rounded-lg border px-3 py-2.5">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <select className="text-sm bg-transparent outline-none w-full">
-                        {Array.from({ length: property.maxGuests }, (_, i) => (
-                          <option key={i + 1} value={i + 1}>
-                            {i + 1} {i === 0 ? 'guest' : 'guests'}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <Button className="w-full h-12 text-base font-semibold" size="lg">
-                  Book Now
-                </Button>
-
-                <p className="text-center text-xs text-muted-foreground">You won't be charged yet</p>
-
-                <Separator />
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Address</span>
-                    <span className="text-foreground font-medium text-right max-w-[60%]">{property.address}</span>
-                  </div>
+          <div className="lg:col-span-1 sticky top-24">
+            <Suspense fallback={<Skeleton className="h-96 w-full rounded-xl" />}>
+              <CreateBookingWidget
+                propertyId={property.id}
+                pricePerNight={property.pricePerNight}
+                maxGuests={property.maxGuests}
+              />
+            </Suspense>
+            <Card className="mt-4 border-0 ring-1 ring-border">
+              <CardContent className="p-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Address</span>
+                  <span className="text-foreground font-medium text-right max-w-[60%]">{property.address}</span>
                 </div>
               </CardContent>
             </Card>

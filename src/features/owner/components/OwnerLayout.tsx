@@ -1,6 +1,6 @@
 import { memo, useCallback, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, PlusCircle, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Building2, PlusCircle, CalendarCheck, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useLogout } from '@/features/auth/hooks/useAuth';
@@ -10,6 +10,7 @@ import NotificationBell from '@/features/notifications/components/NotificationBe
 const NAV_ITEMS = [
   { to: '/owner', icon: LayoutDashboard, label: 'My Properties', end: true },
   { to: '/owner/properties/new', icon: PlusCircle, label: 'Add Property', end: false },
+  { to: '/owner/bookings', icon: CalendarCheck, label: 'Incoming Bookings', end: false },
 ] as const;
 
 const OwnerLayout = memo(() => {

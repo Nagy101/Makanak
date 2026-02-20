@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Building2, LogOut } from 'lucide-react';
+import { Building2, CalendarCheck, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useLogout, useProfile } from '@/features/auth/hooks/useAuth';
@@ -44,6 +44,15 @@ const UserNavbar = memo(({ className = '' }: UserNavbarProps) => {
           {isAuthenticated && (
             <>
               <NotificationBell />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/my-bookings')}
+                className="text-muted-foreground hover:text-foreground hidden sm:flex"
+              >
+                <CalendarCheck className="h-4 w-4 mr-1" />
+                My Bookings
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
