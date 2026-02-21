@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+﻿import { useCallback, useMemo, useState } from 'react';
 import { useIncomingBookings } from '../useBookings';
 import BookingStatusBadge from '../components/BookingStatusBadge';
 import BookingDetailsModal from '../components/BookingDetailsModal';
@@ -13,25 +13,51 @@ import {
 import { Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 
-const STATUS_TABS: { label: string; value: BookingStatusType | 'All' }[] = [
-  { label: 'All', value: 'All' },
-  { label: 'Pending', value: 'PendingOwnerApproval' },
-  { label: 'Payment', value: 'PendingPayment' },
+const STATUS_OPTIONS: { label: string; value: BookingStatusType | 'All' }[] = [
+  { label: 'All Statuses', value: 'All' },
+  { label: 'Pending Approval', value: 'PendingOwnerApproval' },
+  { label: 'Rejected', value: 'RejectedByOwner' },
+  { label: 'Pending Payment', value: 'PendingPayment' },
+  { label: 'Payment Failed', value: 'PaymentFailed' },
   { label: 'Confirmed', value: 'PaymentReceived' },
   { label: 'Checked In', value: 'CheckedIn' },
   { label: 'Completed', value: 'Completed' },
   { label: 'Cancelled', value: 'Cancelled' },
+  { label: 'Disputed', value: 'Disputed' },
+];
+
+const SORT_OPTIONS = [
+  { label: 'Newest First', value: 'DateCreatedDesc' },
+  { label: 'Oldest First', value: 'DateCreatedAsc' },
+  { label: 'Price High to Low', value: 'PriceDesc' },
+  { label: 'Price Low to High', value: 'PriceAsc' },
 ];
 
 const PAGE_SIZE = 10;
 
+const toUrl = (path: string | null | undefined) =>
+  !path ? '/placeholder.svg' : path.startsWith('http') ? path : `/${path}`;
+
 export default function OwnerIncomingBookingsPage() {
   const [statusFilter, setStatusFilter] = useState<BookingStatusType | 'All'>('All');
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState('DateCreatedDesc');
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+
+  const handleSearch = useCallback(() => {
+    setSearch(searchInput);
+    setPage(1);
+  }, [searchInput]);
+
+  const handleSearchKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') handleSearch();
+    },
+    [handleSearch],
+  );
 
   const params = useMemo<BookingListParams>(
     () => ({
@@ -58,46 +84,49 @@ export default function OwnerIncomingBookingsPage() {
       <h1 className="text-2xl font-bold text-foreground">Incoming Bookings</h1>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {STATUS_TABS.map((tab) => (
-            <Button
-              key={tab.value}
-              variant={statusFilter === tab.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                setStatusFilter(tab.value);
-                setPage(1);
-              }}
-            >
-              {tab.label}
-            </Button>
-          ))}
-        </div>
-        <div className="flex gap-2 ml-auto">
-          <div className="relative">
+      <div className="flex flex-col sm:flex-row gap-3">
+        {/* Status dropdown */}
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => { setStatusFilter(v as BookingStatusType | 'All'); setPage(1); }}
+        >
+          <SelectTrigger className="w-full sm:w-52">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Sort dropdown */}
+        <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
+          <SelectTrigger className="w-full sm:w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Search */}
+        <div className="relative flex-1 flex gap-2">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="pl-9 w-52"
+              placeholder="Search by property or tenant..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              className="pl-9 w-full"
             />
           </div>
-          <Select value={sort} onValueChange={setSort}>
-            <SelectTrigger className="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="DateCreatedDesc">Newest First</SelectItem>
-              <SelectItem value="DateCreatedAsc">Oldest First</SelectItem>
-              <SelectItem value="PriceDesc">Price High→Low</SelectItem>
-              <SelectItem value="PriceAsc">Price Low→High</SelectItem>
-            </SelectContent>
-          </Select>
+          <Button onClick={handleSearch} variant="secondary">
+            <Search className="h-4 w-4 mr-1" /> Search
+          </Button>
         </div>
       </div>
 
@@ -114,7 +143,7 @@ export default function OwnerIncomingBookingsPage() {
           <p className="text-sm mt-1">Bookings from tenants will appear here.</p>
         </div>
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-lg border bg-card overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -122,7 +151,9 @@ export default function OwnerIncomingBookingsPage() {
                 <TableHead>Tenant</TableHead>
                 <TableHead>Check-in</TableHead>
                 <TableHead>Check-out</TableHead>
+                <TableHead>Nights</TableHead>
                 <TableHead>Total</TableHead>
+                <TableHead>Owner Payout</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -133,46 +164,45 @@ export default function OwnerIncomingBookingsPage() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <img
-                        src={booking.propertyMainImage || '/placeholder.svg'}
+                        src={toUrl(booking.propertyMainImage)}
                         alt=""
-                        className="h-10 w-14 rounded object-cover bg-muted"
+                        className="h-10 w-14 rounded object-cover bg-muted shrink-0"
                         loading="lazy"
                         width={56}
                         height={40}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder.svg';
-                        }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
                       />
-                      <span className="font-medium text-foreground line-clamp-1">{booking.propertyName}</span>
+                      <span className="font-medium text-foreground line-clamp-1 max-w-[140px]">{booking.propertyName}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {booking.tenantImage ? (
-                        <img
-                          src={booking.tenantImage}
-                          alt=""
-                          className="h-7 w-7 rounded-full object-cover"
-                          loading="lazy"
-                          width={28}
-                          height={28}
-                        />
-                      ) : (
-                        <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                          {booking.tenantName?.charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <img
+                        src={toUrl(booking.tenantImage)}
+                        alt=""
+                        className="h-7 w-7 rounded-full object-cover shrink-0"
+                        loading="lazy"
+                        width={28}
+                        height={28}
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+                      />
                       <span className="text-sm">{booking.tenantName}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="text-sm whitespace-nowrap">
                     {format(new Date(booking.checkInDate), 'MMM dd, yyyy')}
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="text-sm whitespace-nowrap">
                     {format(new Date(booking.checkOutDate), 'MMM dd, yyyy')}
                   </TableCell>
-                  <TableCell className="font-semibold text-primary">
+                  <TableCell className="text-sm text-center">
+                    {booking.totalDays}
+                  </TableCell>
+                  <TableCell className="font-semibold text-primary whitespace-nowrap">
                     {booking.totalPrice.toLocaleString()} EGP
+                  </TableCell>
+                  <TableCell className="text-sm whitespace-nowrap">
+                    {booking.amountToPayToOwner.toLocaleString()} EGP
                   </TableCell>
                   <TableCell>
                     <BookingStatusBadge status={booking.status} />
@@ -195,9 +225,7 @@ export default function OwnerIncomingBookingsPage() {
           <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
-          </span>
+          <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
           <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
             <ChevronRight className="h-4 w-4" />
           </Button>

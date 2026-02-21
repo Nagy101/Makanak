@@ -2,6 +2,7 @@ import axios from 'axios';
 import type {
   BookingApiResponse,
   Booking,
+  BookingDetails,
   PaginatedData,
   CreateBookingRequest,
   UpdateBookingStatusRequest,
@@ -25,7 +26,7 @@ export const createBooking = (data: CreateBookingRequest) =>
 
 // ── Get Booking Details ──
 export const getBookingDetails = (id: number) =>
-  api.get<BookingApiResponse<Booking>>(`/${id}`).then((r) => r.data);
+  api.get<BookingApiResponse<BookingDetails>>(`/${id}`).then((r) => r.data);
 
 // ── My Bookings (Tenant) ──
 export const getMyBookings = (params: BookingListParams) =>

@@ -4,10 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import {
-  Building2, Camera, CheckCircle2, Clock, Loader2, LogOut,
-  Mail, Phone, Shield, Upload, User, XCircle, KeyRound, Calendar, Lock,
+  Camera, CheckCircle2, Clock, Loader2,
+  Mail, Phone, Shield, Upload, User, XCircle, KeyRound, Lock,
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,9 +17,9 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   useProfile, useUpdateProfile, useVerifyIdentity,
-  useLogout, useInitiateEmailChange, useConfirmEmailChange,
+  useInitiateEmailChange, useConfirmEmailChange,
 } from '../hooks/useAuth';
-import NotificationBell from '@/features/notifications/components/NotificationBell';
+import UserNavbar from '@/components/UserNavbar';
 
 // ── Schemas ──
 const profileSchema = z.object({
@@ -46,7 +45,6 @@ const ProfilePage = memo(() => {
   const { data: user, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const verifyIdentity = useVerifyIdentity();
-  const logout = useLogout();
   const initiateEmail = useInitiateEmailChange();
   const confirmEmail = useConfirmEmailChange();
 
@@ -185,14 +183,6 @@ const ProfilePage = memo(() => {
     if (f) handleFilePreview(f, setBackIdPreview, setBackIdFile);
   };
 
-  const handleLogout = () => {
-    logout.mutate();
-  };
-
-  const navigate = useNavigate();
-  const isAdmin = (user?.role ?? '').toString().toLowerCase() === 'admin';
-  const isOwner = (user?.userType ?? '').toString().toLowerCase() === 'owner';
-
   const handleEmailStepChange = () => {
     setEmailStep('initiate');
   };
@@ -203,12 +193,7 @@ const ProfilePage = memo(() => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="border-b bg-card">
-          <div className="container mx-auto flex items-center justify-between px-6 py-4">
-            <Skeleton className="h-8 w-32" />
-            <Skeleton className="h-10 w-24" />
-          </div>
-        </header>
+        <UserNavbar />
         <main className="container mx-auto max-w-4xl px-6 py-10 space-y-6">
           <Skeleton className="h-48 w-full rounded-xl" />
           <Skeleton className="h-64 w-full rounded-xl" />
@@ -219,45 +204,7 @@ const ProfilePage = memo(() => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar */}
-      <header className="border-b bg-card sticky top-0 z-30">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-primary" />
-            <span className="text-lg font-bold text-foreground">Makanak</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            {isOwner && (
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/owner')}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                My Properties
-              </Button>
-            )}
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/admin')}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Admin Panel
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              onClick={handleLogout}
-              disabled={logout.isPending}
-              className="text-muted-foreground hover:text-destructive"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
+      <UserNavbar />
 
       <main className="container mx-auto max-w-4xl px-6 py-10 space-y-8">
         {/* Profile Header Card */}

@@ -1,6 +1,6 @@
 import { memo, useCallback, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, PlusCircle, CalendarCheck, LogOut, Menu, X } from 'lucide-react';
+import { Link, NavLink, Outlet } from 'react-router-dom';
+import { LayoutDashboard, Building2, PlusCircle, CalendarCheck, LogOut, Menu, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useLogout } from '@/features/auth/hooks/useAuth';
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { to: '/owner', icon: LayoutDashboard, label: 'My Properties', end: true },
   { to: '/owner/properties/new', icon: PlusCircle, label: 'Add Property', end: false },
   { to: '/owner/bookings', icon: CalendarCheck, label: 'Incoming Bookings', end: false },
+  { to: '/properties', icon: Search, label: 'Browse Properties', end: true },
 ] as const;
 
 const OwnerLayout = memo(() => {
@@ -40,10 +41,12 @@ const OwnerLayout = memo(() => {
         )}
       >
         <div className="flex h-16 items-center gap-3 border-b border-border px-6">
-          <div className="rounded-lg bg-primary p-1.5">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-bold text-foreground">Makanak</span>
+          <Link to="/" className="flex items-center gap-3 min-w-0">
+            <div className="rounded-lg bg-primary p-1.5 shrink-0">
+              <Building2 className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="text-lg font-bold text-foreground">Makanak</span>
+          </Link>
           <Button variant="ghost" size="icon" className="ml-auto lg:hidden" onClick={closeSidebar}>
             <X className="h-5 w-5" />
           </Button>
@@ -91,10 +94,16 @@ const OwnerLayout = memo(() => {
           <h2 className="text-sm font-medium text-muted-foreground">Owner Panel</h2>
           <div className="ml-auto flex items-center gap-3">
             <NotificationBell />
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-              {userName.charAt(0).toUpperCase()}
-            </div>
-            <span className="hidden text-sm font-medium text-foreground sm:block">{userName}</span>
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-secondary transition-colors"
+              title="Go to profile"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shrink-0">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+              <span className="hidden text-sm font-medium text-foreground sm:block">{userName}</span>
+            </Link>
           </div>
         </header>
 

@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -24,7 +24,6 @@ const NAV_ITEMS = [
 const AdminLayout = memo(() => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const userName = useAuthStore((s) => s.user?.name ?? 'Admin');
-  const navigate = useNavigate();
   const logout = useLogout();
 
   const handleLogout = useCallback(() => {
@@ -53,10 +52,12 @@ const AdminLayout = memo(() => {
       >
         {/* Brand */}
         <div className="flex h-16 items-center gap-3 border-b border-border px-6">
-          <div className="rounded-lg bg-primary p-1.5">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-bold text-foreground">Makanak</span>
+          <Link to="/" className="flex items-center gap-3 min-w-0">
+            <div className="rounded-lg bg-primary p-1.5 shrink-0">
+              <Building2 className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="text-lg font-bold text-foreground">Makanak</span>
+          </Link>
           <Button
             variant="ghost"
             size="icon"
@@ -118,12 +119,18 @@ const AdminLayout = memo(() => {
           <h2 className="text-sm font-medium text-muted-foreground">Admin Panel</h2>
           <div className="ml-auto flex items-center gap-3">
             <NotificationBell />
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-              {userName.charAt(0).toUpperCase()}
-            </div>
-            <span className="hidden text-sm font-medium text-foreground sm:block">
-              {userName}
-            </span>
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-secondary transition-colors"
+              title="Go to profile"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shrink-0">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+              <span className="hidden text-sm font-medium text-foreground sm:block">
+                {userName}
+              </span>
+            </Link>
           </div>
         </header>
 

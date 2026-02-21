@@ -34,7 +34,7 @@ export interface BookingApiResponse<T> {
   errors: string[] | null;
 }
 
-// ── Booking Data ──
+// ── Booking Data (list item) ──
 export interface Booking {
   id: number;
   checkInDate: string;
@@ -49,6 +49,19 @@ export interface Booking {
   propertyMainImage: string;
   tenantName: string;
   tenantImage: string;
+}
+
+// ── Booking Details (single booking, all fields) ──
+export interface BookingDetails extends Booking {
+  pricePerNight: number;
+  galleryImages: string[];
+  numberOfGuests: number;
+  specialRequests: string | null;
+  checkInQrCode: string | null;
+  isQrScanned: boolean;
+  ownerPhoneNumber: string | null;
+  checkInInstructions: string | null;
+  exactLocationUrl: string | null;
 }
 
 // ── Paginated Data ──

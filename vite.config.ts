@@ -18,6 +18,12 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         secure: false,
       },
+      // Proxy uploaded files (images) served by the backend
+      '/uploads': {
+        target: 'https://localhost:7148',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
