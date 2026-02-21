@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMyBookings, useCancelBooking } from '../useBookings';
 import BookingStatusBadge from '../components/BookingStatusBadge';
@@ -12,8 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Eye, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Eye, XCircle, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
 import { format } from 'date-fns';
+
+const PaymentModal = lazy(() => import('@/features/payment/components/PaymentModal'));
 
 const STATUS_OPTIONS: { label: string; value: BookingStatusType | 'All' }[] = [
   { label: 'All Statuses', value: 'All' },
@@ -46,14 +48,17 @@ const BookingCard = memo(
     booking,
     onView,
     onCancel,
+    onPay,
     isCancelling,
   }: {
     booking: { id: number; propertyName: string; propertyMainImage: string; checkInDate: string; checkOutDate: string; totalDays: number; totalPrice: number; status: string };
     onView: (id: number) => void;
     onCancel: (id: number) => void;
+    onPay: (id: number) => void;
     isCancelling: boolean;
   }) => {
     const canCancel = ['PendingOwnerApproval', 'PendingPayment'].includes(booking.status);
+    const canPay = booking.status === 'PendingPayment';
     return (
       <Card className="overflow-hidden hover:shadow-md transition-shadow">
         <div className="flex flex-col sm:flex-row">
@@ -86,10 +91,15 @@ const BookingCard = memo(
               <span className="text-lg font-bold text-primary">
                 {booking.totalPrice.toLocaleString()} EGP
               </span>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button variant="outline" size="sm" onClick={() => onView(booking.id)}>
                   <Eye className="h-3.5 w-3.5 mr-1" /> Details
                 </Button>
+                {canPay && (
+                  <Button size="sm" onClick={() => onPay(booking.id)} className="gap-1">
+                    <CreditCard className="h-3.5 w-3.5" /> Pay Now
+                  </Button>
+                )}
                 {canCancel && (
                   <Button
                     variant="outline"
@@ -131,6 +141,8 @@ export default function TenantBookingsPage() {
   const [sort, setSort] = useState('DateCreatedDesc');
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [payBookingId, setPayBookingId] = useState<number | null>(null);
+  const [payOpen, setPayOpen] = useState(false);
 
   const handleSearch = useCallback(() => {
     setSearch(searchInput);
@@ -167,6 +179,11 @@ export default function TenantBookingsPage() {
     (id: number) => { cancelMutation.mutate(id); },
     [cancelMutation],
   );
+
+  const handlePay = useCallback((id: number) => {
+    setPayBookingId(id);
+    setPayOpen(true);
+  }, []);
 
   const totalPages = data ? Math.ceil(data.totalCount / PAGE_SIZE) : 0;
 
@@ -243,6 +260,7 @@ export default function TenantBookingsPage() {
                 booking={booking}
                 onView={handleView}
                 onCancel={handleCancel}
+                onPay={handlePay}
                 isCancelling={cancelMutation.isPending}
               />
             ))}
@@ -268,6 +286,13 @@ export default function TenantBookingsPage() {
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
         role="tenant"
+        onPayNow={handlePay}
+      />
+
+      <PaymentModal
+        bookingId={payBookingId}
+        open={payOpen}
+        onOpenChange={setPayOpen}
       />
     </div>
   );

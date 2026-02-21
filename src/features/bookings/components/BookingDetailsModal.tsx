@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, lazy, Suspense } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
@@ -7,8 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { useBookingDetails, useCancelBooking, useUpdateBookingStatus } from '../useBookings';
 import BookingStatusBadge from './BookingStatusBadge';
 import { format } from 'date-fns';
-import { Users, Phone, MapPin, QrCode, Info, Star } from 'lucide-react';
+import { Users, Phone, MapPin, QrCode, Info, CreditCard } from 'lucide-react';
 import type { BookingStatusType } from '../booking.types';
+
+const TenantQRCodeDisplay = lazy(() => import('@/features/checkin/components/TenantQRCodeDisplay'));
 
 /** Ensure a relative path like `uploads/...` becomes `/uploads/...` */
 const toUrl = (path: string | null | undefined) =>
@@ -19,9 +21,10 @@ interface BookingDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   role: 'tenant' | 'owner';
+  onPayNow?: (bookingId: number) => void;
 }
 
-const BookingDetailsModal = memo(({ bookingId, open, onOpenChange, role }: BookingDetailsModalProps) => {
+const BookingDetailsModal = memo(({ bookingId, open, onOpenChange, role, onPayNow }: BookingDetailsModalProps) => {
   const { data: booking, isLoading } = useBookingDetails(open ? bookingId : null);
   const cancelMutation = useCancelBooking();
   const updateStatusMutation = useUpdateBookingStatus();
@@ -44,6 +47,8 @@ const BookingDetailsModal = memo(({ bookingId, open, onOpenChange, role }: Booki
 
   const canCancel = booking && ['PendingOwnerApproval', 'PendingPayment'].includes(booking.status);
   const canOwnerAct = role === 'owner' && booking?.status === 'PendingOwnerApproval';
+  const canPay = role === 'tenant' && booking?.status === 'PendingPayment';
+  const showQr = role === 'tenant' && booking?.checkInQrCode && ['PaymentReceived', 'CheckedIn'].includes(booking?.status ?? '');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -177,8 +182,25 @@ const BookingDetailsModal = memo(({ bookingId, open, onOpenChange, role }: Booki
               </>
             )}
 
-            {/* QR Code */}
-            {booking.checkInQrCode && (
+            {/* QR Code — generated client-side for tenant */}
+            {showQr && (
+              <>
+                <Separator />
+                <Suspense fallback={<Skeleton className="h-64 w-full rounded-lg" />}>
+                  <TenantQRCodeDisplay
+                    qrCodeValue={booking.checkInQrCode!}
+                    bookingId={booking.id}
+                    propertyName={booking.propertyName}
+                  />
+                </Suspense>
+                {booking.isQrScanned && (
+                  <Badge variant="secondary" className="text-xs mx-auto">QR already scanned</Badge>
+                )}
+              </>
+            )}
+
+            {/* Fallback: show raw QR image from backend for owner or other statuses */}
+            {!showQr && booking.checkInQrCode && (
               <>
                 <Separator />
                 <div className="flex flex-col items-center gap-2">
@@ -237,6 +259,14 @@ const BookingDetailsModal = memo(({ bookingId, open, onOpenChange, role }: Booki
                     Approve
                   </Button>
                 </>
+              )}
+              {canPay && onPayNow && (
+                <Button
+                  onClick={() => { onPayNow(bookingId!); onOpenChange(false); }}
+                  className="gap-1"
+                >
+                  <CreditCard className="h-4 w-4" /> Pay Now
+                </Button>
               )}
               {canCancel && role === 'tenant' && (
                 <Button

@@ -35,6 +35,9 @@ const AddEditPropertyPage = lazy(() => import("./features/owner/pages/AddEditPro
 // Lazy load booking pages
 const TenantBookingsPage = lazy(() => import("./features/bookings/pages/TenantBookingsPage"));
 const OwnerIncomingBookingsPage = lazy(() => import("./features/bookings/pages/OwnerIncomingBookingsPage"));
+
+// Lazy load check-in / QR scanner page
+const OwnerQRScannerPage = lazy(() => import("./features/checkin/pages/OwnerQRScannerPage"));
 // Loading fallback component for lazy routes
 const PageLoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -181,6 +184,14 @@ const RouterContent = () => {
             element={
               <Suspense fallback={<PageLoadingFallback />}>
                 <OwnerIncomingBookingsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="qr-scanner"
+            element={
+              <Suspense fallback={<PageLoadingFallback />}>
+                <OwnerQRScannerPage />
               </Suspense>
             }
           />
