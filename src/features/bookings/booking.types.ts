@@ -51,17 +51,49 @@ export interface Booking {
   tenantImage: string;
 }
 
-// ── Booking Details (single booking, all fields) ──
-export interface BookingDetails extends Booking {
-  pricePerNight: number;
-  galleryImages: string[];
-  numberOfGuests: number;
-  specialRequests: string | null;
+// ── Tenant Booking Details (GET /api/Booking/tenant/{id}) ──
+export interface TenantBookingDetails {
+  id: number;
+  propertyId: number;
+  propertyName: string;
+  propertyMainImage: string;
+  ownerPhoneNumber: string | null;
+  exactLocationUrl: string | null;
+  checkInInstructions: string | null;
   checkInQrCode: string | null;
   isQrScanned: boolean;
-  ownerPhoneNumber: string | null;
-  checkInInstructions: string | null;
-  exactLocationUrl: string | null;
+  checkInDate: string;
+  checkOutDate: string;
+  totalDays: number;
+  status: string;
+  /** Full cost = commissionPaid + amountToPayToOwner */
+  totalPrice: number;
+  /** Amount paid online via Stripe (platform fee only) — returned only when payment is completed */
+  commissionPaid?: number | null;
+  /** Cash to hand the owner upon arrival — returned only when payment is completed */
+  amountToPayToOwner?: number | null;
+  specialRequests: string | null;
+}
+
+// ── Owner Booking Details (GET /api/Booking/owner/{id}) ──
+export interface OwnerBookingDetails {
+  id: number;
+  propertyId: number;
+  propertyName: string;
+  tenantName: string;
+  tenantImage: string;
+  tenantPhoneNumber: string | null;
+  tenantIdentityImage: string | null;
+  checkInDate: string;
+  checkOutDate: string;
+  totalDays: number;
+  status: string;
+  isQrScanned: boolean;
+  totalPrice: number;
+  commissionPaid: number;
+  /** Cash the owner will receive from the tenant upon arrival */
+  amountToPayToOwner: number;
+  specialRequests: string | null;
 }
 
 // ── Paginated Data ──

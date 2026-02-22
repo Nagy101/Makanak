@@ -2,7 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import {
   createBooking,
-  getBookingDetails,
+  getTenantBookingDetails,
+  getOwnerBookingDetails,
   getMyBookings,
   getIncomingBookings,
   cancelBooking,
@@ -42,11 +43,20 @@ export const useIncomingBookings = (params: BookingListParams) =>
     placeholderData: (prev) => prev,
   });
 
-// ── Booking Details ──
-export const useBookingDetails = (id: number | null) =>
+// ── Tenant: Booking Details ──
+export const useTenantBookingDetails = (id: number | null) =>
   useQuery({
-    queryKey: ['bookings', 'detail', id] as const,
-    queryFn: () => getBookingDetails(id!),
+    queryKey: ['bookings', 'detail', 'tenant', id] as const,
+    queryFn: () => getTenantBookingDetails(id!),
+    enabled: id !== null && id > 0,
+    select: (d) => d.data,
+  });
+
+// ── Owner: Booking Details ──
+export const useOwnerBookingDetails = (id: number | null) =>
+  useQuery({
+    queryKey: ['bookings', 'detail', 'owner', id] as const,
+    queryFn: () => getOwnerBookingDetails(id!),
     enabled: id !== null && id > 0,
     select: (d) => d.data,
   });

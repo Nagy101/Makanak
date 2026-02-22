@@ -2,7 +2,8 @@ import axios from 'axios';
 import type {
   BookingApiResponse,
   Booking,
-  BookingDetails,
+  TenantBookingDetails,
+  OwnerBookingDetails,
   PaginatedData,
   CreateBookingRequest,
   UpdateBookingStatusRequest,
@@ -24,9 +25,13 @@ api.interceptors.request.use((config) => {
 export const createBooking = (data: CreateBookingRequest) =>
   api.post<BookingApiResponse<Booking>>('', data).then((r) => r.data);
 
-// ── Get Booking Details ──
-export const getBookingDetails = (id: number) =>
-  api.get<BookingApiResponse<BookingDetails>>(`/${id}`).then((r) => r.data);
+// ── Get Booking Details — Tenant (GET /api/Booking/tenant/{id}) ──
+export const getTenantBookingDetails = (id: number) =>
+  api.get<BookingApiResponse<TenantBookingDetails>>(`/tenant/${id}`).then((r) => r.data);
+
+// ── Get Booking Details — Owner (GET /api/Booking/owner/{id}) ──
+export const getOwnerBookingDetails = (id: number) =>
+  api.get<BookingApiResponse<OwnerBookingDetails>>(`/owner/${id}`).then((r) => r.data);
 
 // ── My Bookings (Tenant) ──
 export const getMyBookings = (params: BookingListParams) =>
