@@ -71,6 +71,7 @@ const UserNavbar = memo(({ className = '' }: UserNavbarProps) => {
     : [
         { label: 'Browse Properties', href: '/properties', exact: true },
         { label: 'My Bookings', href: '/my-bookings', exact: true },
+        { label: 'My Disputes', href: '/my-disputes', exact: true },
       ];
 
   const handleLogout = () => {

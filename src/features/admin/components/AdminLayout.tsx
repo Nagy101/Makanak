@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Users,
   Building2,
+  AlertTriangle,
   LogOut,
   Menu,
   X,
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/admin/users', icon: Users, label: 'Users', end: false },
   { to: '/admin/properties', icon: Building2, label: 'Properties', end: false },
+  { to: '/admin/disputes', icon: AlertTriangle, label: 'Disputes', end: false },
 ] as const;
 
 const AdminLayout = memo(() => {

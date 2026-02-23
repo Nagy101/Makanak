@@ -38,6 +38,10 @@ const OwnerIncomingBookingsPage = lazy(() => import("./features/bookings/pages/O
 
 // Lazy load check-in / QR scanner page
 const OwnerQRScannerPage = lazy(() => import("./features/checkin/pages/OwnerQRScannerPage"));
+
+// Lazy load dispute pages
+const MyDisputesPage = lazy(() => import("./features/disputes/pages/MyDisputesPage"));
+const AdminDisputesDashboard = lazy(() => import("./features/disputes/pages/AdminDisputesDashboard"));
 // Loading fallback component for lazy routes
 const PageLoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -143,6 +147,14 @@ const RouterContent = () => {
               </Suspense>
             }
           />
+          <Route
+            path="disputes"
+            element={
+              <Suspense fallback={<PageLoadingFallback />}>
+                <AdminDisputesDashboard />
+              </Suspense>
+            }
+          />
         </Route>
         {/* Owner routes */}
         <Route
@@ -202,6 +214,15 @@ const RouterContent = () => {
           element={
             <Suspense fallback={<PageLoadingFallback />}>
               <TenantBookingsPage />
+            </Suspense>
+          }
+        />
+        {/* User Disputes */}
+        <Route
+          path="/my-disputes"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <MyDisputesPage />
             </Suspense>
           }
         />
