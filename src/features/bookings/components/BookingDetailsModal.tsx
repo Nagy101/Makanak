@@ -69,6 +69,9 @@ interface TenantContentProps {
   isCancelling: boolean;
 }
 
+/** Platform fee percentage charged online (10 %) */
+const PLATFORM_FEE_RATE = 0.1;
+
 const TenantBookingContent = memo(
   ({ booking, bookingId, onCancel, onPay, onClose, isCancelling }: TenantContentProps) => {
     const canCancel = ['PendingOwnerApproval', 'PendingPayment'].includes(booking.status);
@@ -76,6 +79,24 @@ const TenantBookingContent = memo(
     const showQr =
       !!booking.checkInQrCode &&
       ['PaymentReceived', 'CheckedIn'].includes(booking.status);
+
+    /**
+     * When the API omits commissionPaid / amountToPayToOwner (post-payment
+     * statuses), derive them from totalPrice using the fixed 10 % platform fee.
+     */
+    const isPostPayment = ['PaymentReceived', 'CheckedIn', 'Completed'].includes(booking.status);
+    const derivedCommission =
+      booking.commissionPaid != null
+        ? booking.commissionPaid
+        : isPostPayment
+          ? Math.round(booking.totalPrice * PLATFORM_FEE_RATE)
+          : null;
+    const derivedOwnerAmount =
+      booking.amountToPayToOwner != null
+        ? booking.amountToPayToOwner
+        : derivedCommission != null
+          ? booking.totalPrice - derivedCommission
+          : null;
 
     return (
       <div className="space-y-5 py-2">
@@ -119,66 +140,97 @@ const TenantBookingContent = memo(
         {/* Pricing — full transparent breakdown for tenant */}
         <div>
           <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">Cost Breakdown</p>
-          <div className="rounded-lg border bg-secondary/30 p-3 space-y-3 text-sm">
-            {/* Detailed breakdown only when backend supplies both fields */}
-            {booking.commissionPaid != null && booking.amountToPayToOwner != null ? (
-              <>
-                {/* Online payment row */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">Platform Fee</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {canPay ? 'Pay now online via card' : 'Paid online \u2714'}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-semibold ${canPay ? 'text-foreground' : 'text-green-600 dark:text-green-400'}`}>
+
+          {/* Post-payment breakdown */}
+          {isPostPayment ? (
+            <div className="rounded-lg border bg-secondary/30 p-3 space-y-3 text-sm">
+              {/* Platform fee row — paid online */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground flex items-center gap-1">
+                    <CreditCard className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                    Platform Fee
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Paid online via card ✔</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-green-600 dark:text-green-400">
+                    {derivedCommission != null ? `${derivedCommission.toLocaleString()} EGP` : '—'}
+                  </p>
+                  <span className="text-xs text-green-600 dark:text-green-400 flex items-center justify-end gap-0.5">
+                    <CheckCircle2 className="h-3 w-3" /> Paid
+                  </span>
+                </div>
+              </div>
+
+              {/* Cash-to-owner row */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground flex items-center gap-1">
+                    <Banknote className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                    Owner Payment
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Pay in cash directly to owner at arrival</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-amber-600 dark:text-amber-400">
+                    {derivedOwnerAmount != null ? `${derivedOwnerAmount.toLocaleString()} EGP` : '—'}
+                  </p>
+                  <span className="text-xs text-amber-600 dark:text-amber-400">Cash at arrival</span>
+                </div>
+              </div>
+
+              <Separator className="my-0.5" />
+
+              <div className="flex justify-between font-bold text-foreground text-base">
+                <span>Total Cost</span>
+                <span>{booking.totalPrice.toLocaleString()} EGP</span>
+              </div>
+            </div>
+          ) : (
+            /* Pre-payment: show breakdown if available, otherwise just total */
+            <div className="rounded-lg border bg-secondary/30 p-3 space-y-3 text-sm">
+              {booking.commissionPaid != null && booking.amountToPayToOwner != null && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground">Platform Fee</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Pay now online via card</p>
+                    </div>
+                    <p className="font-semibold text-foreground">
                       {booking.commissionPaid.toLocaleString()} EGP
                     </p>
-                    {!canPay && (
-                      <span className="text-xs text-green-600 dark:text-green-400 flex items-center justify-end gap-0.5">
-                        <CheckCircle2 className="h-3 w-3" /> Paid
-                      </span>
-                    )}
                   </div>
-                </div>
-
-                {/* Cash-to-owner row */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">Owner Payment</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Pay in cash directly to owner at arrival</p>
-                  </div>
-                  <div className="text-right">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground">Owner Payment</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Cash to owner at arrival</p>
+                    </div>
                     <p className="font-semibold text-amber-600 dark:text-amber-400">
                       {booking.amountToPayToOwner.toLocaleString()} EGP
                     </p>
-                    <span className="text-xs text-amber-600 dark:text-amber-400">Cash at arrival</span>
                   </div>
-                </div>
-
-                <Separator className="my-0.5" />
-              </>
-            ) : null}
-
-            <div className="flex justify-between font-bold text-foreground text-base">
-              <span>Total Cost</span>
-              <span>{booking.totalPrice.toLocaleString()} EGP</span>
-            </div>
-          </div>
-
-          {/* Cash reminder banner — show after payment confirmed, only when amount is known */}
-          {['PaymentReceived', 'CheckedIn', 'Completed'].includes(booking.status) &&
-            booking.amountToPayToOwner != null && (
-              <div className="mt-2 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 px-3 py-2.5 text-sm">
-                <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <p className="text-amber-800 dark:text-amber-300">
-                  Remember to bring{' '}
-                  <span className="font-semibold">{booking.amountToPayToOwner.toLocaleString()} EGP cash</span>{' '}
-                  to pay the owner upon arrival.
-                </p>
+                  <Separator className="my-0.5" />
+                </>
+              )}
+              <div className="flex justify-between font-bold text-foreground text-base">
+                <span>Total Cost</span>
+                <span>{booking.totalPrice.toLocaleString()} EGP</span>
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Cash reminder banner — shown after payment with derived owner amount */}
+          {isPostPayment && derivedOwnerAmount != null && (
+            <div className="mt-2 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 px-3 py-2.5 text-sm">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-amber-800 dark:text-amber-300">
+                Remember to bring{' '}
+                <span className="font-semibold">{derivedOwnerAmount.toLocaleString()} EGP cash</span>{' '}
+                to pay the owner upon arrival.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Special requests */}
