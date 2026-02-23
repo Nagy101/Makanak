@@ -12,10 +12,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Eye, XCircle, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
+import { Search, Eye, XCircle, ChevronLeft, ChevronRight, CreditCard, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 
 const PaymentModal = lazy(() => import('@/features/payment/components/PaymentModal'));
+const CreateDisputeModal = lazy(() => import('@/features/disputes/components/CreateDisputeModal'));
 
 const STATUS_OPTIONS: { label: string; value: BookingStatusType | 'All' }[] = [
   { label: 'All Statuses', value: 'All' },
@@ -49,16 +50,19 @@ const BookingCard = memo(
     onView,
     onCancel,
     onPay,
+    onDispute,
     isCancelling,
   }: {
     booking: { id: number; propertyName: string; propertyMainImage: string; checkInDate: string; checkOutDate: string; totalDays: number; totalPrice: number; status: string };
     onView: (id: number) => void;
     onCancel: (id: number) => void;
     onPay: (id: number) => void;
+    onDispute: (id: number) => void;
     isCancelling: boolean;
   }) => {
     const canCancel = ['PendingOwnerApproval', 'PendingPayment'].includes(booking.status);
     const canPay = booking.status === 'PendingPayment';
+    const canDispute = ['PaymentReceived', 'CheckedIn', 'Completed'].includes(booking.status);
     return (
       <Card className="overflow-hidden hover:shadow-md transition-shadow">
         <div className="flex flex-col sm:flex-row">
@@ -111,6 +115,16 @@ const BookingCard = memo(
                     <XCircle className="h-3.5 w-3.5 mr-1" /> Cancel
                   </Button>
                 )}
+                {canDispute && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-warning border-warning/30 hover:bg-warning/10"
+                    onClick={() => onDispute(booking.id)}
+                  >
+                    <AlertTriangle className="h-3.5 w-3.5 mr-1" /> Dispute
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
@@ -143,7 +157,8 @@ export default function TenantBookingsPage() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [payBookingId, setPayBookingId] = useState<number | null>(null);
   const [payOpen, setPayOpen] = useState(false);
-
+  const [disputeBookingId, setDisputeBookingId] = useState<number | null>(null);
+  const [disputeOpen, setDisputeOpen] = useState(false);
   const handleSearch = useCallback(() => {
     setSearch(searchInput);
     setPage(1);
@@ -183,6 +198,11 @@ export default function TenantBookingsPage() {
   const handlePay = useCallback((id: number) => {
     setPayBookingId(id);
     setPayOpen(true);
+  }, []);
+
+  const handleDispute = useCallback((id: number) => {
+    setDisputeBookingId(id);
+    setDisputeOpen(true);
   }, []);
 
   const totalPages = data ? Math.ceil(data.totalCount / PAGE_SIZE) : 0;
@@ -261,6 +281,7 @@ export default function TenantBookingsPage() {
                 onView={handleView}
                 onCancel={handleCancel}
                 onPay={handlePay}
+                onDispute={handleDispute}
                 isCancelling={cancelMutation.isPending}
               />
             ))}
@@ -294,6 +315,14 @@ export default function TenantBookingsPage() {
         open={payOpen}
         onOpenChange={setPayOpen}
       />
+
+      {disputeBookingId && (
+        <CreateDisputeModal
+          bookingId={disputeBookingId}
+          open={disputeOpen}
+          onOpenChange={setDisputeOpen}
+        />
+      )}
     </div>
   );
 }
