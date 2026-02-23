@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { storage } from '@/lib/storage';
 import type {
   PropertySearchParams,
   PropertyListing,
@@ -14,7 +15,7 @@ const api = axios.create({
 
 // Attach token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = storage.getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });

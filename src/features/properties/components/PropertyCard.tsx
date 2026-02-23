@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Star, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { encodeId } from '@/lib/idEncoder';
 import type { PropertyListing } from '../property.types';
 
 interface Props {
@@ -12,7 +13,7 @@ export default function PropertyCard({ property }: Props) {
 
   return (
     <article
-      onClick={() => navigate(`/properties/${property.id}`)}
+      onClick={() => navigate(`/properties/${encodeId(property.id)}`)}
       className="group cursor-pointer overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
     >
       {/* Image */}

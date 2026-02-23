@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { LookupState } from '../lookup.types';
 import * as lookupService from '../lookup.service';
 
@@ -32,7 +33,9 @@ const initialState: LookupState = {
   error: null,
 };
 
-export const useLookupStore = create<LookupStore>((set) => ({
+export const useLookupStore = create<LookupStore>()(
+  persist(
+    (set) => ({
   ...initialState,
 
   fetchGovernorates: async () => {
@@ -181,4 +184,23 @@ export const useLookupStore = create<LookupStore>((set) => ({
   },
 
   reset: () => set(initialState),
-}));
+    }),
+    {
+      name: 'mk-lookups',
+      storage: createJSONStorage(() => sessionStorage),
+      // Only persist data arrays — never persist loading/error state
+      partialize: (state) => ({
+        governorates: state.governorates,
+        amenities: state.amenities,
+        propertyTypes: state.propertyTypes,
+        propertyStatuses: state.propertyStatuses,
+        userStatuses: state.userStatuses,
+        userTypes: state.userTypes,
+        disputeReasons: state.disputeReasons,
+        bookingStatuses: state.bookingStatuses,
+        disputeStatuses: state.disputeStatuses,
+        sortingOptions: state.sortingOptions,
+      }),
+    }
+  )
+);

@@ -18,17 +18,8 @@ import {
 import { useMyProperties, useDeleteProperty } from '../useOwnerProperties';
 import OwnerPropertyCard from '../components/OwnerPropertyCard';
 import type { MyPropertiesParams } from '../owner.types';
-
-const STATUS_TABS = ['All', 'Pending', 'Accepted', 'Rejected', 'Banned'] as const;
-
-const SORT_OPTIONS = [
-  { value: 'DateCreatedDesc', label: 'Newest First' },
-  { value: 'DateCreatedAsc', label: 'Oldest First' },
-  { value: 'PriceAsc', label: 'Price: Low → High' },
-  { value: 'PriceDesc', label: 'Price: High → Low' },
-  { value: 'NameAsc', label: 'Name: A → Z' },
-  { value: 'NameDesc', label: 'Name: Z → A' },
-];
+import { usePropertyStatuses, useSortingOptions } from '@/features/lookup';
+import { toLabel } from '@/lib/utils';
 
 export default function OwnerDashboardPage() {
   const navigate = useNavigate();
@@ -39,6 +30,8 @@ export default function OwnerDashboardPage() {
 
   const { data, isLoading, isFetching } = useMyProperties(params);
   const deleteMutation = useDeleteProperty();
+  const { propertyStatuses } = usePropertyStatuses();
+  const { sortingOptions } = useSortingOptions();
 
   const totalPages = useMemo(() => (data ? Math.ceil(data.totalCount / (params.PageSize || 6)) : 0), [data, params.PageSize]);
   const currentPage = params.PageIndex || 1;
@@ -90,9 +83,9 @@ export default function OwnerDashboardPage() {
         </Button>
       </div>
 
-      {/* Status tabs */}
+      {/* Status tabs — sourced from lookup API */}
       <div className="flex flex-wrap gap-2">
-        {STATUS_TABS.map((tab) => (
+        {(['All', ...propertyStatuses.map((s) => s.name)] as string[]).map((tab) => (
           <Button
             key={tab}
             variant={activeTab === tab ? 'default' : 'outline'}
@@ -121,8 +114,8 @@ export default function OwnerDashboardPage() {
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
-            {SORT_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            {sortingOptions.map((o) => (
+              <SelectItem key={o.id} value={o.name}>{toLabel(o.name)}</SelectItem>
             ))}
           </SelectContent>
         </Select>

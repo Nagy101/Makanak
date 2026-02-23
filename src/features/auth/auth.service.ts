@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { storage } from '@/lib/storage';
 import type {
   LoginRequest, LoginResponse,
   RegisterRequest, RegisterResponse,
@@ -16,7 +17,7 @@ const api = axios.create({
 
 // Attach token from localStorage to all requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = storage.getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -31,8 +32,7 @@ api.interceptors.response.use(
         message.toLowerCase().includes('suspended') ||
         message.toLowerCase().includes('deactivated')) {
       // Clear auth state if user is banned
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      storage.clear();
     }
     return Promise.reject(error);
   }

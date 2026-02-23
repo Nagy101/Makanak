@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload, X, Loader2 } from 'lucide-react';
 import { useCreateDispute } from '../useDisputes';
 import { useDisputeReasons } from '@/features/lookup/useLookups';
+import { toLabel } from '@/lib/utils';
 
 const schema = z.object({
   BookingId: z.number().min(1, 'Booking ID is required'),
@@ -79,7 +80,7 @@ export default function CreateDisputeModal({ open, onOpenChange, bookingId }: Pr
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>File a Dispute</DialogTitle>
-          <DialogDescription>Report an issue with Booking #{bookingId}</DialogDescription>
+          <DialogDescription>Report an issue with your booking</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -95,7 +96,7 @@ export default function CreateDisputeModal({ open, onOpenChange, bookingId }: Pr
               <SelectContent>
                 {disputeReasons.map((r) => (
                   <SelectItem key={r.id} value={String(r.id)}>
-                    {r.name}
+                    {toLabel(r.name)}
                   </SelectItem>
                 ))}
               </SelectContent>

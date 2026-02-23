@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dialog';
 import { Search, Eye, Gavel, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
+import { encodeId } from '@/lib/idEncoder';
 
 const STATUS_OPTIONS: { label: string; value: DisputeStatusType | 'All' }[] = [
   { label: 'All Statuses', value: 'All' },
@@ -163,7 +164,7 @@ const AdminDisputesDashboard = memo(() => {
             <TableBody>
               {data.data.map((d) => (
                 <TableRow key={d.id}>
-                  <TableCell className="font-medium">#{d.id}</TableCell>
+                  <TableCell className="font-medium">Ref. {encodeId(d.id)}</TableCell>
                   <TableCell className="max-w-[160px] truncate">{d.propertyName}</TableCell>
                   <TableCell>{d.complainantName}</TableCell>
                   <TableCell>{d.reason}</TableCell>

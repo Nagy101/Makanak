@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { QrCode } from 'lucide-react';
+import { encodeId } from '@/lib/idEncoder';
 
 interface TenantQRCodeDisplayProps {
   qrCodeValue: string;
@@ -35,7 +36,7 @@ const TenantQRCodeDisplay = memo(
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-foreground">{propertyName}</p>
-            <p className="text-xs text-muted-foreground">Booking #{bookingId}</p>
+            <p className="text-xs text-muted-foreground">Ref. {encodeId(bookingId)}</p>
           </div>
         </CardContent>
       </Card>

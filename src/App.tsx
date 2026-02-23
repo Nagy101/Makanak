@@ -52,7 +52,17 @@ const PageLoadingFallback = () => (
   </div>
 );
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 3 * 60 * 1000,        // 3 min — data is fresh, no background refetch
+      gcTime: 10 * 60 * 1000,           // 10 min — keep unused cache in memory
+      refetchOnWindowFocus: false,       // don't refetch on every browser tab focus
+      refetchOnReconnect: false,         // don't refetch on network reconnect
+      retry: 1,                          // only one retry on failure
+    },
+  },
+});
 
 // Component inside Router to use navigation hooks
 const RouterContent = () => {

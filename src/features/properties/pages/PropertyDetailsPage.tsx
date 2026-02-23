@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { decodeId } from '@/lib/idEncoder';
 import { useProperty } from '../useProperties';
 import { mapIcon } from '../utils/mapIcon';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,8 +17,9 @@ import UserNavbar from '@/components/UserNavbar';
 const CreateBookingWidget = lazy(() => import('@/features/bookings/components/CreateBookingWidget'));
 
 export default function PropertyDetailsPage() {
-  const { id } = useParams<{ id: string }>();
-  const { data: property, isLoading } = useProperty(Number(id));
+  const { id: encodedId } = useParams<{ id: string }>();
+  const propertyId = encodedId ? decodeId(encodedId) : null;
+  const { data: property, isLoading } = useProperty(propertyId ?? 0);
   const [activeImage, setActiveImage] = useState(0);
 
   if (isLoading) {

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { storage } from '@/lib/storage';
 import type {
   DisputeApiResponse,
   Dispute,
@@ -15,7 +16,7 @@ const api = axios.create({
 
 // Attach auth token to every request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = storage.getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });

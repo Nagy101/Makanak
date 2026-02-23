@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { encodeId } from '@/lib/idEncoder';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useScanQrCode } from '@/features/payment/usePayment';
 import type { QrScanBookingData } from '@/features/payment/payment.types';
@@ -46,7 +47,7 @@ const ScanResultCard = memo(({ data }: { data: QrScanBookingData }) => (
           <p className="font-semibold text-foreground line-clamp-1">
             {data.propertyName}
           </p>
-          <p className="text-sm text-muted-foreground">Booking #{data.id}</p>
+          <p className="text-sm text-muted-foreground">Ref. {encodeId(data.id)}</p>
           <BookingStatusBadge status={data.status} />
         </div>
       </div>

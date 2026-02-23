@@ -22,9 +22,7 @@ import {
 import { useAdminUsers } from '../useAdmin';
 import type { AdminUserSearchParams, UserStatus, UserType, AdminUser } from '../admin.types';
 import UserVerificationModal from '../components/UserVerificationModal';
-
-const STATUS_OPTIONS: UserStatus[] = ['New', 'Pending', 'Active', 'Rejected', 'Banned'];
-const TYPE_OPTIONS: UserType[] = ['Tenant', 'Owner', 'Admin'];
+import { useUserStatuses, useUserTypes } from '@/features/lookup';
 const PAGE_SIZE = 10;
 
 const statusBadgeClass: Record<UserStatus, string> = {
@@ -44,6 +42,8 @@ const AdminUsersPage = memo(() => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   const { data, isLoading } = useAdminUsers(params);
+  const { userStatuses } = useUserStatuses();
+  const { userTypes } = useUserTypes();
 
   const handleSearch = useCallback(() => {
     setParams((p) => ({ ...p, Search: searchInput || undefined, PageIndex: 1 }));
@@ -105,8 +105,8 @@ const AdminUsersPage = memo(() => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            {STATUS_OPTIONS.map((s) => (
-              <SelectItem key={s} value={s}>{s}</SelectItem>
+            {userStatuses.map((s) => (
+              <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -116,8 +116,8 @@ const AdminUsersPage = memo(() => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
-            {TYPE_OPTIONS.map((t) => (
-              <SelectItem key={t} value={t}>{t}</SelectItem>
+            {userTypes.map((t) => (
+              <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>

@@ -34,7 +34,11 @@ export const useCreateDispute = () => {
       toast.success(res.message || 'Dispute created successfully');
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
-    onError: () => toast.error('Failed to create dispute'),
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      const msg = axiosError?.response?.data?.message || 'Failed to create dispute';
+      toast.error(msg);
+    },
   });
 };
 
@@ -47,7 +51,11 @@ export const useResolveDispute = () => {
       toast.success(res.message || 'Dispute resolved');
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
-    onError: () => toast.error('Failed to resolve dispute'),
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      const msg = axiosError?.response?.data?.message || 'Failed to resolve dispute';
+      toast.error(msg);
+    },
   });
 };
 
@@ -60,6 +68,10 @@ export const useCancelDispute = () => {
       toast.success(res.message || 'Dispute cancelled');
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
-    onError: () => toast.error('Failed to cancel dispute'),
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      const msg = axiosError?.response?.data?.message || 'Failed to cancel dispute';
+      toast.error(msg);
+    },
   });
 };

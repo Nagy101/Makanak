@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, memo, useEffect } from 'react';
+import { storage } from '@/lib/storage';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -136,7 +137,7 @@ const ProfilePage = memo(() => {
       onSuccess: () => {
         toast.success('Email changed successfully! Logging out...');
         setTimeout(() => {
-          localStorage.removeItem('token');
+          storage.clear();
           sessionStorage.clear();
           window.location.href = '/login';
         }, 1500);

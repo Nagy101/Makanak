@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { encodeId } from '@/lib/idEncoder';
 import {
   useTenantBookingDetails,
   useOwnerBookingDetails,
@@ -115,7 +116,7 @@ const TenantBookingContent = memo(
         <div className="flex items-start justify-between gap-2">
           <div>
             <h3 className="text-lg font-semibold text-foreground">{booking.propertyName}</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Booking #{booking.id}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Ref. {encodeId(booking.id)}</p>
           </div>
           <BookingStatusBadge status={booking.status} />
         </div>
@@ -338,7 +339,7 @@ const OwnerBookingContent = memo(({ booking, onStatusUpdate, isUpdating }: Owner
       <div className="flex items-start justify-between gap-2">
         <div>
           <h3 className="text-lg font-semibold text-foreground">{booking.propertyName}</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Booking #{booking.id}</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Ref. {encodeId(booking.id)}</p>
         </div>
         <BookingStatusBadge status={booking.status} />
       </div>

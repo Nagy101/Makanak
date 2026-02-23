@@ -2,6 +2,7 @@ import { memo } from 'react';
 import type { Dispute } from '../dispute.types';
 import DisputeStatusBadge from './DisputeStatusBadge';
 import { format } from 'date-fns';
+import { encodeId } from '@/lib/idEncoder';
 
 interface Props {
   dispute: Dispute;
@@ -16,7 +17,7 @@ const DisputeDetailsView = memo<Props>(({ dispute }) => (
     <div className="flex items-start justify-between gap-3">
       <div>
         <h3 className="text-lg font-semibold text-foreground">{dispute.propertyName}</h3>
-        <p className="text-sm text-muted-foreground">Booking #{dispute.bookingId}</p>
+        <p className="text-sm text-muted-foreground">Ref. {encodeId(dispute.bookingId)}</p>
       </div>
       <DisputeStatusBadge status={dispute.status} />
     </div>

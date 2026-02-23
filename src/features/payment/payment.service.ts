@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { storage } from '@/lib/storage';
 import type {
   PaymentApiResponse,
   PaymentIntentData,
@@ -12,7 +13,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = storage.getToken();
   if (token) config.headers.set('Authorization', `Bearer ${token}`);
   return config;
 });
