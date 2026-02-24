@@ -33,4 +33,6 @@ export {
   useDisputeStatuses,
   useAllLookups,
   useLookups,
+  useRoleDisputeReasons,
+  type DisputeReasonRole,
 } from './useLookups';

@@ -17,8 +17,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { useCreateDispute } from '../useDisputes';
-import { useDisputeReasons } from '@/features/lookup/useLookups';
-import { toLabel } from '@/lib/utils';
+import { useRoleDisputeReasons, type DisputeReasonRole } from '@/features/lookup/useLookups';
+import { getDisputeReasonLabel } from '../dispute.i18n';
 
 const schema = z.object({
   BookingId: z.number().min(1, 'Booking ID is required'),
@@ -32,11 +32,16 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   bookingId: number;
+  /** Role of the current user — determines which reasons endpoint is called */
+  role?: DisputeReasonRole;
 }
 
-export default function CreateDisputeModal({ open, onOpenChange, bookingId }: Props) {
+export default function CreateDisputeModal({ open, onOpenChange, bookingId, role = 'tenant' }: Props) {
   const [images, setImages] = useState<File[]>([]);
-  const { disputeReasons } = useDisputeReasons();
+
+  // Fetch reasons on-demand (only when the modal is actually open)
+  const { disputeReasons, isLoading: reasonsLoading } = useRoleDisputeReasons(role, open);
+
   const createMutation = useCreateDispute();
 
   const {
@@ -89,14 +94,18 @@ export default function CreateDisputeModal({ open, onOpenChange, bookingId }: Pr
           {/* Reason */}
           <div className="space-y-1.5">
             <Label>Reason</Label>
-            <Select onValueChange={(v) => setValue('Reason', Number(v), { shouldValidate: true })}>
+            <Select
+              disabled={reasonsLoading}
+              onValueChange={(v) => setValue('Reason', Number(v), { shouldValidate: true })}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="Select a reason" />
+                <SelectValue placeholder={reasonsLoading ? 'Loading reasons…' : 'Select a reason'} />
               </SelectTrigger>
               <SelectContent>
                 {disputeReasons.map((r) => (
                   <SelectItem key={r.id} value={String(r.id)}>
-                    {toLabel(r.name)}
+                    {/* Use Arabic label when the layout is RTL, otherwise use API English name */}
+                    {getDisputeReasonLabel(r.id, r.name)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -147,7 +156,7 @@ export default function CreateDisputeModal({ open, onOpenChange, bookingId }: Pr
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
+            <Button type="submit" disabled={createMutation.isPending || reasonsLoading}>
               {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
               Submit Dispute
             </Button>

@@ -14,7 +14,7 @@ import {
 } from '../useBookings';
 import BookingStatusBadge from './BookingStatusBadge';
 import { format } from 'date-fns';
-import { Phone, MapPin, Info, CreditCard, User, ShieldCheck, Banknote, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Phone, MapPin, Info, CreditCard, User, ShieldCheck, Banknote, CheckCircle2, AlertCircle, AlertTriangle } from 'lucide-react';
 import type { BookingStatusType, TenantBookingDetails, OwnerBookingDetails } from '../booking.types';
 
 const TenantQRCodeDisplay = lazy(() => import('@/features/checkin/components/TenantQRCodeDisplay'));
@@ -328,10 +328,13 @@ interface OwnerContentProps {
   bookingId: number;
   onStatusUpdate: (status: BookingStatusType) => void;
   isUpdating: boolean;
+  /** Called when the owner clicks "Open Dispute". Receives the booking id. */
+  onDispute?: (id: number) => void;
 }
 
-const OwnerBookingContent = memo(({ booking, onStatusUpdate, isUpdating }: OwnerContentProps) => {
+const OwnerBookingContent = memo(({ booking, bookingId, onStatusUpdate, isUpdating, onDispute }: OwnerContentProps) => {
   const canOwnerAct = booking.status === 'PendingOwnerApproval';
+  const canDispute = ['PaymentReceived', 'CheckedIn', 'Completed'].includes(booking.status);
 
   return (
     <div className="space-y-5 py-2">
@@ -436,19 +439,33 @@ const OwnerBookingContent = memo(({ booking, onStatusUpdate, isUpdating }: Owner
       <Separator />
 
       {/* Owner actions */}
-      {canOwnerAct && (
-        <div className="flex gap-2 justify-end">
-          <Button
-            variant="outline"
-            className="text-destructive border-destructive/30 hover:bg-destructive/10"
-            onClick={() => onStatusUpdate('RejectedByOwner')}
-            disabled={isUpdating}
-          >
-            Reject
-          </Button>
-          <Button onClick={() => onStatusUpdate('PendingPayment')} disabled={isUpdating}>
-            Approve
-          </Button>
+      {(canOwnerAct || canDispute) && (
+        <div className="flex gap-2 justify-end flex-wrap">
+          {canOwnerAct && (
+            <>
+              <Button
+                variant="outline"
+                className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                onClick={() => onStatusUpdate('RejectedByOwner')}
+                disabled={isUpdating}
+              >
+                Reject
+              </Button>
+              <Button onClick={() => onStatusUpdate('PendingPayment')} disabled={isUpdating}>
+                Approve
+              </Button>
+            </>
+          )}
+          {canDispute && onDispute && (
+            <Button
+              variant="outline"
+              className="text-warning border-warning/30 hover:bg-warning/10"
+              onClick={() => onDispute(bookingId)}
+            >
+              <AlertTriangle className="h-4 w-4 mr-1" />
+              Open Dispute
+            </Button>
+          )}
         </div>
       )}
     </div>
@@ -464,10 +481,12 @@ interface BookingDetailsModalProps {
   onOpenChange: (open: boolean) => void;
   role: 'tenant' | 'owner';
   onPayNow?: (bookingId: number) => void;
+  /** Owner only — triggered when "Open Dispute" is clicked inside the modal */
+  onDispute?: (bookingId: number) => void;
 }
 
 const BookingDetailsModal = memo(
-  ({ bookingId, open, onOpenChange, role, onPayNow }: BookingDetailsModalProps) => {
+  ({ bookingId, open, onOpenChange, role, onPayNow, onDispute }: BookingDetailsModalProps) => {
     const activeId = open ? bookingId : null;
 
     // Both hooks are always called (React hook rules).
@@ -525,6 +544,7 @@ const BookingDetailsModal = memo(
                 bookingId={bookingId!}
                 onStatusUpdate={handleStatusUpdate}
                 isUpdating={updateStatusMutation.isPending}
+                onDispute={onDispute}
               />
             ) : (
               <p className="py-8 text-center text-muted-foreground">Booking not found.</p>

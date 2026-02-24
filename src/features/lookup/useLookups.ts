@@ -1,5 +1,11 @@
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useLookupStore } from './store/lookupStore';
+import {
+  getOwnerDisputeReasons,
+  getTenantDisputeReasons,
+  getAllDisputeReasons,
+} from './lookup.service';
 
 /**
  * Hook to fetch and cache governorates
@@ -218,4 +224,31 @@ export const useAllLookups = () => {
  */
 export const useLookups = () => {
   return useLookupStore();
+};
+
+// ── Role-based Dispute Reasons (fetched on-demand via React Query) ──────────
+
+export type DisputeReasonRole = 'tenant' | 'owner' | 'admin';
+
+/**
+ * Fetches dispute reasons for the given role from the role-specific endpoint.
+ * Cached per-role by React Query. Enabled only when `enabled` is true
+ * (pass `open` or similar to avoid fetching before the modal is shown).
+ */
+export const useRoleDisputeReasons = (role: DisputeReasonRole, enabled = true) => {
+  const fetchFn =
+    role === 'owner'
+      ? getOwnerDisputeReasons
+      : role === 'admin'
+        ? getAllDisputeReasons
+        : getTenantDisputeReasons;
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['lookups', 'dispute-reasons', role],
+    queryFn: fetchFn,
+    enabled,
+    staleTime: 10 * 60 * 1000, // 10 min — these change rarely
+  });
+
+  return { disputeReasons: data ?? [], isLoading, error };
 };

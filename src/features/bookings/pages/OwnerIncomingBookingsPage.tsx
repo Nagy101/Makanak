@@ -1,4 +1,4 @@
-﻿import { useCallback, useMemo, useState } from 'react';
+﻿import { useCallback, useMemo, useState, lazy, Suspense } from 'react';
 import { useIncomingBookings } from '../useBookings';
 import BookingStatusBadge from '../components/BookingStatusBadge';
 import BookingDetailsModal from '../components/BookingDetailsModal';
@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/table';
 import { Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
+
+const CreateDisputeModal = lazy(() => import('@/features/disputes/components/CreateDisputeModal'));
 
 const STATUS_OPTIONS: { label: string; value: BookingStatusType | 'All' }[] = [
   { label: 'All Statuses', value: 'All' },
@@ -46,6 +48,8 @@ export default function OwnerIncomingBookingsPage() {
   const [sort, setSort] = useState('DateCreatedDesc');
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [disputeBookingId, setDisputeBookingId] = useState<number | null>(null);
+  const [disputeOpen, setDisputeOpen] = useState(false);
 
   const handleSearch = useCallback(() => {
     setSearch(searchInput);
@@ -75,6 +79,12 @@ export default function OwnerIncomingBookingsPage() {
   const handleView = useCallback((id: number) => {
     setSelectedBookingId(id);
     setDetailsOpen(true);
+  }, []);
+
+  const handleDispute = useCallback((id: number) => {
+    setDisputeBookingId(id);
+    setDetailsOpen(false); // close details modal first
+    setDisputeOpen(true);
   }, []);
 
   const totalPages = data ? Math.ceil(data.totalCount / PAGE_SIZE) : 0;
@@ -237,7 +247,19 @@ export default function OwnerIncomingBookingsPage() {
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
         role="owner"
+        onDispute={handleDispute}
       />
+
+      {disputeBookingId && (
+        <Suspense fallback={null}>
+          <CreateDisputeModal
+            bookingId={disputeBookingId}
+            open={disputeOpen}
+            onOpenChange={setDisputeOpen}
+            role="owner"
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

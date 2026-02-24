@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { storage } from '@/lib/storage';
 import type {
   ApiResponse,
   Governorate,
@@ -57,3 +58,26 @@ export const getDisputeStatuses = () =>
 // ── Sorting Options ──
 export const getSortingOptions = () =>
   api.get<ApiResponse<SortingOption[]>>('/sorting-options').then((r) => r.data.data);
+
+// ────────────────────────────────────────────────────────────────────────────
+// Role-based Dispute Reasons  (same /api/Lookup controller, auth-required)
+// ────────────────────────────────────────────────────────────────────────────
+
+// Attach auth token to the shared api instance (idempotent interceptor)
+api.interceptors.request.use((config) => {
+  const token = storage.getToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+/** Reasons available to property owners when filing a dispute */
+export const getOwnerDisputeReasons = () =>
+  api.get<ApiResponse<DisputeReason[]>>('/owner-dispute-reasons').then((r) => r.data.data);
+
+/** Reasons available to tenants when filing a dispute */
+export const getTenantDisputeReasons = () =>
+  api.get<ApiResponse<DisputeReason[]>>('/tenant-dispute-reasons').then((r) => r.data.data);
+
+/** All dispute reasons — for admin filter dropdowns */
+export const getAllDisputeReasons = () =>
+  api.get<ApiResponse<DisputeReason[]>>('/all-dispute-reasons').then((r) => r.data.data);
