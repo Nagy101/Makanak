@@ -10,7 +10,6 @@ import type {
   UserType,
   DisputeReason,
   BookingStatus,
-  DisputeStatus,
   SortingOption,
 } from './lookup.types';
 
@@ -43,17 +42,13 @@ export const getUserStatuses = () =>
 export const getUserTypes = () =>
   api.get<ApiResponse<UserType[]>>('/user-types').then((r) => r.data.data);
 
-// ── Dispute Reasons (Enum) ──
-export const getDisputeReasons = () =>
-  api.get<ApiResponse<DisputeReason[]>>('/dispute-reasons').then((r) => r.data.data);
-
 // ── Booking Statuses (Enum) ──
 export const getBookingStatuses = () =>
   api.get<ApiResponse<BookingStatus[]>>('/booking-statuses').then((r) => r.data.data);
 
-// ── Dispute Statuses (Enum) ──
-export const getDisputeStatuses = () =>
-  api.get<ApiResponse<DisputeStatus[]>>('/dispute-statuses').then((r) => r.data.data);
+// NOTE: /dispute-reasons and /dispute-statuses endpoints do NOT exist on the backend.
+// Use role-scoped dispute reason endpoints below.
+// Use DisputeStatus/DisputeStatusType constants from dispute.types.ts for statuses.
 
 // ── Sorting Options ──
 export const getSortingOptions = () =>

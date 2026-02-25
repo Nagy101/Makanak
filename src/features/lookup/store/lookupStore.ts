@@ -1,8 +1,37 @@
+// ═══════════════════════════════════════════════════════════════
+//  Lookup Store — Zustand + sessionStorage persistence
+//
+//  ROOT CAUSE FIXES:
+//
+//  Bug 1 — Infinite request loop (shared `loading` flag):
+//    Previously, all fetch actions shared a single `loading: boolean`.
+//    When any one fetch failed, `loading` reset to false. Every hook
+//    depended on `loading` in its useEffect, so ALL hooks re-ran,
+//    saw empty arrays + `!loading`, and triggered new fetches →
+//    infinite cycle.
+//    FIX: Per-resource `fetching: Record<string, boolean>` + an
+//    idempotency guard at the TOP of every action (bails if already
+//    in-flight OR data already loaded). Hooks no longer depend on
+//    `loading` at all — they fire once on mount and the action
+//    decides whether to proceed.
+//
+//  Bug 2 — Two 404 endpoints crashing Promise.all:
+//    /api/Lookup/dispute-reasons   → does not exist
+//    /api/Lookup/dispute-statuses  → does not exist
+//    FIX: Removed both. Use useRoleDisputeReasons(role) for reasons;
+//    use DisputeStatus constants (dispute.types.ts) for statuses.
+//
+//  Bug 3 — Promise.all abort-on-first-failure:
+//    fetchAllLookups used Promise.all — one 404 killed ALL fetches.
+//    FIX: Switched to Promise.allSettled so a single failure never
+//    prevents the rest from loading.
+// ═══════════════════════════════════════════════════════════════
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { LookupState } from '../lookup.types';
 import * as lookupService from '../lookup.service';
 
+// ── Store interface ───────────────────────────────────────────
 interface LookupStore extends LookupState {
   fetchGovernorates: () => Promise<void>;
   fetchAmenities: () => Promise<void>;
@@ -10,14 +39,13 @@ interface LookupStore extends LookupState {
   fetchPropertyStatuses: () => Promise<void>;
   fetchUserStatuses: () => Promise<void>;
   fetchUserTypes: () => Promise<void>;
-  fetchDisputeReasons: () => Promise<void>;
   fetchBookingStatuses: () => Promise<void>;
-  fetchDisputeStatuses: () => Promise<void>;
   fetchSortingOptions: () => Promise<void>;
   fetchAllLookups: () => Promise<void>;
   reset: () => void;
 }
 
+// ── Initial state ─────────────────────────────────────────────
 const initialState: LookupState = {
   governorates: [],
   amenities: [],
@@ -25,170 +53,159 @@ const initialState: LookupState = {
   propertyStatuses: [],
   userStatuses: [],
   userTypes: [],
-  disputeReasons: [],
   bookingStatuses: [],
-  disputeStatuses: [],
   sortingOptions: [],
-  loading: false,
-  error: null,
+  fetching: {},
 };
 
+// ── Idempotency helpers ───────────────────────────────────────
+type DataKey = keyof Omit<LookupState, 'fetching'>;
+
+/** Returns true only when it's safe — and necessary — to start fetching. */
+function shouldFetch(get: () => LookupStore, key: DataKey): boolean {
+  const s = get();
+  if (s.fetching[key]) return false;                        // already in-flight
+  if ((s[key] as unknown[]).length > 0) return false;       // already loaded
+  return true;
+}
+
+function setFetching(
+  set: (fn: (s: LookupStore) => Partial<LookupStore>) => void,
+  key: string,
+  value: boolean,
+) {
+  set((s) => ({ fetching: { ...s.fetching, [key]: value } }));
+}
+
+// ── Store ─────────────────────────────────────────────────────
 export const useLookupStore = create<LookupStore>()(
   persist(
-    (set) => ({
-  ...initialState,
+    (set, get) => ({
+      ...initialState,
 
-  fetchGovernorates: async () => {
-    set({ loading: true, error: null });
-    try {
-      const data = await lookupService.getGovernorates();
-      set({ governorates: data, loading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
+      // ── Governorates ─────────────────────────────────────
+      fetchGovernorates: async () => {
+        if (!shouldFetch(get, 'governorates')) return;
+        setFetching(set, 'governorates', true);
+        try {
+          const data = await lookupService.getGovernorates();
+          set((s) => ({ governorates: data, fetching: { ...s.fetching, governorates: false } }));
+        } catch {
+          setFetching(set, 'governorates', false);
+        }
+      },
 
-  fetchAmenities: async () => {
-    set({ loading: true, error: null });
-    try {
-      const data = await lookupService.getAmenities();
-      set({ amenities: data, loading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
+      // ── Amenities ────────────────────────────────────────
+      fetchAmenities: async () => {
+        if (!shouldFetch(get, 'amenities')) return;
+        setFetching(set, 'amenities', true);
+        try {
+          const data = await lookupService.getAmenities();
+          set((s) => ({ amenities: data, fetching: { ...s.fetching, amenities: false } }));
+        } catch {
+          setFetching(set, 'amenities', false);
+        }
+      },
 
-  fetchPropertyTypes: async () => {
-    set({ loading: true, error: null });
-    try {
-      const data = await lookupService.getPropertyTypes();
-      set({ propertyTypes: data, loading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
+      // ── Property Types ───────────────────────────────────
+      fetchPropertyTypes: async () => {
+        if (!shouldFetch(get, 'propertyTypes')) return;
+        setFetching(set, 'propertyTypes', true);
+        try {
+          const data = await lookupService.getPropertyTypes();
+          set((s) => ({ propertyTypes: data, fetching: { ...s.fetching, propertyTypes: false } }));
+        } catch {
+          setFetching(set, 'propertyTypes', false);
+        }
+      },
 
-  fetchPropertyStatuses: async () => {
-    set({ loading: true, error: null });
-    try {
-      const data = await lookupService.getPropertyStatuses();
-      set({ propertyStatuses: data, loading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
+      // ── Property Statuses ────────────────────────────────
+      fetchPropertyStatuses: async () => {
+        if (!shouldFetch(get, 'propertyStatuses')) return;
+        setFetching(set, 'propertyStatuses', true);
+        try {
+          const data = await lookupService.getPropertyStatuses();
+          set((s) => ({ propertyStatuses: data, fetching: { ...s.fetching, propertyStatuses: false } }));
+        } catch {
+          setFetching(set, 'propertyStatuses', false);
+        }
+      },
 
-  fetchUserStatuses: async () => {
-    set({ loading: true, error: null });
-    try {
-      const data = await lookupService.getUserStatuses();
-      set({ userStatuses: data, loading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
+      // ── User Statuses ────────────────────────────────────
+      fetchUserStatuses: async () => {
+        if (!shouldFetch(get, 'userStatuses')) return;
+        setFetching(set, 'userStatuses', true);
+        try {
+          const data = await lookupService.getUserStatuses();
+          set((s) => ({ userStatuses: data, fetching: { ...s.fetching, userStatuses: false } }));
+        } catch {
+          setFetching(set, 'userStatuses', false);
+        }
+      },
 
-  fetchUserTypes: async () => {
-    set({ loading: true, error: null });
-    try {
-      const data = await lookupService.getUserTypes();
-      set({ userTypes: data, loading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
+      // ── User Types ───────────────────────────────────────
+      fetchUserTypes: async () => {
+        if (!shouldFetch(get, 'userTypes')) return;
+        setFetching(set, 'userTypes', true);
+        try {
+          const data = await lookupService.getUserTypes();
+          set((s) => ({ userTypes: data, fetching: { ...s.fetching, userTypes: false } }));
+        } catch {
+          setFetching(set, 'userTypes', false);
+        }
+      },
 
-  fetchDisputeReasons: async () => {
-    set({ loading: true, error: null });
-    try {
-      const data = await lookupService.getDisputeReasons();
-      set({ disputeReasons: data, loading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
+      // ── Booking Statuses ─────────────────────────────────
+      fetchBookingStatuses: async () => {
+        if (!shouldFetch(get, 'bookingStatuses')) return;
+        setFetching(set, 'bookingStatuses', true);
+        try {
+          const data = await lookupService.getBookingStatuses();
+          set((s) => ({ bookingStatuses: data, fetching: { ...s.fetching, bookingStatuses: false } }));
+        } catch {
+          setFetching(set, 'bookingStatuses', false);
+        }
+      },
 
-  fetchBookingStatuses: async () => {
-    set({ loading: true, error: null });
-    try {
-      const data = await lookupService.getBookingStatuses();
-      set({ bookingStatuses: data, loading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
+      // ── Sorting Options ──────────────────────────────────
+      fetchSortingOptions: async () => {
+        if (!shouldFetch(get, 'sortingOptions')) return;
+        setFetching(set, 'sortingOptions', true);
+        try {
+          const data = await lookupService.getSortingOptions();
+          set((s) => ({ sortingOptions: data, fetching: { ...s.fetching, sortingOptions: false } }));
+        } catch {
+          setFetching(set, 'sortingOptions', false);
+        }
+      },
 
-  fetchDisputeStatuses: async () => {
-    set({ loading: true, error: null });
-    try {
-      const data = await lookupService.getDisputeStatuses();
-      set({ disputeStatuses: data, loading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
+      // ── fetchAllLookups — called once on app boot ────────
+      // Uses Promise.allSettled so a single failure (e.g. network)
+      // can never prevent all other lookups from loading.
+      // Each action is self-guarding — safe to call even if some
+      // data was already restored from sessionStorage cache.
+      fetchAllLookups: async () => {
+        const a = get();
+        await Promise.allSettled([
+          a.fetchGovernorates(),
+          a.fetchAmenities(),
+          a.fetchPropertyTypes(),
+          a.fetchPropertyStatuses(),
+          a.fetchUserStatuses(),
+          a.fetchUserTypes(),
+          a.fetchBookingStatuses(),
+          a.fetchSortingOptions(),
+        ]);
+      },
 
-  fetchSortingOptions: async () => {
-    set({ loading: true, error: null });
-    try {
-      const data = await lookupService.getSortingOptions();
-      set({ sortingOptions: data, loading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
-
-  fetchAllLookups: async () => {
-    set({ loading: true, error: null });
-    try {
-      const [
-        governorates,
-        amenities,
-        propertyTypes,
-        propertyStatuses,
-        userStatuses,
-        userTypes,
-        disputeReasons,
-        bookingStatuses,
-        disputeStatuses,
-        sortingOptions,
-      ] = await Promise.all([
-        lookupService.getGovernorates(),
-        lookupService.getAmenities(),
-        lookupService.getPropertyTypes(),
-        lookupService.getPropertyStatuses(),
-        lookupService.getUserStatuses(),
-        lookupService.getUserTypes(),
-        lookupService.getDisputeReasons(),
-        lookupService.getBookingStatuses(),
-        lookupService.getDisputeStatuses(),
-        lookupService.getSortingOptions(),
-      ]);
-
-      set({
-        governorates,
-        amenities,
-        propertyTypes,
-        propertyStatuses,
-        userStatuses,
-        userTypes,
-        disputeReasons,
-        bookingStatuses,
-        disputeStatuses,
-        sortingOptions,
-        loading: false,
-      });
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false });
-    }
-  },
-
-  reset: () => set(initialState),
+      reset: () => set(initialState),
     }),
     {
       name: 'mk-lookups',
+      version: 1, // bumped: clears old cache that contained removed keys
+                  // (disputeReasons, disputeStatuses, loading, error)
       storage: createJSONStorage(() => sessionStorage),
-      // Only persist data arrays — never persist loading/error state
+      // Only persist data arrays — never persist in-flight `fetching` flags
       partialize: (state) => ({
         governorates: state.governorates,
         amenities: state.amenities,
@@ -196,11 +213,10 @@ export const useLookupStore = create<LookupStore>()(
         propertyStatuses: state.propertyStatuses,
         userStatuses: state.userStatuses,
         userTypes: state.userTypes,
-        disputeReasons: state.disputeReasons,
         bookingStatuses: state.bookingStatuses,
-        disputeStatuses: state.disputeStatuses,
         sortingOptions: state.sortingOptions,
+        // fetching intentionally excluded — always starts as {}
       }),
-    }
-  )
+    },
+  ),
 );

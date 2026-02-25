@@ -7,19 +7,6 @@ export interface AdminApiResponse<T> {
   errors?: string[] | null;
 }
 
-// ── Dashboard Stats ──
-export interface AdminStats {
-  totalUsers: number;
-  adminsCount: number;
-  tenantsCount: number;
-  ownersCount: number;
-  pendingUsers: number;
-  activeUsers: number;
-  rejectsCount: number;
-  bannedsCount: number;
-  newsCount: number;
-}
-
 // ── User Management ──
 export type UserStatus = 'New' | 'Pending' | 'Active' | 'Rejected' | 'Banned';
 export type UserType = 'Tenant' | 'Owner' | 'Admin';

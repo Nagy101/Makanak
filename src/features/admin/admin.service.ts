@@ -2,7 +2,6 @@ import axios from 'axios';
 import { storage } from '@/lib/storage';
 import type {
   AdminApiResponse,
-  AdminStats,
   AdminUser,
   AdminUserSearchParams,
   PaginatedData,
@@ -23,10 +22,6 @@ api.interceptors.request.use((config) => {
   if (token) config.headers.set('Authorization', `Bearer ${token}`);
   return config;
 });
-
-// ── Stats ──
-export const getAdminStats = () =>
-  api.get<AdminApiResponse<AdminStats>>('/Admin/stats').then((r) => r.data.data);
 
 // ── Users ──
 export const getAdminUsers = (params: AdminUserSearchParams) =>

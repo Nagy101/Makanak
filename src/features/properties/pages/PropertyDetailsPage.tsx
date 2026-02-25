@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
 import UserNavbar from '@/components/UserNavbar';
+import PropertyReviewsSection from '@/features/reviews/components/PropertyReviewsSection';
 
 const CreateBookingWidget = lazy(() => import('@/features/bookings/components/CreateBookingWidget'));
 
@@ -217,6 +218,9 @@ export default function PropertyDetailsPage() {
                 </div>
               </div>
             )}
+
+            {/* ── Reviews ───────────────────────────────────── */}
+            <PropertyReviewsSection propertyId={property.id} />
           </div>
 
           {/* Booking card */}

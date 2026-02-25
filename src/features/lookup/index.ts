@@ -9,9 +9,10 @@ export type {
   UserType,
   DisputeReason,
   BookingStatus,
-  DisputeStatus,
+  SortingOption,
   LookupState,
 } from './lookup.types';
+// NOTE: DisputeStatus removed — use DisputeStatus constants from dispute.types.ts directly.
 
 // Service
 export * as lookupService from './lookup.service';
@@ -27,12 +28,12 @@ export {
   usePropertyStatuses,
   useUserStatuses,
   useUserTypes,
-  useDisputeReasons,
   useBookingStatuses,
   useSortingOptions,
-  useDisputeStatuses,
   useAllLookups,
   useLookups,
   useRoleDisputeReasons,
   type DisputeReasonRole,
 } from './useLookups';
+// NOTE: useDisputeReasons & useDisputeStatuses removed — endpoints don't exist.
+// Use useRoleDisputeReasons(role) for reasons; DisputeStatus constants for statuses.

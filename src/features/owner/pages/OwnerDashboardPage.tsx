@@ -1,6 +1,6 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, ChevronLeft, ChevronRight, SearchX } from 'lucide-react';
+import { Plus, Search, ChevronLeft, ChevronRight, SearchX, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,11 +15,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useMyProperties, useDeleteProperty } from '../useOwnerProperties';
 import OwnerPropertyCard from '../components/OwnerPropertyCard';
 import type { MyPropertiesParams } from '../owner.types';
 import { usePropertyStatuses, useSortingOptions } from '@/features/lookup';
 import { toLabel } from '@/lib/utils';
+
+const PropertyReviewsSection = lazy(() => import('@/features/reviews/components/PropertyReviewsSection'));
 
 export default function OwnerDashboardPage() {
   const navigate = useNavigate();
@@ -27,6 +35,7 @@ export default function OwnerDashboardPage() {
   const [localSearch, setLocalSearch] = useState('');
   const [activeTab, setActiveTab] = useState<string>('All');
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [reviewPropertyId, setReviewPropertyId] = useState<number | null>(null);
 
   const { data, isLoading, isFetching } = useMyProperties(params);
   const deleteMutation = useDeleteProperty();
@@ -66,6 +75,10 @@ export default function OwnerDashboardPage() {
 
   const handlePageChange = useCallback((page: number) => {
     setParams((p) => ({ ...p, PageIndex: page }));
+  }, []);
+
+  const handleViewReviews = useCallback((id: number) => {
+    setReviewPropertyId(id);
   }, []);
 
   return (
@@ -168,7 +181,7 @@ export default function OwnerDashboardPage() {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {data.data.map((p) => (
-              <OwnerPropertyCard key={p.id} property={p} onEdit={handleEdit} onDelete={handleDelete} />
+              <OwnerPropertyCard key={p.id} property={p} onEdit={handleEdit} onDelete={handleDelete} onViewReviews={handleViewReviews} />
             ))}
           </div>
 
@@ -188,6 +201,22 @@ export default function OwnerDashboardPage() {
           )}
         </>
       )}
+
+      {/* Property Reviews Dialog */}
+      <Dialog open={!!reviewPropertyId} onOpenChange={(open) => !open && setReviewPropertyId(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-[#1E3A8A] flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" /> Property Reviews
+            </DialogTitle>
+          </DialogHeader>
+          {reviewPropertyId && (
+            <Suspense fallback={<div className="py-10 text-center text-muted-foreground">Loading reviews…</div>}>
+              <PropertyReviewsSection propertyId={reviewPropertyId} />
+            </Suspense>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete confirmation */}
       <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>

@@ -1,69 +1,201 @@
-import { memo, useMemo } from 'react';
-import { Users, Building2, UserCheck, UserX, Clock, Newspaper } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useAdminStats } from '../useAdmin';
+// ═══════════════════════════════════════════════════════════════
+//  AdminDashboardPage — Analytics Home
+//
+//  Architecture:
+//  ┌─────────────────────────────────────────────────────────────┐
+//  │  4 queries fire in parallel (zero waterfall)                │
+//  │  Each section renders independently from its own isLoading  │
+//  │  Chart bundles are lazy-loaded (Recharts stays out of the   │
+//  │  initial JS payload)                                        │
+//  └─────────────────────────────────────────────────────────────┘
+//
+//  Layout:
+//  ┌──────────────────────────────────────────────────────────┐
+//  │  TOP ROW      3 financial metric cards (high-impact)     │
+//  ├──────────────────────────────────────────────────────────┤
+//  │  MIDDLE ROW   Properties Donut  │  Bookings Bar          │
+//  ├──────────────────────────────────────────────────────────┤
+//  │  BOTTOM ROW   User Demographics (Role + Status Pies)     │
+//  └──────────────────────────────────────────────────────────┘
+// ═══════════════════════════════════════════════════════════════
+import { lazy, Suspense, memo } from 'react';
+import { TrendingUp, Wallet, Landmark, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useQueryClient } from '@tanstack/react-query';
 
-interface StatCardProps {
-  label: string;
-  value: number;
-  icon: React.ElementType;
-  color: string;
-}
+import {
+  useFinancialStats,
+  usePropertyStats,
+  useBookingsStats,
+  useUserStats,
+  dashboardKeys,
+} from '../dashboard/useDashboardStats';
+import { FinancialCard } from '../dashboard/components/FinancialCard';
+import { StatCardSkeleton } from '../dashboard/components/StatCardSkeleton';
+import { ChartSkeleton } from '../dashboard/components/ChartSkeleton';
 
-const StatCard = memo<StatCardProps>(({ label, value, icon: Icon, color }) => (
-  <Card className="border-border">
-    <CardContent className="flex items-center gap-4 p-5">
-      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${color}`}>
-        <Icon className="h-5 w-5" />
-      </div>
-      <div>
-        <p className="text-2xl font-bold text-foreground">{value}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
-      </div>
-    </CardContent>
-  </Card>
-));
-StatCard.displayName = 'StatCard';
+// ── Lazy-load all chart modules (Recharts stays out of initial bundle) ──
+const PropertiesDonutChart = lazy(
+  () => import(
+    /* webpackChunkName: "chart-properties" */
+    '../dashboard/components/PropertiesDonutChart'
+  ),
+);
+const BookingsBarChart = lazy(
+  () => import(
+    /* webpackChunkName: "chart-bookings" */
+    '../dashboard/components/BookingsBarChart'
+  ),
+);
+const UsersOverviewChart = lazy(
+  () => import(
+    /* webpackChunkName: "chart-users" */
+    '../dashboard/components/UsersOverviewChart'
+  ),
+);
 
-const AdminDashboardPage = memo(() => {
-  const { data: stats, isLoading } = useAdminStats();
+// ── Section wrapper keeps layout stable while content loads ───
+const SectionTitle = memo(function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">
+      {children}
+    </h2>
+  );
+});
+SectionTitle.displayName = 'SectionTitle';
 
-  const cards = useMemo(() => {
-    if (!stats) return [];
-    return [
-      { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'bg-primary/10 text-primary' },
-      { label: 'Tenants', value: stats.tenantsCount, icon: Users, color: 'bg-primary/10 text-primary' },
-      { label: 'Owners', value: stats.ownersCount, icon: Building2, color: 'bg-accent/10 text-accent' },
-      { label: 'Admins', value: stats.adminsCount, icon: UserCheck, color: 'bg-success/10 text-success' },
-      { label: 'Pending', value: stats.pendingUsers, icon: Clock, color: 'bg-warning/10 text-warning' },
-      { label: 'Active', value: stats.activeUsers, icon: UserCheck, color: 'bg-success/10 text-success' },
-      { label: 'Rejected', value: stats.rejectsCount, icon: UserX, color: 'bg-destructive/10 text-destructive' },
-      { label: 'Banned', value: stats.bannedsCount, icon: UserX, color: 'bg-destructive/10 text-destructive' },
-      { label: 'News', value: stats.newsCount, icon: Newspaper, color: 'bg-primary/10 text-primary' },
-    ];
-  }, [stats]);
+// ══════════════════════════════════════════════════════════════
+//  Main Page
+// ══════════════════════════════════════════════════════════════
+const AdminDashboardPage = memo(function AdminDashboardPage() {
+  const qc = useQueryClient();
+
+  // ── 4 parallel queries — NO chaining ─────────────────────
+  const financial  = useFinancialStats();
+  const properties = usePropertyStats();
+  const bookings   = useBookingsStats();
+  const users      = useUserStats();
+
+  // ── Manual refresh ────────────────────────────────────────
+  const handleRefresh = () => {
+    qc.invalidateQueries({ queryKey: dashboardKeys.all });
+  };
+
+  const isAnyRefetching =
+    financial.isFetching ||
+    properties.isFetching ||
+    bookings.isFetching ||
+    users.isFetching;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Overview of your platform</p>
+    <div className="space-y-8">
+      {/* ── Page Header ──────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Analytics Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Real-time overview of the Makanak platform
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isAnyRefetching}
+          className="self-start sm:self-auto gap-2"
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${isAnyRefetching ? 'animate-spin' : ''}`}
+          />
+          Refresh
+        </Button>
       </div>
 
-      {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-lg" />
-          ))}
+      {/* ══════════════════════════════════════════════════════
+          TOP ROW — Financial Metrics
+          Renders as soon as `useFinancialStats` resolves,
+          completely independent of the other 3 queries.
+      ════════════════════════════════════════════════════════ */}
+      <section className="space-y-3">
+        <SectionTitle>Financial Overview</SectionTitle>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {financial.isLoading ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : financial.data ? (
+            <>
+              <FinancialCard
+                label="Total Booking Volume"
+                amount={financial.data.totalBookingVolume}
+                icon={TrendingUp}
+                accentClass="bg-[#1E3A8A]/10 text-[#1E3A8A]"
+                description="Gross revenue across all bookings"
+              />
+              <FinancialCard
+                label="Platform Earnings"
+                amount={financial.data.totalPlatformEarnings}
+                icon={Wallet}
+                accentClass="bg-emerald-50 text-emerald-600"
+                description="Makanak's net commission"
+              />
+              <FinancialCard
+                label="Cash Owed to Owners"
+                amount={financial.data.totalCashExpectedByOwners}
+                icon={Landmark}
+                accentClass="bg-amber-50 text-amber-600"
+                description="Pending owner payouts"
+              />
+            </>
+          ) : null}
         </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {cards.map((c) => (
-            <StatCard key={c.label} {...c} />
-          ))}
+      </section>
+
+      {/* ══════════════════════════════════════════════════════
+          MIDDLE ROW — Properties + Bookings Charts (side-by-side)
+          Each renders independently from its own query.
+      ════════════════════════════════════════════════════════ */}
+      <section className="space-y-3">
+        <SectionTitle>Properties &amp; Bookings</SectionTitle>
+        <div className="grid gap-4 lg:grid-cols-2">
+
+          {/* Properties Donut */}
+          {properties.isLoading ? (
+            <ChartSkeleton />
+          ) : properties.data ? (
+            <Suspense fallback={<ChartSkeleton />}>
+              <PropertiesDonutChart data={properties.data} />
+            </Suspense>
+          ) : null}
+
+          {/* Bookings Bar */}
+          {bookings.isLoading ? (
+            <ChartSkeleton />
+          ) : bookings.data ? (
+            <Suspense fallback={<ChartSkeleton />}>
+              <BookingsBarChart data={bookings.data} />
+            </Suspense>
+          ) : null}
+
         </div>
-      )}
+      </section>
+
+      {/* ══════════════════════════════════════════════════════
+          BOTTOM ROW — User Demographics (full width)
+          Renders independently from its own query.
+      ════════════════════════════════════════════════════════ */}
+      <section className="space-y-3">
+        <SectionTitle>User Demographics</SectionTitle>
+        {users.isLoading ? (
+          <ChartSkeleton height={280} />
+        ) : users.data ? (
+          <Suspense fallback={<ChartSkeleton height={280} />}>
+            <UsersOverviewChart data={users.data} />
+          </Suspense>
+        ) : null}
+      </section>
     </div>
   );
 });

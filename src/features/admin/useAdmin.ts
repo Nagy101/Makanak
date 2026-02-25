@@ -2,15 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as adminService from './admin.service';
 import type { AdminUserSearchParams, UpdateUserStatusRequest, UpdatePropertyStatusRequest, AdminPropertySearchParams } from './admin.types';
 
-// ── Stats ──
-export function useAdminStats() {
-  return useQuery({
-    queryKey: ['admin', 'stats'],
-    queryFn: adminService.getAdminStats,
-    staleTime: 60 * 1000,
-  });
-}
-
 // ── Users ──
 export function useAdminUsers(params: AdminUserSearchParams) {
   return useQuery({

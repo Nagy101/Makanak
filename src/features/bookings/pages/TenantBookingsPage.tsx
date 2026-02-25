@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState, lazy } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMyBookings, useCancelBooking } from '../useBookings';
 import BookingStatusBadge from '../components/BookingStatusBadge';
@@ -12,11 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Eye, XCircle, ChevronLeft, ChevronRight, CreditCard, AlertTriangle } from 'lucide-react';
+import { Search, Eye, XCircle, ChevronLeft, ChevronRight, CreditCard, AlertTriangle, Star } from 'lucide-react';
 import { format } from 'date-fns';
 
 const PaymentModal = lazy(() => import('@/features/payment/components/PaymentModal'));
 const CreateDisputeModal = lazy(() => import('@/features/disputes/components/CreateDisputeModal'));
+const LeaveReviewModal = lazy(
+  () => import(/* webpackChunkName: "reviews-module" */ '@/features/reviews/components/LeaveReviewModal'),
+);
 
 const STATUS_OPTIONS: { label: string; value: BookingStatusType | 'All' }[] = [
   { label: 'All Statuses', value: 'All' },
@@ -51,18 +54,21 @@ const BookingCard = memo(
     onCancel,
     onPay,
     onDispute,
+    onReview,
     isCancelling,
   }: {
-    booking: { id: number; propertyName: string; propertyMainImage: string; checkInDate: string; checkOutDate: string; totalDays: number; totalPrice: number; status: string };
+    booking: { id: number; propertyId: number; propertyName: string; propertyMainImage: string; checkInDate: string; checkOutDate: string; totalDays: number; totalPrice: number; status: string };
     onView: (id: number) => void;
     onCancel: (id: number) => void;
     onPay: (id: number) => void;
     onDispute: (id: number) => void;
+    onReview: (bookingId: number, propertyId: number) => void;
     isCancelling: boolean;
   }) => {
     const canCancel = ['PendingOwnerApproval', 'PendingPayment'].includes(booking.status);
     const canPay = booking.status === 'PendingPayment';
     const canDispute = ['PaymentReceived', 'CheckedIn', 'Completed'].includes(booking.status);
+    const canReview = booking.status === 'Completed';
     return (
       <Card className="overflow-hidden hover:shadow-md transition-shadow">
         <div className="flex flex-col sm:flex-row">
@@ -125,6 +131,16 @@ const BookingCard = memo(
                     <AlertTriangle className="h-3.5 w-3.5 mr-1" /> Dispute
                   </Button>
                 )}
+                {canReview && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-[#1E3A8A] border-[#1E3A8A]/30 hover:bg-[#1E3A8A]/10"
+                    onClick={() => onReview(booking.id, booking.propertyId)}
+                  >
+                    <Star className="h-3.5 w-3.5 mr-1" /> Review
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
@@ -159,6 +175,7 @@ export default function TenantBookingsPage() {
   const [payOpen, setPayOpen] = useState(false);
   const [disputeBookingId, setDisputeBookingId] = useState<number | null>(null);
   const [disputeOpen, setDisputeOpen] = useState(false);
+  const [reviewTarget, setReviewTarget] = useState<{ bookingId: number; propertyId: number } | null>(null);
   const handleSearch = useCallback(() => {
     setSearch(searchInput);
     setPage(1);
@@ -203,6 +220,10 @@ export default function TenantBookingsPage() {
   const handleDispute = useCallback((id: number) => {
     setDisputeBookingId(id);
     setDisputeOpen(true);
+  }, []);
+
+  const handleReview = useCallback((bookingId: number, propertyId: number) => {
+    setReviewTarget({ bookingId, propertyId });
   }, []);
 
   const totalPages = data ? Math.ceil(data.totalCount / PAGE_SIZE) : 0;
@@ -282,6 +303,7 @@ export default function TenantBookingsPage() {
                 onCancel={handleCancel}
                 onPay={handlePay}
                 onDispute={handleDispute}
+                onReview={handleReview}
                 isCancelling={cancelMutation.isPending}
               />
             ))}
@@ -322,6 +344,17 @@ export default function TenantBookingsPage() {
           open={disputeOpen}
           onOpenChange={setDisputeOpen}
         />
+      )}
+
+      {reviewTarget && (
+        <Suspense fallback={null}>
+          <LeaveReviewModal
+            bookingId={reviewTarget.bookingId}
+            propertyId={reviewTarget.propertyId}
+            open={!!reviewTarget}
+            onClose={() => setReviewTarget(null)}
+          />
+        </Suspense>
       )}
     </div>
   );

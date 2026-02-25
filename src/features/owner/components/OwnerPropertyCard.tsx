@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Star, MapPin, Edit, Trash2 } from 'lucide-react';
+import { Star, MapPin, Edit, Trash2, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { OwnerPropertyListing } from '../owner.types';
@@ -15,9 +15,10 @@ interface Props {
   property: OwnerPropertyListing;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
+  onViewReviews: (id: number) => void;
 }
 
-const OwnerPropertyCard = memo(({ property, onEdit, onDelete }: Props) => (
+const OwnerPropertyCard = memo(({ property, onEdit, onDelete, onViewReviews }: Props) => (
   <article className="group overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-200 hover:shadow-md">
     <div className="relative aspect-[4/3] overflow-hidden bg-muted">
       <img
@@ -65,6 +66,14 @@ const OwnerPropertyCard = memo(({ property, onEdit, onDelete }: Props) => (
       <div className="flex gap-2 pt-2 border-t border-border">
         <Button variant="outline" size="sm" className="flex-1" onClick={() => onEdit(property.id)}>
           <Edit className="h-3.5 w-3.5 mr-1" /> Edit
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1 text-[#1E3A8A] border-[#1E3A8A]/30 hover:bg-[#1E3A8A]/10"
+          onClick={() => onViewReviews(property.id)}
+        >
+          <MessageSquare className="h-3.5 w-3.5 mr-1" /> Reviews
         </Button>
         <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => onDelete(property.id)}>
           <Trash2 className="h-3.5 w-3.5" />

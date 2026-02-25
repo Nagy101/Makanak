@@ -95,6 +95,13 @@ export interface SortingOption {
 
 /**
  * Lookup Store State
+ *
+ * NOTE: disputeReasons and disputeStatuses are intentionally absent.
+ *   - dispute-statuses: endpoint does not exist on the backend; use the
+ *     DisputeStatus/DisputeStatusType constants from dispute.types.ts directly.
+ *   - dispute-reasons: only role-scoped endpoints exist
+ *     (/owner-dispute-reasons, /tenant-dispute-reasons, /all-dispute-reasons);
+ *     use useRoleDisputeReasons(role) instead.
  */
 export interface LookupState {
   governorates: Governorate[];
@@ -103,10 +110,12 @@ export interface LookupState {
   propertyStatuses: PropertyStatus[];
   userStatuses: UserStatus[];
   userTypes: UserType[];
-  disputeReasons: DisputeReason[];
   bookingStatuses: BookingStatus[];
-  disputeStatuses: DisputeStatus[];
   sortingOptions: SortingOption[];
-  loading: boolean;
-  error: string | null;
+  /**
+   * Per-resource in-flight tracker.
+   * Key = resource name (e.g. 'governorates').
+   * Prevents concurrent duplicate requests and infinite retry loops.
+   */
+  fetching: Record<string, boolean>;
 }
