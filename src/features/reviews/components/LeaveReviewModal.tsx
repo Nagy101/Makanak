@@ -44,8 +44,8 @@
 //         </Suspense>
 //       )}
 // ═══════════════════════════════════════════════════════════════
-import { memo, useCallback, useState } from 'react';
-import { Loader2, Star } from 'lucide-react';
+import { memo, useCallback, useState } from "react";
+import { Loader2, Star } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -53,12 +53,12 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import StarRating from './StarRating';
-import { useCreateReview } from '../useReviews';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import StarRating from "./StarRating";
+import { useCreateReview } from "../useReviews";
 
 // ── Props ─────────────────────────────────────────────────────
 interface LeaveReviewModalProps {
@@ -85,7 +85,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
   onClose,
 }: LeaveReviewModalProps) {
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
 
   const { mutate: createReview, isPending } = useCreateReview(propertyId);
 
@@ -93,15 +93,14 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
   const handleRatingChange = useCallback((val: number) => setRating(val), []);
 
   const handleCommentChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-      setComment(e.target.value),
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => setComment(e.target.value),
     [],
   );
 
   const handleClose = useCallback(() => {
     if (isPending) return;
     setRating(0);
-    setComment('');
+    setComment("");
     onClose();
   }, [isPending, onClose]);
 
@@ -135,8 +134,8 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-[#1E3A8A] flex items-center gap-2">
-            <Star className="h-5 w-5 fill-[#1E3A8A] text-[#1E3A8A]" />
+          <DialogTitle className="text-primary flex items-center gap-2">
+            <Star className="h-5 w-5 fill-primary text-primary" />
             Leave a Review
           </DialogTitle>
           <DialogDescription>
@@ -147,7 +146,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
         <form onSubmit={handleSubmit} className="space-y-5 mt-2">
           {/* ── Star Rating Selector ────────────────────────── */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">
+            <Label className="text-sm font-medium text-foreground">
               Your Rating <span className="text-red-500">*</span>
             </Label>
             <StarRating
@@ -156,7 +155,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
               size={32}
             />
             {rating === 0 && (
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 Please select a star rating.
               </p>
             )}
@@ -166,7 +165,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
           <div className="space-y-2">
             <Label
               htmlFor="review-comment"
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-medium text-foreground"
             >
               Your Comment <span className="text-red-500">*</span>
             </Label>
@@ -178,8 +177,8 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
               rows={4}
               maxLength={MAX_COMMENT}
               disabled={isPending}
-              className={`resize-none focus-visible:ring-[#1E3A8A] ${
-                commentTooShort ? 'border-red-400' : ''
+              className={`resize-none focus-visible:ring-primary ${
+                commentTooShort ? "border-red-400" : ""
               }`}
             />
             <div className="flex justify-between items-center">
@@ -190,7 +189,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
               ) : (
                 <span />
               )}
-              <span className="text-xs text-gray-400 ml-auto">
+              <span className="text-xs text-muted-foreground ml-auto">
                 {comment.length} / {MAX_COMMENT}
               </span>
             </div>
@@ -209,7 +208,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
             <Button
               type="submit"
               disabled={!isValid || isPending}
-              className="bg-[#1E3A8A] hover:bg-[#1e3a8a]/90 text-white min-w-[120px]"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[120px]"
             >
               {isPending ? (
                 <>
@@ -217,7 +216,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
                   Submitting…
                 </>
               ) : (
-                'Submit Review'
+                "Submit Review"
               )}
             </Button>
           </DialogFooter>

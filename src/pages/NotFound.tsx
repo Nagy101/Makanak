@@ -1,13 +1,16 @@
-import { Link, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
-import { Building2, Home } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Link, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { Building2, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const NotFound = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.error('404 Error: User attempted to access non-existent route:', location.pathname);
+    console.error(
+      "404 Error: User attempted to access non-existent route:",
+      location.pathname,
+    );
   }, [location.pathname]);
 
   return (
@@ -15,12 +18,20 @@ const NotFound = () => {
       <div className="text-center space-y-6 max-w-md">
         <div className="flex justify-center">
           <div className="rounded-2xl bg-muted p-6">
-            <Building2 className="h-14 w-14 text-muted-foreground" />
+            <img
+              src="/Makanak_logo.ico"
+              alt="Makanak Logo"
+              className="h-14 object-contain opacity-40 grayscale"
+            />
           </div>
         </div>
         <div className="space-y-2">
-          <h1 className="text-7xl font-extrabold text-foreground tracking-tight">404</h1>
-          <p className="text-xl font-semibold text-foreground">Page not found</p>
+          <h1 className="text-7xl font-extrabold text-foreground tracking-tight">
+            404
+          </h1>
+          <p className="text-xl font-semibold text-foreground">
+            Page not found
+          </p>
           <p className="text-muted-foreground">
             The page you're looking for doesn't exist or has been moved.
           </p>
@@ -36,4 +47,3 @@ const NotFound = () => {
 };
 
 export default NotFound;
-

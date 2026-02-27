@@ -1,34 +1,34 @@
 // ═══════════════════════════════════════════════════════════════
 //  Reviews Module — Axios Service Layer
 // ═══════════════════════════════════════════════════════════════
-import axios from 'axios';
-import { storage } from '@/lib/storage';
+import axios from "axios";
+import { storage } from "@/lib/storage";
+import { setup401Interceptor } from "@/lib/api";
 import type {
   ReviewApiResponse,
   ReviewPaginatedData,
   Review,
   CreateReviewRequest,
   GetPropertyReviewsParams,
-} from './review.types';
+} from "./review.types";
 
 // ── Axios instance ────────────────────────────────────────────
 const api = axios.create({
-  baseURL: '/api/Review',
-  headers: { 'Content-Type': 'application/json' },
+  baseURL: "/api/Review",
+  headers: { "Content-Type": "application/json" },
 });
 
 api.interceptors.request.use((config) => {
   const token = storage.getToken();
-  if (token) config.headers.set('Authorization', `Bearer ${token}`);
+  if (token) config.headers.set("Authorization", `Bearer ${token}`);
   return config;
 });
+setup401Interceptor(api);
 
 // ── Create Review (Tenant — Completed bookings only) ─────────
 // POST /api/Review
 export const createReview = (data: CreateReviewRequest) =>
-  api
-    .post<ReviewApiResponse<Review>>('', data)
-    .then((r) => r.data);
+  api.post<ReviewApiResponse<Review>>("", data).then((r) => r.data);
 
 // ── Get Property Reviews (Paginated) ─────────────────────────
 // GET /api/Review/{propertyId}?pageIndex=1&pageSize=5
@@ -45,6 +45,4 @@ export const getPropertyReviews = (
 // ── Delete Review (Tenant author OR Admin) ────────────────────
 // DELETE /api/Review/{reviewId}
 export const deleteReview = (reviewId: number) =>
-  api
-    .delete<ReviewApiResponse<string>>(`/${reviewId}`)
-    .then((r) => r.data);
+  api.delete<ReviewApiResponse<string>>(`/${reviewId}`).then((r) => r.data);

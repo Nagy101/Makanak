@@ -41,7 +41,7 @@ export interface LoginResponse {
   isSuccess: boolean;
   message: string;
   data: AuthData;
-  errors: null | any;
+  errors: null | string[];
 }
 
 export interface RegisterRequest {
@@ -50,7 +50,7 @@ export interface RegisterRequest {
   password: string;
   confirmPassword: string;
   phoneNumber?: string;
-  userType: 'Tenant' | 'Owner';
+  userType: "Tenant" | "Owner";
   dateOfBirth: string;
 }
 
@@ -59,7 +59,7 @@ export interface RegisterResponse {
   isSuccess: boolean;
   message: string;
   data: AuthData;
-  errors: null | any;
+  errors: null | string[];
 }
 
 export interface LogoutResponse {
@@ -87,6 +87,7 @@ export interface ResetPasswordRequest {
 export interface UpdateProfileRequest {
   Name: string;
   PhoneNumber: string;
+  Address?: string;
   ProfilePicture?: File;
 }
 

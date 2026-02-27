@@ -1,15 +1,21 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { useEffect } from 'react';
-import * as authService from '../auth.service';
-import { useAuthStore } from '../store/authStore';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useEffect } from "react";
+import * as authService from "../auth.service";
+import { useAuthStore } from "../store/authStore";
 import type {
-  LoginRequest, RegisterRequest,
-  ForgotPasswordRequest, VerifyOtpRequest, ResetPasswordRequest,
-  UpdateProfileRequest, VerifyIdentityRequest,
-  InitiateEmailChangeRequest, ConfirmEmailChangeRequest,
-} from '../auth.types';
+  LoginRequest,
+  RegisterRequest,
+  User,
+  ForgotPasswordRequest,
+  VerifyOtpRequest,
+  ResetPasswordRequest,
+  UpdateProfileRequest,
+  VerifyIdentityRequest,
+  InitiateEmailChangeRequest,
+  ConfirmEmailChangeRequest,
+} from "../auth.types";
 
 // Type for auth response
 interface AuthResponse {
@@ -26,7 +32,7 @@ interface AuthResponse {
 export function useProfile() {
   const { token, setUser } = useAuthStore();
   return useQuery({
-    queryKey: ['auth', 'profile'],
+    queryKey: ["auth", "profile"],
     queryFn: async () => {
       const user = await authService.getProfile();
       setUser(user);
@@ -42,69 +48,56 @@ export function useLogin() {
   const { setAuth, clearAuth } = useAuthStore();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: LoginRequest) => authService.login(data),
     onSuccess: async (res: AuthResponse) => {
       // First set the auth to get the token for profile request
       setAuth(res.user, res.token);
-      
+
       // Fetch full profile to get userType, userStatus, etc.
       try {
         const profile = await authService.getProfile();
-        const userStatus = (profile?.userStatus || '').toString().toLowerCase();
-        
+        const userStatus = (profile?.userStatus || "").toString().toLowerCase();
+
         // Check if user is banned
-        if (userStatus === 'banned' || userStatus === 'suspended' || userStatus === 'deactivated') {
+        if (
+          userStatus === "banned" ||
+          userStatus === "suspended" ||
+          userStatus === "deactivated"
+        ) {
           clearAuth();
           qc.clear();
-          toast.error('Your account has been banned. Please contact support.');
+          toast.error("Your account has been banned. Please contact support.");
           return;
         }
-        
+
         // Store full profile data (includes userType: "Owner" / "Tenant")
         setAuth(profile, res.token);
-        
-        toast.success('Welcome back!');
-        navigate('/profile');
-      } catch (error) {
-        // If profile fetch fails, still allow login but log the error
-        console.error('Failed to fetch profile:', error);
-        toast.success('Welcome back!');
-        navigate('/profile');
-      }
-    },
-    onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string; errors?: Record<string, string[]>; isSuccess?: boolean } } };
-      const message = axiosError?.response?.data?.message || '';
-      const isSuccess = axiosError?.response?.data?.isSuccess;
-      
-      // If backend explicitly says not successful, check for banned keywords
-      if (isSuccess === false && message) {
-        if (message.toLowerCase().includes('banned') || 
-            message.toLowerCase().includes('suspended') ||
-            message.toLowerCase().includes('deactivated')) {
-          toast.error('Your account has been banned. Please contact support.');
+
+        const role = (profile?.role || profile?.userType || "").toLowerCase();
+
+        // Admins must use the dedicated admin portal — block them here.
+        if (role === "admin" || role === "administrator") {
+          clearAuth();
+          qc.clear();
+          toast.error("Invalid email or password.");
           return;
         }
+
+        toast.success("Welcome back!");
+        if (role === "owner") navigate("/owner", { replace: true });
+        else navigate("/", { replace: true });
+      } catch (error) {
+        // If profile fetch fails, still navigate home
+        console.error("Failed to fetch profile:", error);
+        toast.success("Welcome back!");
+        navigate("/", { replace: true });
       }
-      
-      // Check if user is banned in error message
-      if (message.toLowerCase().includes('banned') || 
-          message.toLowerCase().includes('suspended') ||
-          message.toLowerCase().includes('deactivated')) {
-        toast.error('Your account has been banned. Please contact support.');
-        return;
-      }
-      
-      // Show backend error message if available
-      if (message) {
-        toast.error(message);
-        return;
-      }
-      
-      // Default error
-      toast.error('Invalid email or password.');
+    },
+    onError: () => {
+      // Always show a generic message — never leak raw backend errors to the user
+      toast.error("Invalid email or password.");
     },
   });
 }
@@ -117,10 +110,10 @@ export function useRegister() {
     mutationFn: (data: RegisterRequest) => authService.register(data),
     onSuccess: (res: AuthResponse) => {
       setAuth(res.user, res.token);
-      toast.success('Account created successfully!');
-      navigate('/profile');
+      toast.success("Account created successfully!");
+      navigate("/profile");
     },
-    onError: () => toast.error('Registration failed. Please try again.'),
+    onError: () => toast.error("Registration failed. Please try again."),
   });
 }
 
@@ -134,8 +127,8 @@ export function useLogout() {
     onSuccess: () => {
       clearAuth();
       qc.clear();
-      toast.success('Logged out successfully.');
-      navigate('/login');
+      toast.success("Logged out successfully.");
+      navigate("/login");
     },
   });
 }
@@ -143,13 +136,25 @@ export function useLogout() {
 // ── Forgot Password ──
 export function useForgotPassword() {
   return useMutation({
-    mutationFn: (data: ForgotPasswordRequest) => authService.forgotPassword(data),
-    onSuccess: () => toast.success('OTP sent to your email. Please check your inbox.'),
+    mutationFn: (data: ForgotPasswordRequest) =>
+      authService.forgotPassword(data),
+    onSuccess: () =>
+      toast.success("OTP sent to your email. Please check your inbox."),
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } };
-      const errorMsg = axiosError?.response?.data?.message || 
-        axiosError?.response?.data?.errors?.[Object.keys(axiosError.response?.data?.errors || {})[0]]?.[0];
-      toast.error(errorMsg || 'Could not send OTP. Please check your email address and try again.');
+      const axiosError = error as {
+        response?: {
+          data?: { message?: string; errors?: Record<string, string[]> };
+        };
+      };
+      const errorMsg =
+        axiosError?.response?.data?.message ||
+        axiosError?.response?.data?.errors?.[
+          Object.keys(axiosError.response?.data?.errors || {})[0]
+        ]?.[0];
+      toast.error(
+        errorMsg ||
+          "Could not send OTP. Please check your email address and try again.",
+      );
     },
   });
 }
@@ -158,8 +163,8 @@ export function useForgotPassword() {
 export function useVerifyOtp() {
   return useMutation({
     mutationFn: (data: VerifyOtpRequest) => authService.verifyOtp(data),
-    onSuccess: () => toast.success('OTP verified!'),
-    onError: () => toast.error('Invalid OTP. Please try again.'),
+    onSuccess: () => toast.success("OTP verified!"),
+    onError: () => toast.error("Invalid OTP. Please try again."),
   });
 }
 
@@ -169,10 +174,10 @@ export function useResetPassword() {
   return useMutation({
     mutationFn: (data: ResetPasswordRequest) => authService.resetPassword(data),
     onSuccess: () => {
-      toast.success('Password reset successfully!');
-      navigate('/login');
+      toast.success("Password reset successfully!");
+      navigate("/login");
     },
-    onError: () => toast.error('Could not reset password.'),
+    onError: () => toast.error("Could not reset password."),
   });
 }
 
@@ -181,12 +186,12 @@ export function useUpdateProfile() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: UpdateProfileRequest) => authService.updateProfile(data),
-    onSuccess: (user) => {
+    onSuccess: (user: User) => {
       useAuthStore.getState().setUser(user);
-      qc.invalidateQueries({ queryKey: ['auth', 'profile'] });
-      toast.success('Profile updated!');
+      qc.invalidateQueries({ queryKey: ["auth", "profile"] });
+      toast.success("Profile updated!");
     },
-    onError: () => toast.error('Profile update failed.'),
+    onError: () => toast.error("Profile update failed."),
   });
 }
 
@@ -194,21 +199,23 @@ export function useUpdateProfile() {
 export function useVerifyIdentity() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: VerifyIdentityRequest) => authService.verifyIdentity(data),
+    mutationFn: (data: VerifyIdentityRequest) =>
+      authService.verifyIdentity(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['auth', 'profile'] });
-      toast.success('Identity verification submitted!');
+      qc.invalidateQueries({ queryKey: ["auth", "profile"] });
+      toast.success("Identity verification submitted!");
     },
-    onError: () => toast.error('Identity verification failed.'),
+    onError: () => toast.error("Identity verification failed."),
   });
 }
 
 // ── Initiate Email Change ──
 export function useInitiateEmailChange() {
   return useMutation({
-    mutationFn: (data: InitiateEmailChangeRequest) => authService.initiateEmailChange(data),
-    onSuccess: () => toast.success('Verification code sent to your new email.'),
-    onError: () => toast.error('Could not initiate email change.'),
+    mutationFn: (data: InitiateEmailChangeRequest) =>
+      authService.initiateEmailChange(data),
+    onSuccess: () => toast.success("Verification code sent to your new email."),
+    onError: () => toast.error("Could not initiate email change."),
   });
 }
 
@@ -216,12 +223,13 @@ export function useInitiateEmailChange() {
 export function useConfirmEmailChange() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: ConfirmEmailChangeRequest) => authService.confirmEmailChange(data),
+    mutationFn: (data: ConfirmEmailChangeRequest) =>
+      authService.confirmEmailChange(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['auth', 'profile'] });
-      toast.success('Email changed successfully!');
+      qc.invalidateQueries({ queryKey: ["auth", "profile"] });
+      toast.success("Email changed successfully!");
     },
-    onError: () => toast.error('Could not confirm email change.'),
+    onError: () => toast.error("Could not confirm email change."),
   });
 }
 
@@ -235,14 +243,18 @@ export function useBannedUserCheck() {
   useEffect(() => {
     if (!isAuthenticated || !user) return;
 
-    const userStatus = (user?.userStatus || '').toString().toLowerCase();
-    
-    if (userStatus === 'banned' || userStatus === 'suspended' || userStatus === 'deactivated') {
-      toast.error('Your account has been banned. Please contact support.', {
+    const userStatus = (user?.userStatus || "").toString().toLowerCase();
+
+    if (
+      userStatus === "banned" ||
+      userStatus === "suspended" ||
+      userStatus === "deactivated"
+    ) {
+      toast.error("Your account has been banned. Please contact support.", {
         duration: 5000,
       });
       clearAuth();
-      navigate('/login', { replace: true });
+      navigate("/login", { replace: true });
     }
   }, [user?.userStatus, isAuthenticated, user, clearAuth, navigate]);
 }

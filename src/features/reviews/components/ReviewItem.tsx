@@ -14,20 +14,20 @@
 //    ✓ Fallback avatar when reviewerPhotoUrl is null/broken.
 //    ✓ Atomic Zustand selector (s => s.user).
 // ═══════════════════════════════════════════════════════════════
-import { memo, useCallback, useState } from 'react';
-import { Trash2 } from 'lucide-react';
-import { format } from 'date-fns';
-import { useAuthStore } from '@/features/auth/store/authStore';
-import StarRating from './StarRating';
-import type { Review } from '../review.types';
+import { memo, useCallback, useState } from "react";
+import { Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { useAuthStore } from "@/features/auth/store/authStore";
+import StarRating from "./StarRating";
+import type { Review } from "../review.types";
 
 // ── Fallback avatar URL ───────────────────────────────────────
-const FALLBACK_AVATAR = '/placeholder.svg';
+const FALLBACK_AVATAR = "/placeholder.svg";
 
 // ── Helper: resolve image URL ─────────────────────────────────
 function resolvePhotoUrl(url: string | null | undefined): string {
   if (!url) return FALLBACK_AVATAR;
-  if (url.startsWith('http') || url.startsWith('/')) return url;
+  if (url.startsWith("http") || url.startsWith("/")) return url;
   return `/${url}`;
 }
 
@@ -47,7 +47,7 @@ const ReviewItem = memo(function ReviewItem({
   // Atomic selector — only re-renders if `user` object reference changes
   const user = useAuthStore((s) => s.user);
 
-  const isAdmin = user?.role === 'Admin';
+  const isAdmin = user?.role === "Admin";
   const isOwner = user?.name === review.reviewerName;
   const canDelete = isAdmin || isOwner;
 
@@ -62,13 +62,10 @@ const ReviewItem = memo(function ReviewItem({
     resolvePhotoUrl(review.reviewerPhotoUrl),
   );
 
-  const handleImgError = useCallback(
-    () => setImgSrc(FALLBACK_AVATAR),
-    [],
-  );
+  const handleImgError = useCallback(() => setImgSrc(FALLBACK_AVATAR), []);
 
   return (
-    <article className="flex gap-4 py-5 border-b border-gray-100 last:border-none">
+    <article className="flex gap-4 py-5 border-b border-border/50 last:border-none">
       {/* ── Reviewer Avatar ───────────────────────────── */}
       <img
         src={imgSrc}
@@ -77,7 +74,7 @@ const ReviewItem = memo(function ReviewItem({
         height={44}
         loading="lazy"
         onError={handleImgError}
-        className="h-11 w-11 rounded-full object-cover flex-shrink-0 bg-gray-100"
+        className="h-11 w-11 rounded-full object-cover flex-shrink-0 bg-muted"
       />
 
       {/* ── Review Body ───────────────────────────────── */}
@@ -85,14 +82,14 @@ const ReviewItem = memo(function ReviewItem({
         {/* Header row */}
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-0.5">
-            <p className="font-semibold text-[#1E3A8A] text-sm leading-tight truncate">
+            <p className="font-semibold text-foreground text-sm leading-tight truncate">
               {review.reviewerName}
             </p>
             <time
               dateTime={review.createdAt}
-              className="text-xs text-gray-500"
+              className="text-xs text-muted-foreground"
             >
-              {format(new Date(review.createdAt), 'MMM d, yyyy')}
+              {format(new Date(review.createdAt), "MMM d, yyyy")}
             </time>
           </div>
 
@@ -106,9 +103,9 @@ const ReviewItem = memo(function ReviewItem({
                 onClick={handleDelete}
                 disabled={isDeleting}
                 aria-label="Delete review"
-                className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50
+                className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10
                            disabled:opacity-40 disabled:cursor-not-allowed transition-colors
-                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -117,7 +114,7 @@ const ReviewItem = memo(function ReviewItem({
         </div>
 
         {/* Comment */}
-        <p className="mt-2 text-sm text-gray-700 leading-relaxed break-words">
+        <p className="mt-2 text-sm text-foreground/80 leading-relaxed break-words">
           {review.comment}
         </p>
       </div>

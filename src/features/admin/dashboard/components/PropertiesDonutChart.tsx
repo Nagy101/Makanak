@@ -6,7 +6,7 @@
 //  It MUST be consumed via React.lazy() to keep Recharts out of
 //  the initial JS bundle.
 // ═══════════════════════════════════════════════════════════════
-import { memo, useMemo } from 'react';
+import { memo, useMemo } from "react";
 import {
   PieChart,
   Pie,
@@ -14,15 +14,21 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import type { PropertyStats, PropertyChartEntry } from '../dashboard.types';
+} from "recharts";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import type { PropertyStats, PropertyChartEntry } from "../dashboard.types";
 
 // ── Colour palette (Royal Blue → amber → red → slate) ─────────
 const PROPERTY_COLORS: Record<string, string> = {
-  Active:   '#1E3A8A',
-  Pending:  '#F59E0B',
-  Rejected: '#EF4444',
+  Active: "#1559AC",
+  Pending: "#F59E0B",
+  Rejected: "#EF4444",
 };
 
 interface PropertiesDonutChartProps {
@@ -34,11 +40,24 @@ const PropertiesDonutChart = memo(function PropertiesDonutChart({
 }: PropertiesDonutChartProps) {
   // ── Memoised transformation ────────────────────────────────
   const chartData = useMemo<PropertyChartEntry[]>(
-    () => [
-      { name: 'Active',   value: data.activeProperties,           fill: PROPERTY_COLORS.Active   },
-      { name: 'Pending',  value: data.pendingApprovalProperties,  fill: PROPERTY_COLORS.Pending  },
-      { name: 'Rejected', value: data.rejectedProperties,         fill: PROPERTY_COLORS.Rejected },
-    ].filter((e) => e.value > 0),
+    () =>
+      [
+        {
+          name: "Active",
+          value: data.activeProperties,
+          fill: PROPERTY_COLORS.Active,
+        },
+        {
+          name: "Pending",
+          value: data.pendingApprovalProperties,
+          fill: PROPERTY_COLORS.Pending,
+        },
+        {
+          name: "Rejected",
+          value: data.rejectedProperties,
+          fill: PROPERTY_COLORS.Rejected,
+        },
+      ].filter((e) => e.value > 0),
     [data],
   );
 
@@ -64,7 +83,7 @@ const PropertiesDonutChart = memo(function PropertiesDonutChart({
               paddingAngle={3}
               dataKey="value"
               label={({ name, percent }) =>
-                percent > 0.04 ? `${name} ${(percent * 100).toFixed(0)}%` : ''
+                percent > 0.04 ? `${name} ${(percent * 100).toFixed(0)}%` : ""
               }
               labelLine={false}
             >
@@ -88,5 +107,5 @@ const PropertiesDonutChart = memo(function PropertiesDonutChart({
   );
 });
 
-PropertiesDonutChart.displayName = 'PropertiesDonutChart';
+PropertiesDonutChart.displayName = "PropertiesDonutChart";
 export default PropertiesDonutChart;

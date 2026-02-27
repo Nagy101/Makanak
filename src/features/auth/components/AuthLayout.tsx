@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
-import { Building2 } from 'lucide-react';
-import { memo } from 'react';
-import authHero from '@/assets/auth-hero.jpg';
+import { Link } from "react-router-dom";
+import { Building2 } from "lucide-react";
+import { memo } from "react";
+import authHero from "@/assets/auth-hero.jpg";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -23,15 +23,24 @@ const AuthLayout = memo(({ children, title, subtitle }: AuthLayoutProps) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/30 to-transparent" />
         <div className="relative z-10 flex flex-col justify-end p-12 text-primary-foreground">
-          <Link to="/" className="absolute top-8 left-8 flex items-center gap-2">
-            <Building2 className="h-8 w-8" />
-            <span className="text-2xl font-bold tracking-tight">Makanak</span>
+          <Link
+            to="/"
+            className="absolute top-8 left-8 flex items-center gap-2"
+          >
+            <img
+              src="/Makanak_logo.ico"
+              alt="Makanak Logo"
+              className="h-10 object-contain brightness-0 invert"
+            />
           </Link>
           <h2 className="text-4xl font-bold leading-tight mb-3">
-            Find your perfect<br />place to call home
+            Find your perfect
+            <br />
+            place to call home
           </h2>
           <p className="text-primary-foreground/80 text-lg max-w-md">
-            Browse thousands of verified listings with confidence. Your dream property is just a few clicks away.
+            Browse thousands of verified listings with confidence. Your dream
+            property is just a few clicks away.
           </p>
         </div>
       </div>
@@ -39,8 +48,11 @@ const AuthLayout = memo(({ children, title, subtitle }: AuthLayoutProps) => {
       {/* Right: Form */}
       <div className="flex w-full lg:w-1/2 flex-col items-center justify-center px-6 py-12 bg-background">
         <div className="lg:hidden flex items-center gap-2 mb-10">
-          <Building2 className="h-7 w-7 text-primary" />
-          <span className="text-xl font-bold tracking-tight text-foreground">Makanak</span>
+          <img
+            src="/Makanak_logo.ico"
+            alt="Makanak Logo"
+            className="h-8 object-contain"
+          />
         </div>
         <div className="w-full max-w-md space-y-8">
           <div>
@@ -56,5 +68,5 @@ const AuthLayout = memo(({ children, title, subtitle }: AuthLayoutProps) => {
   );
 });
 
-AuthLayout.displayName = 'AuthLayout';
+AuthLayout.displayName = "AuthLayout";
 export default AuthLayout;

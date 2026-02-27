@@ -4,9 +4,9 @@
 //  Performance: React.memo — prevents re-render when parent
 //    re-renders with identical props.
 // ═══════════════════════════════════════════════════════════════
-import { memo, useCallback } from 'react';
-import { Star } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { memo, useCallback } from "react";
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // ── Props ──────────────────────────────────────────────────────
 interface StarRatingProps {
@@ -27,7 +27,7 @@ const StarRating = memo(function StarRating({
   size = 20,
   className,
 }: StarRatingProps) {
-  const interactive = typeof onChange === 'function';
+  const interactive = typeof onChange === "function";
 
   // useCallback: stable handler refs — avoids re-creating a new
   // function reference on every render when passed as props.
@@ -40,9 +40,9 @@ const StarRating = memo(function StarRating({
 
   return (
     <div
-      className={cn('flex items-center gap-0.5', className)}
-      role={interactive ? 'group' : undefined}
-      aria-label={interactive ? 'Rating selector' : `Rating: ${value} out of 5`}
+      className={cn("flex items-center gap-0.5", className)}
+      role={interactive ? "group" : undefined}
+      aria-label={interactive ? "Rating selector" : `Rating: ${value} out of 5`}
     >
       {[1, 2, 3, 4, 5].map((star) => {
         const filled = star <= value;
@@ -52,12 +52,12 @@ const StarRating = memo(function StarRating({
             type="button"
             disabled={!interactive}
             onClick={() => handleClick(star)}
-            aria-label={`${star} star${star > 1 ? 's' : ''}`}
+            aria-label={`${star} star${star > 1 ? "s" : ""}`}
             className={cn(
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A] rounded-sm',
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm",
               interactive
-                ? 'cursor-pointer hover:scale-110 transition-transform'
-                : 'cursor-default pointer-events-none',
+                ? "cursor-pointer hover:scale-110 transition-transform"
+                : "cursor-default pointer-events-none",
             )}
           >
             <Star
@@ -65,10 +65,10 @@ const StarRating = memo(function StarRating({
               height={size}
               // Filled stars: deep royal blue fill, no outline; empty: grey outline
               className={cn(
-                'transition-colors',
+                "transition-colors",
                 filled
-                  ? 'fill-[#1E3A8A] text-[#1E3A8A]'
-                  : 'fill-transparent text-gray-300',
+                  ? "fill-primary text-primary"
+                  : "fill-transparent text-border",
               )}
             />
           </button>

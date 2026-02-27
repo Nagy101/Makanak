@@ -4,7 +4,7 @@
 //
 //  ⚠ Must be consumed via React.lazy().
 // ═══════════════════════════════════════════════════════════════
-import { memo, useMemo } from 'react';
+import { memo, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -14,32 +14,60 @@ import {
   Tooltip,
   Cell,
   ResponsiveContainer,
-} from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import type { BookingsStats, BookingChartEntry } from '../dashboard.types';
+} from "recharts";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import type { BookingsStats, BookingChartEntry } from "../dashboard.types";
 
 // ── Colours ────────────────────────────────────────────────────
 const BOOKING_COLORS: Record<string, string> = {
-  Completed:        '#1E3A8A',
-  'Checked In':     '#2563EB',
-  'Payment Recv.':  '#3B82F6',
-  Pending:          '#F59E0B',
-  Cancelled:        '#EF4444',
+  Completed: "#1559AC",
+  "Checked In": "#2563EB",
+  "Payment Recv.": "#3B82F6",
+  Pending: "#F59E0B",
+  Cancelled: "#EF4444",
 };
 
 interface BookingsBarChartProps {
   data: BookingsStats;
 }
 
-const BookingsBarChart = memo(function BookingsBarChart({ data }: BookingsBarChartProps) {
+const BookingsBarChart = memo(function BookingsBarChart({
+  data,
+}: BookingsBarChartProps) {
   // ── Memoised transformation ────────────────────────────────
   const chartData = useMemo<BookingChartEntry[]>(
     () => [
-      { name: 'Completed',       value: data.completedBookings, fill: BOOKING_COLORS.Completed        },
-      { name: 'Checked In',      value: data.checkedIn,         fill: BOOKING_COLORS['Checked In']    },
-      { name: 'Payment Recv.',   value: data.paymentReceived,   fill: BOOKING_COLORS['Payment Recv.'] },
-      { name: 'Pending',         value: data.pendingBookings,   fill: BOOKING_COLORS.Pending          },
-      { name: 'Cancelled',       value: data.cancelledBookings, fill: BOOKING_COLORS.Cancelled        },
+      {
+        name: "Completed",
+        value: data.completedBookings,
+        fill: BOOKING_COLORS.Completed,
+      },
+      {
+        name: "Checked In",
+        value: data.checkedIn,
+        fill: BOOKING_COLORS["Checked In"],
+      },
+      {
+        name: "Payment Recv.",
+        value: data.paymentReceived,
+        fill: BOOKING_COLORS["Payment Recv."],
+      },
+      {
+        name: "Pending",
+        value: data.pendingBookings,
+        fill: BOOKING_COLORS.Pending,
+      },
+      {
+        name: "Cancelled",
+        value: data.cancelledBookings,
+        fill: BOOKING_COLORS.Cancelled,
+      },
     ],
     [data],
   );
@@ -60,25 +88,29 @@ const BookingsBarChart = memo(function BookingsBarChart({ data }: BookingsBarCha
             margin={{ top: 0, right: 16, bottom: 0, left: 8 }}
             barSize={18}
           >
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              horizontal={false}
+              stroke="#e5e7eb"
+            />
             <XAxis
               type="number"
-              tick={{ fontSize: 12, fill: '#6B7280' }}
+              tick={{ fontSize: 12, fill: "#6B7280" }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               type="category"
               dataKey="name"
-              tick={{ fontSize: 12, fill: '#374151' }}
+              tick={{ fontSize: 12, fill: "#374151" }}
               axisLine={false}
               tickLine={false}
               width={94}
             />
             <Tooltip
-              cursor={{ fill: 'rgba(30,58,138,0.05)' }}
+              cursor={{ fill: "rgba(30,58,138,0.05)" }}
               contentStyle={{ borderRadius: 8, fontSize: 13 }}
-              formatter={(value: number) => [value, 'Bookings']}
+              formatter={(value: number) => [value, "Bookings"]}
             />
             <Bar dataKey="value" radius={[0, 4, 4, 0]}>
               {chartData.map((entry) => (
@@ -92,5 +124,5 @@ const BookingsBarChart = memo(function BookingsBarChart({ data }: BookingsBarCha
   );
 });
 
-BookingsBarChart.displayName = 'BookingsBarChart';
+BookingsBarChart.displayName = "BookingsBarChart";
 export default BookingsBarChart;

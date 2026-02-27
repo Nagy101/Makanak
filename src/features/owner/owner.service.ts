@@ -1,5 +1,6 @@
-import axios from 'axios';
-import { storage } from '@/lib/storage';
+import axios from "axios";
+import { storage } from "@/lib/storage";
+import { setup401Interceptor } from "@/lib/api";
 import type {
   OwnerApiResponse,
   OwnerPropertyListing,
@@ -7,17 +8,18 @@ import type {
   PaginatedData,
   CreatePropertyPayload,
   EditPropertyPayload,
-} from './owner.types';
+} from "./owner.types";
 
 const api = axios.create({
-  baseURL: '/api/Property',
+  baseURL: "/api/Property",
 });
 
 api.interceptors.request.use((config) => {
   const token = storage.getToken();
-  if (token) config.headers.set('Authorization', `Bearer ${token}`);
+  if (token) config.headers.set("Authorization", `Bearer ${token}`);
   return config;
 });
+setup401Interceptor(api);
 
 /**
  * Convert a create/edit payload into multipart/form-data.
@@ -28,10 +30,10 @@ function toFormData(payload: Record<string, any>): FormData {
   const fd = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
-    if (key === 'GalleryImages' && Array.isArray(value)) {
-      (value as File[]).forEach((file) => fd.append('GalleryImages', file));
-    } else if (key === 'MainImage' && value instanceof File) {
-      fd.append('MainImage', value);
+    if (key === "GalleryImages" && Array.isArray(value)) {
+      (value as File[]).forEach((file) => fd.append("GalleryImages", file));
+    } else if (key === "MainImage" && value instanceof File) {
+      fd.append("MainImage", value);
     } else if (Array.isArray(value)) {
       value.forEach((v) => fd.append(key, String(v)));
     } else {
@@ -44,23 +46,29 @@ function toFormData(payload: Record<string, any>): FormData {
 // ── My Properties ──
 export const getMyProperties = (params: MyPropertiesParams) =>
   api
-    .get<OwnerApiResponse<PaginatedData<OwnerPropertyListing>>>('/my-properties', { params })
+    .get<
+      OwnerApiResponse<PaginatedData<OwnerPropertyListing>>
+    >("/my-properties", { params })
     .then((r) => r.data.data);
 
 // ── Create Property ──
 export const createProperty = (payload: CreatePropertyPayload) =>
   api
-    .post<OwnerApiResponse<OwnerPropertyListing>>('', toFormData(payload), {
-      headers: { 'Content-Type': 'multipart/form-data' },
+    .post<OwnerApiResponse<OwnerPropertyListing>>("", toFormData(payload), {
+      headers: { "Content-Type": "multipart/form-data" },
     })
     .then((r) => r.data);
 
 // ── Edit Property ──
 export const updateProperty = (id: number, payload: EditPropertyPayload) =>
   api
-    .put<OwnerApiResponse<OwnerPropertyListing>>(`/${id}`, toFormData(payload), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    .put<OwnerApiResponse<OwnerPropertyListing>>(
+      `/${id}`,
+      toFormData(payload),
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      },
+    )
     .then((r) => r.data);
 
 // ── Delete Property ──

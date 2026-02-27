@@ -34,18 +34,24 @@ const ForgotPasswordPage = memo(() => {
   const emailForm = useForm<z.output<typeof emailSchema>>({ resolver: zodResolver(emailSchema), defaultValues: { email: '' } });
   const resetForm = useForm<z.output<typeof resetSchema>>({ resolver: zodResolver(resetSchema), defaultValues: { newPassword: '', confirmPassword: '' } });
 
-  const handleEmailSubmit = useCallback(emailForm.handleSubmit((d) => {
-    setEmail(d.email);
-    forgot.mutate({ email: d.email }, { onSuccess: () => setStep('otp') });
-  }), [emailForm, forgot]);
+  const handleEmailSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    emailForm.handleSubmit((d) => {
+      setEmail(d.email);
+      forgot.mutate({ email: d.email }, { onSuccess: () => setStep('otp') });
+    })(e);
+  }, [emailForm, forgot]);
 
   const handleOtpSubmit = useCallback(() => {
     verify.mutate({ otp, email }, { onSuccess: () => setStep('reset') });
   }, [verify, otp, email]);
 
-  const handleResetSubmit = useCallback(resetForm.handleSubmit((d) => {
-    reset.mutate({ confirmPassword: d.confirmPassword!, newPassword: d.newPassword!, email, otp });
-  }), [resetForm, reset, email, otp]);
+  const handleResetSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    resetForm.handleSubmit((d) => {
+      reset.mutate({ confirmPassword: d.confirmPassword!, newPassword: d.newPassword!, email, otp });
+    })(e);
+  }, [resetForm, reset, email, otp]);
 
   const handleChangeEmail = useCallback(() => {
     setStep('email');

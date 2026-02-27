@@ -15,13 +15,13 @@
 //    ✓ useMemo for the average rating derived value.
 //    ✓ Atomic Zustand selector used inside child components.
 // ═══════════════════════════════════════════════════════════════
-import { memo, useCallback, useMemo } from 'react';
-import { MessageSquare, Loader2 } from 'lucide-react';
-import { usePropertyReviews, useDeleteReview } from '../useReviews';
-import ReviewItem from './ReviewItem';
-import StarRating from './StarRating';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { memo, useCallback, useMemo } from "react";
+import { MessageSquare, Loader2 } from "lucide-react";
+import { usePropertyReviews, useDeleteReview } from "../useReviews";
+import ReviewItem from "./ReviewItem";
+import StarRating from "./StarRating";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 // ── Props ─────────────────────────────────────────────────────
 interface PropertyReviewsSectionProps {
@@ -33,7 +33,7 @@ const ReviewSkeletons = memo(function ReviewSkeletons() {
   return (
     <div className="space-y-5">
       {[1, 2, 3].map((n) => (
-        <div key={n} className="flex gap-4 py-5 border-b border-gray-100">
+        <div key={n} className="flex gap-4 py-5 border-b border-border/50">
           <Skeleton className="h-11 w-11 rounded-full flex-shrink-0" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-32" />
@@ -51,11 +51,11 @@ const ReviewSkeletons = memo(function ReviewSkeletons() {
 const EmptyReviews = memo(function EmptyReviews() {
   return (
     <div className="flex flex-col items-center justify-center py-14 gap-3 text-center">
-      <div className="h-14 w-14 rounded-full bg-[#1E3A8A]/8 flex items-center justify-center">
-        <MessageSquare className="h-7 w-7 text-[#1E3A8A]/50" />
+      <div className="h-14 w-14 rounded-full bg-primary/8 flex items-center justify-center">
+        <MessageSquare className="h-7 w-7 text-primary/50" />
       </div>
-      <p className="font-semibold text-gray-700">No reviews yet</p>
-      <p className="text-sm text-gray-500">
+      <p className="font-semibold text-foreground">No reviews yet</p>
+      <p className="text-sm text-muted-foreground">
         Be the first to share your experience with this property.
       </p>
     </div>
@@ -66,13 +66,8 @@ const EmptyReviews = memo(function EmptyReviews() {
 const PropertyReviewsSection = memo(function PropertyReviewsSection({
   propertyId,
 }: PropertyReviewsSectionProps) {
-  const {
-    data,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-  } = usePropertyReviews(propertyId);
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    usePropertyReviews(propertyId);
 
   const { mutate: deleteReview, isPending: isDeleting } =
     useDeleteReview(propertyId);
@@ -102,28 +97,25 @@ const PropertyReviewsSection = memo(function PropertyReviewsSection({
     <section aria-labelledby="reviews-heading" className="mt-8">
       {/* ── Section Header ─────────────────────────────────── */}
       <div className="flex items-center justify-between mb-4">
-        <h2
-          id="reviews-heading"
-          className="text-xl font-bold text-[#1E3A8A]"
-        >
+        <h2 id="reviews-heading" className="text-xl font-bold text-foreground">
           Guest Reviews
         </h2>
 
         {!isLoading && totalCount > 0 && (
           <div className="flex items-center gap-2">
             <StarRating value={Math.round(averageRating)} size={18} />
-            <span className="text-sm font-semibold text-[#1E3A8A]">
+            <span className="text-sm font-semibold text-primary">
               {averageRating}
             </span>
-            <span className="text-sm text-gray-500">
-              ({totalCount} review{totalCount !== 1 ? 's' : ''})
+            <span className="text-sm text-muted-foreground">
+              ({totalCount} review{totalCount !== 1 ? "s" : ""})
             </span>
           </div>
         )}
       </div>
 
       {/* ── Divider ────────────────────────────────────────── */}
-      <div className="h-px bg-[#1E3A8A]/10 mb-4" />
+      <div className="h-px bg-border/60 mb-4" />
 
       {/* ── Content ────────────────────────────────────────── */}
       {isLoading ? (
@@ -153,7 +145,7 @@ const PropertyReviewsSection = memo(function PropertyReviewsSection({
                 variant="outline"
                 onClick={handleLoadMore}
                 disabled={isFetchingNextPage}
-                className="border-[#1E3A8A] text-[#1E3A8A] hover:bg-[#1E3A8A] hover:text-white
+                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground
                            min-w-[140px] transition-colors"
               >
                 {isFetchingNextPage ? (
@@ -162,7 +154,7 @@ const PropertyReviewsSection = memo(function PropertyReviewsSection({
                     Loading…
                   </>
                 ) : (
-                  'Load More Reviews'
+                  "Load More Reviews"
                 )}
               </Button>
             </div>

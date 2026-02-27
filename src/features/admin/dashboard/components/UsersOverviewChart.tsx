@@ -6,7 +6,7 @@
 //
 //  ⚠ Must be consumed via React.lazy().
 // ═══════════════════════════════════════════════════════════════
-import { memo, useMemo } from 'react';
+import { memo, useMemo } from "react";
 import {
   PieChart,
   Pie,
@@ -14,38 +14,52 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import type { UserStats, UserRoleEntry, UserStatusEntry } from '../dashboard.types';
+} from "recharts";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import type {
+  UserStats,
+  UserRoleEntry,
+  UserStatusEntry,
+} from "../dashboard.types";
 
 // ── Palettes ───────────────────────────────────────────────────
-const ROLE_COLORS   = ['#1E3A8A', '#2563EB', '#60A5FA'];
-const STATUS_COLORS = ['#16A34A', '#F59E0B', '#EF4444', '#6B7280', '#94A3B8'];
+const ROLE_COLORS = ["#1559AC", "#2563EB", "#60A5FA"];
+const STATUS_COLORS = ["#16A34A", "#F59E0B", "#EF4444", "#6B7280", "#94A3B8"];
 
 interface UsersOverviewChartProps {
   data: UserStats;
 }
 
-const UsersOverviewChart = memo(function UsersOverviewChart({ data }: UsersOverviewChartProps) {
+const UsersOverviewChart = memo(function UsersOverviewChart({
+  data,
+}: UsersOverviewChartProps) {
   // ── Roles data ─────────────────────────────────────────────
   const rolesData = useMemo<UserRoleEntry[]>(
-    () => [
-      { name: 'Admins',  value: data.adminsCount,   fill: ROLE_COLORS[0] },
-      { name: 'Owners',  value: data.ownersCount,   fill: ROLE_COLORS[1] },
-      { name: 'Tenants', value: data.tenantsCount,  fill: ROLE_COLORS[2] },
-    ].filter((e) => e.value >= 0),
+    () =>
+      [
+        { name: "Admins", value: data.adminsCount, fill: ROLE_COLORS[0] },
+        { name: "Owners", value: data.ownersCount, fill: ROLE_COLORS[1] },
+        { name: "Tenants", value: data.tenantsCount, fill: ROLE_COLORS[2] },
+      ].filter((e) => e.value >= 0),
     [data],
   );
 
   // ── Statuses data ──────────────────────────────────────────
   const statusData = useMemo<UserStatusEntry[]>(
-    () => [
-      { name: 'Active',   value: data.activeUsers,    fill: STATUS_COLORS[0] },
-      { name: 'Pending',  value: data.pendingUsers,   fill: STATUS_COLORS[1] },
-      { name: 'Rejected', value: data.rejectsCount,   fill: STATUS_COLORS[2] },
-      { name: 'Banned',   value: data.bannedsCount,   fill: STATUS_COLORS[3] },
-      { name: 'New',      value: data.newsCount,      fill: STATUS_COLORS[4] },
-    ].filter((e) => e.value >= 0),
+    () =>
+      [
+        { name: "Active", value: data.activeUsers, fill: STATUS_COLORS[0] },
+        { name: "Pending", value: data.pendingUsers, fill: STATUS_COLORS[1] },
+        { name: "Rejected", value: data.rejectsCount, fill: STATUS_COLORS[2] },
+        { name: "Banned", value: data.bannedsCount, fill: STATUS_COLORS[3] },
+        { name: "New", value: data.newsCount, fill: STATUS_COLORS[4] },
+      ].filter((e) => e.value >= 0),
     [data],
   );
 
@@ -76,7 +90,7 @@ const UsersOverviewChart = memo(function UsersOverviewChart({ data }: UsersOverv
                   paddingAngle={3}
                   dataKey="value"
                   label={({ name, percent }) =>
-                    percent > 0.04 ? `${(percent * 100).toFixed(0)}%` : ''
+                    percent > 0.04 ? `${(percent * 100).toFixed(0)}%` : ""
                   }
                   labelLine={false}
                 >
@@ -110,7 +124,7 @@ const UsersOverviewChart = memo(function UsersOverviewChart({ data }: UsersOverv
                   paddingAngle={3}
                   dataKey="value"
                   label={({ name, percent }) =>
-                    percent > 0.04 ? `${(percent * 100).toFixed(0)}%` : ''
+                    percent > 0.04 ? `${(percent * 100).toFixed(0)}%` : ""
                   }
                   labelLine={false}
                 >
@@ -133,5 +147,5 @@ const UsersOverviewChart = memo(function UsersOverviewChart({ data }: UsersOverv
   );
 });
 
-UsersOverviewChart.displayName = 'UsersOverviewChart';
+UsersOverviewChart.displayName = "UsersOverviewChart";
 export default UsersOverviewChart;

@@ -18,10 +18,10 @@
 //  │  BOTTOM ROW   User Demographics (Role + Status Pies)     │
 //  └──────────────────────────────────────────────────────────┘
 // ═══════════════════════════════════════════════════════════════
-import { lazy, Suspense, memo } from 'react';
-import { TrendingUp, Wallet, Landmark, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useQueryClient } from '@tanstack/react-query';
+import { lazy, Suspense, memo } from "react";
+import { TrendingUp, Wallet, Landmark, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
 
 import {
   useFinancialStats,
@@ -29,40 +29,47 @@ import {
   useBookingsStats,
   useUserStats,
   dashboardKeys,
-} from '../dashboard/useDashboardStats';
-import { FinancialCard } from '../dashboard/components/FinancialCard';
-import { StatCardSkeleton } from '../dashboard/components/StatCardSkeleton';
-import { ChartSkeleton } from '../dashboard/components/ChartSkeleton';
+} from "../dashboard/useDashboardStats";
+import { FinancialCard } from "../dashboard/components/FinancialCard";
+import { StatCardSkeleton } from "../dashboard/components/StatCardSkeleton";
+import { ChartSkeleton } from "../dashboard/components/ChartSkeleton";
 
 // ── Lazy-load all chart modules (Recharts stays out of initial bundle) ──
 const PropertiesDonutChart = lazy(
-  () => import(
-    /* webpackChunkName: "chart-properties" */
-    '../dashboard/components/PropertiesDonutChart'
-  ),
+  () =>
+    import(
+      /* webpackChunkName: "chart-properties" */
+      "../dashboard/components/PropertiesDonutChart"
+    ),
 );
 const BookingsBarChart = lazy(
-  () => import(
-    /* webpackChunkName: "chart-bookings" */
-    '../dashboard/components/BookingsBarChart'
-  ),
+  () =>
+    import(
+      /* webpackChunkName: "chart-bookings" */
+      "../dashboard/components/BookingsBarChart"
+    ),
 );
 const UsersOverviewChart = lazy(
-  () => import(
-    /* webpackChunkName: "chart-users" */
-    '../dashboard/components/UsersOverviewChart'
-  ),
+  () =>
+    import(
+      /* webpackChunkName: "chart-users" */
+      "../dashboard/components/UsersOverviewChart"
+    ),
 );
 
 // ── Section wrapper keeps layout stable while content loads ───
-const SectionTitle = memo(function SectionTitle({ children }: { children: React.ReactNode }) {
+const SectionTitle = memo(function SectionTitle({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">
       {children}
     </h2>
   );
 });
-SectionTitle.displayName = 'SectionTitle';
+SectionTitle.displayName = "SectionTitle";
 
 // ══════════════════════════════════════════════════════════════
 //  Main Page
@@ -71,10 +78,10 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
   const qc = useQueryClient();
 
   // ── 4 parallel queries — NO chaining ─────────────────────
-  const financial  = useFinancialStats();
+  const financial = useFinancialStats();
   const properties = usePropertyStats();
-  const bookings   = useBookingsStats();
-  const users      = useUserStats();
+  const bookings = useBookingsStats();
+  const users = useUserStats();
 
   // ── Manual refresh ────────────────────────────────────────
   const handleRefresh = () => {
@@ -92,7 +99,9 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
       {/* ── Page Header ──────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Analytics Dashboard</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Analytics Dashboard
+          </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Real-time overview of the Makanak platform
           </p>
@@ -105,7 +114,7 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
           className="self-start sm:self-auto gap-2"
         >
           <RefreshCw
-            className={`h-4 w-4 ${isAnyRefetching ? 'animate-spin' : ''}`}
+            className={`h-4 w-4 ${isAnyRefetching ? "animate-spin" : ""}`}
           />
           Refresh
         </Button>
@@ -131,7 +140,7 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
                 label="Total Booking Volume"
                 amount={financial.data.totalBookingVolume}
                 icon={TrendingUp}
-                accentClass="bg-[#1E3A8A]/10 text-[#1E3A8A]"
+                accentClass="bg-primary/10 text-primary"
                 description="Gross revenue across all bookings"
               />
               <FinancialCard
@@ -160,7 +169,6 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
       <section className="space-y-3">
         <SectionTitle>Properties &amp; Bookings</SectionTitle>
         <div className="grid gap-4 lg:grid-cols-2">
-
           {/* Properties Donut */}
           {properties.isLoading ? (
             <ChartSkeleton />
@@ -178,7 +186,6 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
               <BookingsBarChart data={bookings.data} />
             </Suspense>
           ) : null}
-
         </div>
       </section>
 
@@ -200,5 +207,5 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
   );
 });
 
-AdminDashboardPage.displayName = 'AdminDashboardPage';
+AdminDashboardPage.displayName = "AdminDashboardPage";
 export default AdminDashboardPage;

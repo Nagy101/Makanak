@@ -15,7 +15,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 // Stripe publishable key — safe to store in client code
-const STRIPE_PK = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
+const STRIPE_PK =
+  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ||
+  "" ;
 const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
 
 interface PaymentModalProps {
