@@ -184,7 +184,7 @@ const BookingCard = memo(
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-warning border-warning/30 hover:bg-warning/10"
+                    className="text-warning border-warning/30 hover:bg-warning hover:text-white hover:border-warning"
                     onClick={() => onDispute(booking.id)}
                   >
                     <AlertTriangle className="h-3.5 w-3.5 mr-1" /> Dispute
@@ -194,7 +194,7 @@ const BookingCard = memo(
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-primary border-primary/30 hover:bg-primary/10"
+                    className="text-primary border-primary/30 hover:bg-primary hover:text-primary-foreground hover:border-primary"
                     onClick={() => onReview(booking.id, booking.propertyId)}
                   >
                     <Star className="h-3.5 w-3.5 mr-1" /> Review
@@ -360,7 +360,11 @@ export default function TenantBookingsPage() {
                 className="pl-9 w-full"
               />
             </div>
-            <Button onClick={handleSearch} variant="secondary">
+            <Button
+              onClick={handleSearch}
+              variant="secondary"
+              className="hover:bg-primary hover:text-primary-foreground"
+            >
               <Search className="h-4 w-4 mr-1" /> Search
             </Button>
           </div>

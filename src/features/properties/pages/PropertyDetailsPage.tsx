@@ -139,19 +139,19 @@ export default function PropertyDetailsPage() {
                           (prev - 1 + allImages.length) % allImages.length,
                       )
                     }
-                    className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 backdrop-blur-sm p-2.5 shadow-md hover:bg-white transition-all hover:scale-105"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-md p-2.5 shadow-md hover:bg-black/70 transition-all hover:scale-105 border border-white/10"
                     aria-label="Previous image"
                   >
-                    <ChevronLeft className="h-5 w-5 text-foreground" />
+                    <ChevronLeft className="h-5 w-5 text-white" />
                   </button>
                   <button
                     onClick={() =>
                       setActiveImage((prev) => (prev + 1) % allImages.length)
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 backdrop-blur-sm p-2.5 shadow-md hover:bg-white transition-all hover:scale-105"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-md p-2.5 shadow-md hover:bg-black/70 transition-all hover:scale-105 border border-white/10"
                     aria-label="Next image"
                   >
-                    <ChevronRight className="h-5 w-5 text-foreground" />
+                    <ChevronRight className="h-5 w-5 text-white" />
                   </button>
                   {/* Dot indicators */}
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">

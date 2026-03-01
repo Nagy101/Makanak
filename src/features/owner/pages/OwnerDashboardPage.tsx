@@ -150,7 +150,7 @@ export default function OwnerDashboardPage() {
               className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-all border ${
                 activeTab === tab
                   ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                  : "bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                  : "bg-background text-muted-foreground border-border hover:bg-primary hover:text-primary-foreground hover:border-primary"
               }`}
             >
               {tab}
@@ -299,7 +299,7 @@ export default function OwnerDashboardPage() {
                       className={`h-8 w-8 rounded-md text-sm font-medium transition-colors ${
                         page === currentPage
                           ? "bg-primary text-primary-foreground"
-                          : "hover:bg-secondary text-muted-foreground"
+                          : "hover:bg-primary hover:text-primary-foreground text-muted-foreground"
                       }`}
                     >
                       {page}

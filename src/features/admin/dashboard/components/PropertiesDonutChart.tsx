@@ -93,7 +93,13 @@ const PropertiesDonutChart = memo(function PropertiesDonutChart({
             </Pie>
             <Tooltip
               formatter={(value: number, name: string) => [value, name]}
-              contentStyle={{ borderRadius: 8, fontSize: 13 }}
+              contentStyle={{
+                borderRadius: 8,
+                fontSize: 13,
+                background: "var(--color-card, #ffffff)",
+                border: "1px solid var(--color-border, #e2e8f0)",
+                color: "var(--color-foreground, #111827)",
+              }}
             />
             <Legend
               iconType="circle"

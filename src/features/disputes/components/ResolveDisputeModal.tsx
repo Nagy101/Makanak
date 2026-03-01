@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,14 +6,20 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
-import { useResolveDispute } from '../useDisputes';
-import type { DisputeDecisionType } from '../dispute.types';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
+import { useResolveDispute } from "../useDisputes";
+import type { DisputeDecisionType } from "../dispute.types";
 
 interface Props {
   open: boolean;
@@ -21,19 +27,27 @@ interface Props {
   disputeId: number | null;
 }
 
-export default function ResolveDisputeModal({ open, onOpenChange, disputeId }: Props) {
-  const [decision, setDecision] = useState<DisputeDecisionType | ''>('');
-  const [comment, setComment] = useState('');
+export default function ResolveDisputeModal({
+  open,
+  onOpenChange,
+  disputeId,
+}: Props) {
+  const [decision, setDecision] = useState<DisputeDecisionType | "">("");
+  const [comment, setComment] = useState("");
   const resolveMutation = useResolveDispute();
 
   const handleSubmit = useCallback(() => {
     if (!disputeId || !decision) return;
     resolveMutation.mutate(
-      { disputeId, decision: decision as DisputeDecisionType, adminComment: comment },
+      {
+        disputeId,
+        decision: decision as DisputeDecisionType,
+        adminComment: comment,
+      },
       {
         onSuccess: () => {
-          setDecision('');
-          setComment('');
+          setDecision("");
+          setComment("");
           onOpenChange(false);
         },
       },
@@ -45,13 +59,18 @@ export default function ResolveDisputeModal({ open, onOpenChange, disputeId }: P
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Resolve Dispute #{disputeId}</DialogTitle>
-          <DialogDescription>Choose a decision and add a comment.</DialogDescription>
+          <DialogDescription>
+            Choose a decision and add a comment.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>Decision</Label>
-            <Select value={decision} onValueChange={(v) => setDecision(v as DisputeDecisionType)}>
+            <Select
+              value={decision}
+              onValueChange={(v) => setDecision(v as DisputeDecisionType)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select decision" />
               </SelectTrigger>
@@ -74,9 +93,20 @@ export default function ResolveDisputeModal({ open, onOpenChange, disputeId }: P
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={resolveMutation.isPending || !decision}>
-            {resolveMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="hover:bg-muted hover:text-foreground"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={resolveMutation.isPending || !decision}
+          >
+            {resolveMutation.isPending && (
+              <Loader2 className="h-4 w-4 animate-spin mr-1" />
+            )}
             Submit Decision
           </Button>
         </DialogFooter>

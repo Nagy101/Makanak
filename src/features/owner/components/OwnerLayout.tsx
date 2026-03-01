@@ -94,7 +94,7 @@ const OwnerLayout = memo(() => {
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
+                    : "text-muted-foreground hover:bg-primary hover:text-primary-foreground",
                 )
               }
             >
@@ -133,7 +133,7 @@ const OwnerLayout = memo(() => {
             <NotificationBell />
             <Link
               to="/profile"
-              className="flex items-center gap-2 rounded-xl px-2 py-1 hover:bg-secondary/70 transition-all duration-150"
+              className="flex items-center gap-2 rounded-xl px-2 py-1 hover:bg-primary hover:text-primary-foreground transition-all duration-150"
               title="Go to profile"
             >
               {userAvatar ? (

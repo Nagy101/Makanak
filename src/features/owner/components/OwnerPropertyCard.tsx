@@ -34,12 +34,12 @@ const OwnerPropertyCard = memo(
           }}
         />
         <Badge
-          className={`absolute top-3 left-3 text-xs font-medium ${STATUS_VARIANT[property.propertyStatus] || "bg-secondary text-secondary-foreground"}`}
+          className={`absolute top-3 left-3 text-xs font-medium pointer-events-none ${STATUS_VARIANT[property.propertyStatus] || "bg-secondary text-secondary-foreground"}`}
         >
           {property.propertyStatus}
         </Badge>
         {property.propertyType && (
-          <Badge className="absolute top-3 right-3 bg-primary/90 text-primary-foreground text-xs">
+          <Badge className="absolute top-3 right-3 bg-primary/90 text-primary-foreground text-xs pointer-events-none">
             {property.propertyType}
           </Badge>
         )}
@@ -84,7 +84,7 @@ const OwnerPropertyCard = memo(
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 text-primary border-primary/30 hover:bg-primary/10"
+            className="flex-1 text-primary border-primary/30 hover:bg-primary hover:text-primary-foreground hover:border-primary"
             onClick={() => onViewReviews(property.id)}
           >
             <MessageSquare className="h-3.5 w-3.5 mr-1" /> Reviews

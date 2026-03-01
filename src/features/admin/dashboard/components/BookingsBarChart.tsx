@@ -91,7 +91,7 @@ const BookingsBarChart = memo(function BookingsBarChart({
             <CartesianGrid
               strokeDasharray="3 3"
               horizontal={false}
-              stroke="#e5e7eb"
+              stroke="rgba(255,255,255,0.06)"
             />
             <XAxis
               type="number"
@@ -102,14 +102,20 @@ const BookingsBarChart = memo(function BookingsBarChart({
             <YAxis
               type="category"
               dataKey="name"
-              tick={{ fontSize: 12, fill: "#374151" }}
+              tick={{ fontSize: 12, fill: "#9CA3AF" }}
               axisLine={false}
               tickLine={false}
               width={94}
             />
             <Tooltip
-              cursor={{ fill: "rgba(30,58,138,0.05)" }}
-              contentStyle={{ borderRadius: 8, fontSize: 13 }}
+              cursor={{ fill: "rgba(59,130,246,0.06)" }}
+              contentStyle={{
+                borderRadius: 8,
+                fontSize: 13,
+                background: "var(--color-card, #ffffff)",
+                border: "1px solid var(--color-border, #e2e8f0)",
+                color: "var(--color-foreground, #111827)",
+              }}
               formatter={(value: number) => [value, "Bookings"]}
             />
             <Bar dataKey="value" radius={[0, 4, 4, 0]}>

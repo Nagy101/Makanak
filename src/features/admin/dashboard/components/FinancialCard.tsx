@@ -2,13 +2,13 @@
 //  FinancialCard — A single high-impact currency metric card.
 //  memo-wrapped; will not re-render unless props change.
 // ═══════════════════════════════════════════════════════════════
-import { memo } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { memo } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 
 // ── Currency formatter (Egyptian Pound) ───────────────────────
-const egpFormatter = new Intl.NumberFormat('en-EG', {
-  style: 'currency',
-  currency: 'EGP',
+const egpFormatter = new Intl.NumberFormat("en-EG", {
+  style: "currency",
+  currency: "EGP",
   maximumFractionDigits: 0,
 });
 
@@ -30,7 +30,7 @@ export const FinancialCard = memo(function FinancialCard({
   description,
 }: FinancialCardProps) {
   return (
-    <Card className="border-border bg-white shadow-sm hover:shadow-md transition-shadow">
+    <Card className="border-border bg-card shadow-card hover:shadow-card-hover transition-shadow transition-premium">
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1 min-w-0">
@@ -41,7 +41,9 @@ export const FinancialCard = memo(function FinancialCard({
               {egpFormatter.format(amount)}
             </p>
             {description && (
-              <p className="text-xs text-muted-foreground mt-1">{description}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {description}
+              </p>
             )}
           </div>
           <div
@@ -55,5 +57,5 @@ export const FinancialCard = memo(function FinancialCard({
   );
 });
 
-FinancialCard.displayName = 'FinancialCard';
+FinancialCard.displayName = "FinancialCard";
 export default FinancialCard;

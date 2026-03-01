@@ -1,52 +1,69 @@
-﻿import { useCallback, useMemo, useState, lazy, Suspense } from 'react';
-import { useIncomingBookings } from '../useBookings';
-import BookingStatusBadge from '../components/BookingStatusBadge';
-import BookingDetailsModal from '../components/BookingDetailsModal';
-import type { BookingStatusType, BookingListParams } from '../booking.types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+﻿import { useCallback, useMemo, useState, lazy, Suspense } from "react";
+import { useIncomingBookings } from "../useBookings";
+import BookingStatusBadge from "../components/BookingStatusBadge";
+import BookingDetailsModal from "../components/BookingDetailsModal";
+import type { BookingStatusType, BookingListParams } from "../booking.types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
-import { Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format } from 'date-fns';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Search, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { format } from "date-fns";
 
-const CreateDisputeModal = lazy(() => import('@/features/disputes/components/CreateDisputeModal'));
+const CreateDisputeModal = lazy(
+  () => import("@/features/disputes/components/CreateDisputeModal"),
+);
 
-const STATUS_OPTIONS: { label: string; value: BookingStatusType | 'All' }[] = [
-  { label: 'All Statuses', value: 'All' },
-  { label: 'Pending Approval', value: 'PendingOwnerApproval' },
-  { label: 'Rejected', value: 'RejectedByOwner' },
-  { label: 'Pending Payment', value: 'PendingPayment' },
-  { label: 'Payment Failed', value: 'PaymentFailed' },
-  { label: 'Confirmed', value: 'PaymentReceived' },
-  { label: 'Checked In', value: 'CheckedIn' },
-  { label: 'Completed', value: 'Completed' },
-  { label: 'Cancelled', value: 'Cancelled' },
-  { label: 'Disputed', value: 'Disputed' },
+const STATUS_OPTIONS: { label: string; value: BookingStatusType | "All" }[] = [
+  { label: "All Statuses", value: "All" },
+  { label: "Pending Approval", value: "PendingOwnerApproval" },
+  { label: "Rejected", value: "RejectedByOwner" },
+  { label: "Pending Payment", value: "PendingPayment" },
+  { label: "Payment Failed", value: "PaymentFailed" },
+  { label: "Confirmed", value: "PaymentReceived" },
+  { label: "Checked In", value: "CheckedIn" },
+  { label: "Completed", value: "Completed" },
+  { label: "Cancelled", value: "Cancelled" },
+  { label: "Disputed", value: "Disputed" },
 ];
 
 const SORT_OPTIONS = [
-  { label: 'Newest First', value: 'DateCreatedDesc' },
-  { label: 'Oldest First', value: 'DateCreatedAsc' },
-  { label: 'Price High to Low', value: 'PriceDesc' },
-  { label: 'Price Low to High', value: 'PriceAsc' },
+  { label: "Newest First", value: "DateCreatedDesc" },
+  { label: "Oldest First", value: "DateCreatedAsc" },
+  { label: "Price High to Low", value: "PriceDesc" },
+  { label: "Price Low to High", value: "PriceAsc" },
 ];
 
 const PAGE_SIZE = 10;
 
 const toUrl = (path: string | null | undefined) =>
-  !path ? '/placeholder.svg' : path.startsWith('http') ? path : `/${path}`;
+  !path ? "/placeholder.svg" : path.startsWith("http") ? path : `/${path}`;
 
 export default function OwnerIncomingBookingsPage() {
-  const [statusFilter, setStatusFilter] = useState<BookingStatusType | 'All'>('All');
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<BookingStatusType | "All">(
+    "All",
+  );
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [sort, setSort] = useState('DateCreatedDesc');
-  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
+  const [sort, setSort] = useState("DateCreatedDesc");
+  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(
+    null,
+  );
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [disputeBookingId, setDisputeBookingId] = useState<number | null>(null);
   const [disputeOpen, setDisputeOpen] = useState(false);
@@ -58,14 +75,17 @@ export default function OwnerIncomingBookingsPage() {
 
   const handleSearchKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') handleSearch();
+      if (e.key === "Enter") handleSearch();
     },
     [handleSearch],
   );
 
   const params = useMemo<BookingListParams>(
     () => ({
-      Status: statusFilter === 'All' ? undefined : (statusFilter as BookingStatusType),
+      Status:
+        statusFilter === "All"
+          ? undefined
+          : (statusFilter as BookingStatusType),
       Search: search || undefined,
       PageIndex: page,
       PageSize: PAGE_SIZE,
@@ -98,26 +118,39 @@ export default function OwnerIncomingBookingsPage() {
         {/* Status dropdown */}
         <Select
           value={statusFilter}
-          onValueChange={(v) => { setStatusFilter(v as BookingStatusType | 'All'); setPage(1); }}
+          onValueChange={(v) => {
+            setStatusFilter(v as BookingStatusType | "All");
+            setPage(1);
+          }}
         >
           <SelectTrigger className="w-full sm:w-52">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
             {STATUS_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
         {/* Sort dropdown */}
-        <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
+        <Select
+          value={sort}
+          onValueChange={(v) => {
+            setSort(v);
+            setPage(1);
+          }}
+        >
           <SelectTrigger className="w-full sm:w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {SORT_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -134,7 +167,11 @@ export default function OwnerIncomingBookingsPage() {
               className="pl-9 w-full"
             />
           </div>
-          <Button onClick={handleSearch} variant="secondary">
+          <Button
+            onClick={handleSearch}
+            variant="secondary"
+            className="hover:bg-primary hover:text-primary-foreground"
+          >
             <Search className="h-4 w-4 mr-1" /> Search
           </Button>
         </div>
@@ -150,7 +187,9 @@ export default function OwnerIncomingBookingsPage() {
       ) : !data?.data.length ? (
         <div className="text-center py-20 text-muted-foreground">
           <p className="text-lg font-medium">No incoming bookings</p>
-          <p className="text-sm mt-1">Bookings from tenants will appear here.</p>
+          <p className="text-sm mt-1">
+            Bookings from tenants will appear here.
+          </p>
         </div>
       ) : (
         <div className="rounded-lg border bg-card overflow-x-auto">
@@ -180,9 +219,14 @@ export default function OwnerIncomingBookingsPage() {
                         loading="lazy"
                         width={56}
                         height={40}
-                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "/placeholder.svg";
+                        }}
                       />
-                      <span className="font-medium text-foreground line-clamp-1 max-w-[140px]">{booking.propertyName}</span>
+                      <span className="font-medium text-foreground line-clamp-1 max-w-[140px]">
+                        {booking.propertyName}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -194,16 +238,19 @@ export default function OwnerIncomingBookingsPage() {
                         loading="lazy"
                         width={28}
                         height={28}
-                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "/placeholder.svg";
+                        }}
                       />
                       <span className="text-sm">{booking.tenantName}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm whitespace-nowrap">
-                    {format(new Date(booking.checkInDate), 'MMM dd, yyyy')}
+                    {format(new Date(booking.checkInDate), "MMM dd, yyyy")}
                   </TableCell>
                   <TableCell className="text-sm whitespace-nowrap">
-                    {format(new Date(booking.checkOutDate), 'MMM dd, yyyy')}
+                    {format(new Date(booking.checkOutDate), "MMM dd, yyyy")}
                   </TableCell>
                   <TableCell className="text-sm text-center">
                     {booking.totalDays}
@@ -218,7 +265,11 @@ export default function OwnerIncomingBookingsPage() {
                     <BookingStatusBadge status={booking.status} />
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => handleView(booking.id)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleView(booking.id)}
+                    >
                       <Eye className="h-4 w-4 mr-1" /> View
                     </Button>
                   </TableCell>
@@ -232,11 +283,23 @@ export default function OwnerIncomingBookingsPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
-          <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>

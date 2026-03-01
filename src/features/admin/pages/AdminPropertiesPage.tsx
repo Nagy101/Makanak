@@ -1,17 +1,25 @@
-import { memo, useState, useCallback, useMemo } from 'react';
-import { Search, ChevronLeft, ChevronRight, CheckCircle2, XCircle, Eye, Calendar } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Textarea } from '@/components/ui/textarea';
+import { memo, useState, useCallback, useMemo } from "react";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  XCircle,
+  Eye,
+  Calendar,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -19,39 +27,51 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { useProperties } from '@/features/properties/useProperties';
-import { useUpdatePropertyStatus, useAdminProperties } from '../useAdmin';
-import { usePropertyTypes, usePropertyStatuses, useGovernorates, useSortingOptions } from '@/features/lookup';
-import PropertyDetailsModal from '../components/PropertyDetailsModal';
-import type { PropertySearchParams, PropertyListing } from '@/features/properties/property.types';
-import type { AdminPropertySearchParams, AdminPropertyListing, PropertyStatus } from '../admin.types';
-import { toast } from 'sonner';
+} from "@/components/ui/dialog";
+import { useProperties } from "@/features/properties/useProperties";
+import { useUpdatePropertyStatus, useAdminProperties } from "../useAdmin";
+import {
+  usePropertyTypes,
+  usePropertyStatuses,
+  useGovernorates,
+  useSortingOptions,
+} from "@/features/lookup";
+import PropertyDetailsModal from "../components/PropertyDetailsModal";
+import type {
+  PropertySearchParams,
+  PropertyListing,
+} from "@/features/properties/property.types";
+import type {
+  AdminPropertySearchParams,
+  AdminPropertyListing,
+  PropertyStatus,
+} from "../admin.types";
+import { toast } from "sonner";
 
 const PAGE_SIZE = 10;
 
 // Mapping from SortingOption id to backend enum names
 const SORT_ID_TO_ENUM: Record<number, string> = {
-  1: 'NameAsc',
-  2: 'NameDesc',
-  3: 'DateCreatedAsc',
-  4: 'DateCreatedDesc',
-  5: 'PriceAsc',
-  6: 'PriceDesc',
+  1: "NameAsc",
+  2: "NameDesc",
+  3: "DateCreatedAsc",
+  4: "DateCreatedDesc",
+  5: "PriceAsc",
+  6: "PriceDesc",
 };
 
 const statusColor: Record<string, string> = {
-  Pending: 'bg-warning/10 text-warning border-warning/20',
-  Accepted: 'bg-success/10 text-success border-success/20',
-  Rejected: 'bg-destructive/10 text-destructive border-destructive/20',
-  Banned: 'bg-destructive/10 text-destructive border-destructive/20',
+  Pending: "bg-warning/10 text-warning border-warning/20",
+  Accepted: "bg-success/10 text-success border-success/20",
+  Rejected: "bg-destructive/10 text-destructive border-destructive/20",
+  Banned: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
 const AdminPropertiesPage = memo(() => {
@@ -59,7 +79,7 @@ const AdminPropertiesPage = memo(() => {
     PageIndex: 1,
     PageSize: PAGE_SIZE,
   });
-  const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState("");
 
   // Use admin-specific property endpoint
   const { data, isLoading } = useAdminProperties(params);
@@ -73,27 +93,45 @@ const AdminPropertiesPage = memo(() => {
 
   // Reject dialog state
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [selectedPropertyId, setSelectedPropertyId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [selectedPropertyId, setSelectedPropertyId] = useState<number | null>(
+    null,
+  );
 
   const handleSearch = useCallback(() => {
-    setParams((p) => ({ ...p, Search: searchInput || undefined, PageIndex: 1 }));
+    setParams((p) => ({
+      ...p,
+      Search: searchInput || undefined,
+      PageIndex: 1,
+    }));
   }, [searchInput]);
 
   const handleStatusFilter = useCallback((val: string) => {
-    setParams((p) => ({ ...p, Status: val === 'all' ? undefined : (val as PropertyStatus), PageIndex: 1 }));
+    setParams((p) => ({
+      ...p,
+      Status: val === "all" ? undefined : (val as PropertyStatus),
+      PageIndex: 1,
+    }));
   }, []);
 
   const handleTypeFilter = useCallback((val: string) => {
-    setParams((p) => ({ ...p, Type: val === 'all' ? undefined : val, PageIndex: 1 }));
+    setParams((p) => ({
+      ...p,
+      Type: val === "all" ? undefined : val,
+      PageIndex: 1,
+    }));
   }, []);
 
   const handleGovernorateFilter = useCallback((val: string) => {
-    setParams((p) => ({ ...p, GovernorateId: val === 'all' ? undefined : Number(val), PageIndex: 1 }));
+    setParams((p) => ({
+      ...p,
+      GovernorateId: val === "all" ? undefined : Number(val),
+      PageIndex: 1,
+    }));
   }, []);
 
   const handleSortChange = useCallback((val: string) => {
-    if (val === 'none') {
+    if (val === "none") {
       setParams((p) => ({ ...p, Sort: undefined, PageIndex: 1 }));
     } else {
       const enumName = SORT_ID_TO_ENUM[Number(val)];
@@ -103,30 +141,34 @@ const AdminPropertiesPage = memo(() => {
 
   const totalPages = useMemo(
     () => (data ? Math.ceil(data.totalCount / PAGE_SIZE) : 1),
-    [data]
+    [data],
   );
 
   const handleApprove = useCallback(
     (propertyId: number) => {
       mutation.mutate(
-        { propertyId, newStatus: 'Accepted' },
-        { onSuccess: () => toast.success('Property approved') }
+        { propertyId, newStatus: "Accepted" },
+        { onSuccess: () => toast.success("Property approved") },
       );
     },
-    [mutation]
+    [mutation],
   );
 
   const handleRejectSubmit = useCallback(() => {
     if (rejectTarget === null) return;
     mutation.mutate(
-      { propertyId: rejectTarget, newStatus: 'Rejected', rejectedReason: rejectReason },
+      {
+        propertyId: rejectTarget,
+        newStatus: "Rejected",
+        rejectedReason: rejectReason,
+      },
       {
         onSuccess: () => {
-          toast.success('Property rejected');
+          toast.success("Property rejected");
           setRejectTarget(null);
-          setRejectReason('');
+          setRejectReason("");
         },
-      }
+      },
     );
   }, [rejectTarget, rejectReason, mutation]);
 
@@ -137,8 +179,12 @@ const AdminPropertiesPage = memo(() => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Property Management</h1>
-        <p className="text-sm text-muted-foreground">Review and manage property listings</p>
+        <h1 className="text-2xl font-bold text-foreground">
+          Property Management
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Review and manage property listings
+        </p>
       </div>
 
       {/* Filters */}
@@ -150,7 +196,7 @@ const AdminPropertiesPage = memo(() => {
             className="pl-9"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
         </div>
         <Select onValueChange={handleStatusFilter} defaultValue="all">
@@ -205,7 +251,9 @@ const AdminPropertiesPage = memo(() => {
             ))}
           </SelectContent>
         </Select>
-        <Button onClick={handleSearch} size="sm">Search</Button>
+        <Button onClick={handleSearch} size="sm">
+          Search
+        </Button>
       </div>
 
       {/* Table */}
@@ -236,7 +284,9 @@ const AdminPropertiesPage = memo(() => {
             <TableBody>
               {data.data.map((p: AdminPropertyListing) => (
                 <TableRow key={p.id}>
-                  <TableCell className="font-medium max-w-[200px] truncate">{p.title}</TableCell>
+                  <TableCell className="font-medium max-w-[200px] truncate">
+                    {p.title}
+                  </TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground text-xs">
                     {p.propertyType}
                   </TableCell>
@@ -246,9 +296,11 @@ const AdminPropertiesPage = memo(() => {
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className={statusColor[p.propertyStatus ?? 'Pending'] ?? ''}
+                      className={
+                        statusColor[p.propertyStatus ?? "Pending"] ?? ""
+                      }
                     >
-                      {p.propertyStatus ?? 'Pending'}
+                      {p.propertyStatus ?? "Pending"}
                     </Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground text-xs">
@@ -265,7 +317,7 @@ const AdminPropertiesPage = memo(() => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-primary hover:text-primary"
+                        className="text-primary hover:bg-primary/15 hover:text-primary"
                         onClick={() => setSelectedPropertyId(p.id)}
                         title="View details"
                       >
@@ -274,7 +326,7 @@ const AdminPropertiesPage = memo(() => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-success hover:text-success"
+                        className="text-success hover:bg-success/15 hover:text-success"
                         onClick={() => handleApprove(p.id)}
                         disabled={mutation.isPending}
                       >
@@ -283,7 +335,7 @@ const AdminPropertiesPage = memo(() => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-destructive hover:text-destructive"
+                        className="text-destructive hover:bg-destructive/15 hover:text-destructive"
                         onClick={() => setRejectTarget(p.id)}
                         disabled={mutation.isPending}
                       >
@@ -302,7 +354,8 @@ const AdminPropertiesPage = memo(() => {
       {data && data.totalCount > PAGE_SIZE && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
-            Page {params.PageIndex ?? 1} of {totalPages} ({data.totalCount} total)
+            Page {params.PageIndex ?? 1} of {totalPages} ({data.totalCount}{" "}
+            total)
           </p>
           <div className="flex gap-2">
             <Button
@@ -326,10 +379,16 @@ const AdminPropertiesPage = memo(() => {
       )}
 
       {/* Property Details Modal */}
-      <PropertyDetailsModal propertyId={selectedPropertyId} onClose={() => setSelectedPropertyId(null)} />
+      <PropertyDetailsModal
+        propertyId={selectedPropertyId}
+        onClose={() => setSelectedPropertyId(null)}
+      />
 
       {/* Reject Dialog */}
-      <Dialog open={rejectTarget !== null} onOpenChange={() => setRejectTarget(null)}>
+      <Dialog
+        open={rejectTarget !== null}
+        onOpenChange={() => setRejectTarget(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Reject Property</DialogTitle>
@@ -340,8 +399,18 @@ const AdminPropertiesPage = memo(() => {
             onChange={(e) => setRejectReason(e.target.value)}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectTarget(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleRejectSubmit} disabled={mutation.isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setRejectTarget(null)}
+              className="hover:bg-muted hover:text-foreground hover:border-border"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRejectSubmit}
+              disabled={mutation.isPending}
+            >
               Reject
             </Button>
           </DialogFooter>
@@ -351,5 +420,5 @@ const AdminPropertiesPage = memo(() => {
   );
 });
 
-AdminPropertiesPage.displayName = 'AdminPropertiesPage';
+AdminPropertiesPage.displayName = "AdminPropertiesPage";
 export default AdminPropertiesPage;

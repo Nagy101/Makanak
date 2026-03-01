@@ -65,35 +65,35 @@ const HeroSection = memo(function HeroSection({
         className="absolute inset-0 h-full w-full object-cover object-center scale-105 blur-[2px]"
       />
 
-      {/* Dark blue overlay — matches site palette, keeps text readable */}
-      <div className="absolute inset-0 bg-[hsl(213_78%_15%)]/75" />
+      {/* Overlay — subtle dark tint in light mode, deep navy in dark mode */}
+      <div className="absolute inset-0 bg-black/45 dark:bg-[rgb(19,23,32)]/80" />
 
       {/* Content */}
       <div className="relative z-10 mx-auto w-full max-w-4xl px-4 text-center text-white">
         {/* Pill badge */}
-        <div className="mb-5 flex justify-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
+        <div className="mb-5 flex justify-center animate-fade-in-down">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-4 py-1.5 text-sm font-medium backdrop-blur-sm text-white">
             <Star className="h-4 w-4 fill-white text-white" />
             Egypt's Premier Real Estate Platform
           </span>
         </div>
 
         {/* Headline */}
-        <h1 className="mb-6 text-4xl font-bold leading-tight drop-shadow-xl sm:text-5xl md:text-6xl">
+        <h1 className="mb-6 text-4xl font-bold leading-tight drop-shadow-xl sm:text-5xl md:text-6xl animate-fade-in-up">
           Find your perfect place
           <br className="hidden sm:block" />
           to call home
         </h1>
 
-        <p className="mx-auto mb-10 max-w-2xl text-lg text-white/85 drop-shadow md:text-xl">
+        <p className="mx-auto mb-10 max-w-2xl text-lg text-white/90 drop-shadow md:text-xl animate-fade-in-up">
           Discover thousands of verified properties across Egypt — apartments,
           chalets, villas and more.
         </p>
 
         {/* Search bar */}
-        <div className="mx-auto max-w-2xl rounded-2xl bg-white p-3 shadow-2xl">
+        <div className="mx-auto max-w-2xl rounded-2xl bg-white dark:bg-[rgb(19,23,32)]/90 border border-black/10 dark:border-white/10 p-3 shadow-2xl backdrop-blur-md">
           <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="flex flex-1 items-center gap-3 rounded-xl border border-border bg-secondary/50 px-4 py-3">
+            <div className="flex flex-1 items-center gap-3 rounded-xl border border-border bg-gray-50 dark:bg-secondary/50 px-4 py-3">
               <MapPin className="h-5 w-5 shrink-0 text-primary" />
               <input
                 type="text"
@@ -107,7 +107,7 @@ const HeroSection = memo(function HeroSection({
             </div>
             <Button
               onClick={handleSubmit}
-              className="h-12 w-full shrink-0 rounded-xl px-8 text-base font-semibold sm:w-auto"
+              className="h-12 w-full shrink-0 rounded-xl px-8 text-base font-semibold sm:w-auto shadow-glow-sm hover:shadow-glow transition-premium"
             >
               <Search className="mr-2 h-4 w-4" />
               Search
@@ -116,7 +116,7 @@ const HeroSection = memo(function HeroSection({
         </div>
 
         {/* Quick stats */}
-        <div className="mt-10 flex flex-wrap justify-center gap-8 text-sm text-white/80">
+        <div className="mt-10 flex flex-wrap justify-center gap-8 text-sm text-white drop-shadow-md">
           {[
             { label: "Properties", value: "10,000+" },
             { label: "Governorates", value: "27" },
@@ -226,7 +226,7 @@ const STEPS = [
 const HowItWorksSection = memo(function HowItWorksSection() {
   return (
     <section
-      className="px-4 py-20 bg-background"
+      className="px-4 py-20 bg-slate-50 dark:bg-background border-t border-slate-200/70 dark:border-border/40"
       aria-labelledby="how-it-works-heading"
     >
       <div className="mx-auto max-w-5xl">
@@ -366,10 +366,10 @@ export default function HomePage() {
       {/* ── Hero ───────────────────────────────────────────── */}
       <HeroSection onSearch={handleHeroSearch} />
 
-      {/* ── Browse by Governorate ───────────────────────── */}
+      {/* ── Browse by Governorate — GRAY ───────────────── */}
       {displayedGovernorates.length > 0 && (
         <section
-          className="bg-card px-4 py-20 border-y border-border/50"
+          className="bg-slate-50 dark:bg-card px-4 py-20 border-y border-slate-200/70 dark:border-border/50"
           aria-labelledby="governorates-heading"
         >
           <div className="mx-auto max-w-7xl">
@@ -456,11 +456,14 @@ export default function HomePage() {
       {/* ── How It Works ────────────────────────────────── */}
       <HowItWorksSection />
 
-      {/* ── Owner CTA — only shown to unauthenticated visitors ── */}
+      {/* ── Owner CTA — WHITE ────────────────────────── */}
       {!isAuthenticated && (
-        <section className="px-4 py-16" aria-labelledby="owner-cta-heading">
+        <section
+          className="bg-white dark:bg-background px-4 py-16"
+          aria-labelledby="owner-cta-heading"
+        >
           <div className="mx-auto max-w-5xl">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/75 p-10 text-center text-white shadow-2xl md:p-14">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/90 via-primary to-accent/80 p-10 text-center text-white shadow-2xl shadow-primary/20 md:p-14">
               {/* Decorative blur blobs */}
               <div
                 aria-hidden="true"
@@ -516,8 +519,8 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── Footer ──────────────────────────────────────── */}
-      <footer className="border-t bg-[#0f172a] text-slate-400">
+      {/* ── Footer — always dark ─────────────────────────── */}
+      <footer className="border-t border-border/60 bg-[rgb(11,14,21)] text-slate-400">
         {/* Main grid */}
         <div className="mx-auto max-w-7xl px-6 py-14 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
@@ -709,10 +712,10 @@ export default function HomePage() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-white/10">
+        <div className="border-t border-white/8">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-5 text-xs sm:flex-row">
             <p>© {new Date().getFullYear()} Makanak. All rights reserved.</p>
-            <p className="text-slate-500">Built with ♥ in Egypt</p>
+            <p className="text-slate-600">Built with ♥ in Egypt</p>
           </div>
         </div>
       </footer>

@@ -98,7 +98,15 @@ const UsersOverviewChart = memo(function UsersOverviewChart({
                     <Cell key={entry.name} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 13 }} />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 8,
+                    fontSize: 13,
+                    background: "var(--color-card, #ffffff)",
+                    border: "1px solid var(--color-border, #e2e8f0)",
+                    color: "var(--color-foreground, #111827)",
+                  }}
+                />
                 <Legend
                   iconType="circle"
                   iconSize={9}
@@ -108,7 +116,7 @@ const UsersOverviewChart = memo(function UsersOverviewChart({
             </ResponsiveContainer>
           </div>
 
-          {/* ── Statuses ──────────────────────────────── */}
+          {/* ── Statuses ───────────────────────────────────────── */}
           <div>
             <p className="text-xs font-medium text-center text-muted-foreground mb-1 uppercase tracking-wide">
               By Status
@@ -132,7 +140,15 @@ const UsersOverviewChart = memo(function UsersOverviewChart({
                     <Cell key={entry.name} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 13 }} />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 8,
+                    fontSize: 13,
+                    background: "var(--color-card, #ffffff)",
+                    border: "1px solid var(--color-border, #e2e8f0)",
+                    color: "var(--color-foreground, #111827)",
+                  }}
+                />
                 <Legend
                   iconType="circle"
                   iconSize={9}

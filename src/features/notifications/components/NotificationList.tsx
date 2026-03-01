@@ -1,8 +1,8 @@
-import { memo, useCallback, useState } from 'react';
-import { useNotificationList, useMarkAsRead } from '../useNotifications';
-import NotificationItem from './NotificationItem';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bell } from 'lucide-react';
+import { memo, useCallback, useState } from "react";
+import { useNotificationList, useMarkAsRead } from "../useNotifications";
+import NotificationItem from "./NotificationItem";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Bell } from "lucide-react";
 
 const NotificationList = memo(() => {
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
@@ -14,7 +14,7 @@ const NotificationList = memo(() => {
     (id: number) => {
       markAsRead.mutate(id);
     },
-    [markAsRead]
+    [markAsRead],
   );
 
   return (
@@ -28,8 +28,8 @@ const NotificationList = memo(() => {
             onClick={() => setShowUnreadOnly(false)}
             className={`text-xs px-2 py-1 rounded-md transition-colors ${
               !showUnreadOnly
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted'
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-primary hover:text-primary-foreground"
             }`}
           >
             All
@@ -39,8 +39,8 @@ const NotificationList = memo(() => {
             onClick={() => setShowUnreadOnly(true)}
             className={`text-xs px-2 py-1 rounded-md transition-colors ${
               showUnreadOnly
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted'
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-primary hover:text-primary-foreground"
             }`}
           >
             Unread
@@ -83,5 +83,5 @@ const NotificationList = memo(() => {
   );
 });
 
-NotificationList.displayName = 'NotificationList';
+NotificationList.displayName = "NotificationList";
 export default NotificationList;

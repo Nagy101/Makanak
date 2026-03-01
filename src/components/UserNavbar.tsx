@@ -14,6 +14,7 @@ import { useAuthStore } from "@/features/auth/store/authStore";
 import { useLogout, useProfile } from "@/features/auth/hooks/useAuth";
 import NotificationBell from "@/features/notifications/components/NotificationBell";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface NavItem {
   label: string;
@@ -59,8 +60,8 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
     cn(
       "text-sm font-medium px-3 py-1.5 rounded-lg transition-all duration-150",
       isActive(href, exact)
-        ? "bg-primary/10 text-primary font-semibold"
-        : "text-muted-foreground hover:text-foreground hover:bg-secondary/70",
+        ? "bg-primary text-primary-foreground font-semibold"
+        : "text-muted-foreground hover:bg-primary hover:text-primary-foreground",
     );
 
   // Role-based nav items
@@ -95,7 +96,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 border-b border-border/60 bg-card/90 backdrop-blur-md shadow-panel",
+        "sticky top-0 z-30 border-b border-border/50 bg-background/80 backdrop-blur-xl shadow-panel",
         className,
       )}
     >
@@ -124,6 +125,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
 
         {/* Right side actions */}
         <div className="flex items-center gap-1.5">
+          <ThemeToggle />
           {isAuthenticated ? (
             <>
               <NotificationBell />
@@ -134,8 +136,9 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                 size="sm"
                 asChild
                 className={cn(
-                  "hidden md:flex items-center gap-2 px-2",
-                  isActive("/profile", true) && "bg-primary/10 text-primary",
+                  "hidden md:flex items-center gap-2 px-2 hover:bg-primary hover:text-primary-foreground",
+                  isActive("/profile", true) &&
+                    "bg-primary text-primary-foreground",
                 )}
               >
                 <Link to="/profile">
@@ -162,7 +165,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                 size="sm"
                 onClick={() => logout.mutate()}
                 disabled={logout.isPending}
-                className="hidden md:flex items-center gap-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/8"
+                className="hidden md:flex items-center gap-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden lg:inline">Logout</span>
@@ -212,7 +215,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                           "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                           isActive(item.href, item.exact)
                             ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                            : "text-muted-foreground hover:bg-primary hover:text-primary-foreground",
                         )}
                       >
                         {item.label}
@@ -226,7 +229,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                         "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                         isActive("/profile", true)
                           ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                          : "text-muted-foreground hover:bg-primary hover:text-primary-foreground",
                       )}
                     >
                       <User className="h-4 w-4" />
