@@ -544,7 +544,7 @@ export default function HomePage() {
             {/* Social links */}
             <div className="flex gap-3 mt-1">
               <a
-                href="https://www.facebook.com"
+                href="https://www.facebook.com/share/1LAUyCrgqJ/?mibextid=wwXIfr"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-slate-400 transition hover:bg-primary hover:text-white"
@@ -559,7 +559,7 @@ export default function HomePage() {
                 </svg>
               </a>
               <a
-                href="https://www.instagram.com"
+                href="https://www.instagram.com/findmakanak?igsh=cmd5OHF5MmNtYmI5"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-slate-400 transition hover:bg-primary hover:text-white"
