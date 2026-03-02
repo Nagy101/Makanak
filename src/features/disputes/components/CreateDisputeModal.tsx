@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
+import { validateFileSize } from "@/lib/apiError";
 import {
   Dialog,
   DialogContent,
@@ -98,7 +100,16 @@ export default function CreateDisputeModal({
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
-      if (files) setImages((prev) => [...prev, ...Array.from(files)]);
+      if (!files) return;
+      const valid = Array.from(files).filter((f) => {
+        const err = validateFileSize(f);
+        if (err) {
+          toast.error(err);
+          return false;
+        }
+        return true;
+      });
+      if (valid.length) setImages((prev) => [...prev, ...valid]);
     },
     [],
   );

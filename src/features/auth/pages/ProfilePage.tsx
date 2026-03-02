@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, memo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { storage } from "@/lib/storage";
+import { validateFileSize, getApiErrorMessage } from "@/lib/apiError";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -137,6 +138,12 @@ const ProfilePage = memo(() => {
       setPreview: (url: string) => void,
       setFile: (f: File) => void,
     ) => {
+      // Guard: reject files larger than 5 MB before reading or uploading
+      const sizeError = validateFileSize(file);
+      if (sizeError) {
+        toast.error(sizeError);
+        return;
+      }
       setFile(file);
       const reader = new FileReader();
       reader.onload = (e) => setPreview(e.target?.result as string);
@@ -186,16 +193,10 @@ const ProfilePage = memo(() => {
             window.location.href = "/login";
           }, 1500);
         },
-        onError: (error: unknown) => {
-          let errorMsg = t("profile.emailChangeFailed");
-          if (error && typeof error === "object" && "response" in error) {
-            const apiError = error as {
-              response?: { data?: { message?: string } };
-            };
-            errorMsg = apiError.response?.data?.message || errorMsg;
-          }
-          toast.error(errorMsg);
-        },
+        onError: (error) =>
+          toast.error(
+            getApiErrorMessage(error, t("profile.emailChangeFailed")),
+          ),
       },
     );
   });
@@ -794,6 +795,7 @@ const ProfilePage = memo(() => {
                           id="currentPassword"
                           type="password"
                           placeholder={t("profile.enterYourPassword")}
+                          autoComplete="current-password"
                           className="pl-10"
                           {...emailForm.register("currentPassword")}
                         />

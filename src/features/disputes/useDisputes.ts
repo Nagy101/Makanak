@@ -1,18 +1,24 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import * as disputeService from './dispute.service';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import * as disputeService from "./dispute.service";
 import type {
   CreateDisputeRequest,
   ResolveDisputeRequest,
   DisputeListParams,
-} from './dispute.types';
-import { toast } from 'sonner';
+} from "./dispute.types";
+import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/apiError";
 
-const DISPUTES_KEY = 'disputes';
+const DISPUTES_KEY = "disputes";
 
 // ── List Disputes (shared: filtered by role on backend) ──
 export const useDisputesList = (params: DisputeListParams) =>
   useQuery({
-    queryKey: [DISPUTES_KEY, 'list', params],
+    queryKey: [DISPUTES_KEY, "list", params],
     queryFn: () => disputeService.getDisputes(params),
     placeholderData: keepPreviousData,
   });
@@ -20,7 +26,7 @@ export const useDisputesList = (params: DisputeListParams) =>
 // ── Get Dispute Details ──
 export const useDisputeDetails = (id: number | null) =>
   useQuery({
-    queryKey: [DISPUTES_KEY, 'details', id],
+    queryKey: [DISPUTES_KEY, "details", id],
     queryFn: () => disputeService.getDisputeDetails(id!),
     enabled: !!id,
   });
@@ -29,16 +35,14 @@ export const useDisputeDetails = (id: number | null) =>
 export const useCreateDispute = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateDisputeRequest) => disputeService.createDispute(data),
+    mutationFn: (data: CreateDisputeRequest) =>
+      disputeService.createDispute(data),
     onSuccess: (res) => {
-      toast.success(res.message || 'Dispute created successfully');
+      toast.success(res.message || "Dispute created successfully");
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
-    onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      const msg = axiosError?.response?.data?.message || 'Failed to create dispute';
-      toast.error(msg);
-    },
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Failed to create dispute")),
   });
 };
 
@@ -46,16 +50,14 @@ export const useCreateDispute = () => {
 export const useResolveDispute = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: ResolveDisputeRequest) => disputeService.resolveDispute(data),
+    mutationFn: (data: ResolveDisputeRequest) =>
+      disputeService.resolveDispute(data),
     onSuccess: (res) => {
-      toast.success(res.message || 'Dispute resolved');
+      toast.success(res.message || "Dispute resolved");
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
-    onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      const msg = axiosError?.response?.data?.message || 'Failed to resolve dispute';
-      toast.error(msg);
-    },
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Failed to resolve dispute")),
   });
 };
 
@@ -65,13 +67,10 @@ export const useCancelDispute = () => {
   return useMutation({
     mutationFn: (id: number) => disputeService.cancelDispute(id),
     onSuccess: (res) => {
-      toast.success(res.message || 'Dispute cancelled');
+      toast.success(res.message || "Dispute cancelled");
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
-    onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      const msg = axiosError?.response?.data?.message || 'Failed to cancel dispute';
-      toast.error(msg);
-    },
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Failed to cancel dispute")),
   });
 };

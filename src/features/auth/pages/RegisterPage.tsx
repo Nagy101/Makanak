@@ -206,6 +206,7 @@ const RegisterPage = memo(() => {
                 id="password"
                 type={showPw ? "text" : "password"}
                 placeholder="••••••••"
+                autoComplete="new-password"
                 className="pl-10 pr-10"
                 {...register("password")}
               />
@@ -239,6 +240,7 @@ const RegisterPage = memo(() => {
                 id="confirmPassword"
                 type={showPw ? "text" : "password"}
                 placeholder="••••••••"
+                autoComplete="new-password"
                 className="pl-10"
                 {...register("confirmPassword")}
               />

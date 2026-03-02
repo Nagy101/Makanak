@@ -63,6 +63,7 @@ const LoginPage = memo(() => {
               id="email"
               type="email"
               placeholder="you@example.com"
+              autoComplete="email"
               className="pl-10"
               {...register("email")}
             />
@@ -88,6 +89,7 @@ const LoginPage = memo(() => {
               id="password"
               type={showPw ? "text" : "password"}
               placeholder="••••••••"
+              autoComplete="current-password"
               className="pl-10 pr-10"
               {...register("password")}
             />

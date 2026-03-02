@@ -192,6 +192,7 @@ const ForgotPasswordPage = memo(() => {
                 id="newPassword"
                 type="password"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 className="pl-10"
                 {...resetForm.register("newPassword")}
               />
@@ -210,6 +211,7 @@ const ForgotPasswordPage = memo(() => {
                 id="confirmPassword"
                 type="password"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 className="pl-10"
                 {...resetForm.register("confirmPassword")}
               />

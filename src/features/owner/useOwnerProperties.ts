@@ -1,9 +1,19 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import * as ownerService from './owner.service';
-import type { MyPropertiesParams, CreatePropertyPayload, EditPropertyPayload } from './owner.types';
-import { toast } from 'sonner';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
+import * as ownerService from "./owner.service";
+import type {
+  MyPropertiesParams,
+  CreatePropertyPayload,
+  EditPropertyPayload,
+} from "./owner.types";
+import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/apiError";
 
-const OWNER_KEY = ['owner', 'properties'] as const;
+const OWNER_KEY = ["owner", "properties"] as const;
 
 export function useMyProperties(params: MyPropertiesParams) {
   return useQuery({
@@ -17,27 +27,35 @@ export function useMyProperties(params: MyPropertiesParams) {
 export function useCreateProperty() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreatePropertyPayload) => ownerService.createProperty(payload),
+    mutationFn: (payload: CreatePropertyPayload) =>
+      ownerService.createProperty(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: OWNER_KEY });
-      toast.success('Property created successfully!');
+      toast.success("Property created successfully!");
     },
-    onError: () => toast.error('Failed to create property.'),
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Failed to create property.")),
   });
 }
 
 export function useUpdateProperty() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: EditPropertyPayload }) =>
-      ownerService.updateProperty(id, payload),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: number;
+      payload: EditPropertyPayload;
+    }) => ownerService.updateProperty(id, payload),
     onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: OWNER_KEY });
       // Invalidate the individual property detail cache so navigating back shows fresh data
-      qc.invalidateQueries({ queryKey: ['property', id] });
-      toast.success('Property updated successfully!');
+      qc.invalidateQueries({ queryKey: ["property", id] });
+      toast.success("Property updated successfully!");
     },
-    onError: () => toast.error('Failed to update property.'),
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Failed to update property.")),
   });
 }
 
@@ -47,8 +65,9 @@ export function useDeleteProperty() {
     mutationFn: (id: number) => ownerService.deleteProperty(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: OWNER_KEY });
-      toast.success('Property deleted.');
+      toast.success("Property deleted.");
     },
-    onError: () => toast.error('Failed to delete property.'),
+    onError: (error) =>
+      toast.error(getApiErrorMessage(error, "Failed to delete property.")),
   });
 }

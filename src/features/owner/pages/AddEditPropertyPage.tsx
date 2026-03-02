@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, Upload, X, Trash2, Loader2, ImagePlus } from "lucide-react";
+import { toast } from "sonner";
+import { validateFileSize } from "@/lib/apiError";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -165,6 +167,11 @@ export default function AddEditPropertyPage() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
+        const sizeError = validateFileSize(file);
+        if (sizeError) {
+          toast.error(sizeError);
+          return;
+        }
         setMainImage(file);
         setMainImagePreview(URL.createObjectURL(file));
       }
@@ -174,11 +181,19 @@ export default function AddEditPropertyPage() {
 
   const handleGalleryImages = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-      setGalleryFiles((prev) => [...prev, ...files]);
+      const all = Array.from(e.target.files || []);
+      const valid = all.filter((f) => {
+        const err = validateFileSize(f);
+        if (err) {
+          toast.error(err);
+          return false;
+        }
+        return true;
+      });
+      setGalleryFiles((prev) => [...prev, ...valid]);
       setGalleryPreviews((prev) => [
         ...prev,
-        ...files.map((f) => URL.createObjectURL(f)),
+        ...valid.map((f) => URL.createObjectURL(f)),
       ]);
     },
     [],
