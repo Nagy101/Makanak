@@ -1,5 +1,6 @@
 import { memo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Building2, LogOut, Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import { useLogout, useProfile } from "@/features/auth/hooks/useAuth";
 import NotificationBell from "@/features/notifications/components/NotificationBell";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface NavItem {
   label: string;
@@ -27,6 +29,7 @@ interface UserNavbarProps {
 }
 
 const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
+  const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
   const location = useLocation();
   const logout = useLogout();
@@ -48,7 +51,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
   const userName = user?.name ?? "";
   const userInitials = userName ? userName.charAt(0).toUpperCase() : "U";
   const userAvatar = storedAvatar || profileData?.profilePictureUrl || null;
-  const userRoleLabel = isAdmin ? "Admin" : isOwner ? "Owner" : "Tenant";
+  const userRoleLabel = isAdmin ? t("nav.admin") : isOwner ? t("nav.owner") : t("nav.tenant");
 
   // Active state helper — exact match or path prefix
   const isActive = (href: string, exact = false) =>
@@ -66,26 +69,15 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
 
   // Role-based nav items
   const navItems: NavItem[] = !isAuthenticated
-    ? [{ label: "Browse Properties", href: "/properties", exact: true }]
+    ? [{ label: t("nav.browseProperties"), href: "/properties", exact: true }]
     : isAdmin
-      ? [
-          { label: "Dashboard", href: "/admin", exact: true },
-          { label: "Users", href: "/admin/users", exact: true },
-          { label: "Properties", href: "/admin/properties", exact: true },
-        ]
+      ? [{ label: t("nav.adminDashboard"), href: "/admin", exact: false }]
       : isOwner
-        ? [
-            { label: "My Properties", href: "/owner", exact: true },
-            {
-              label: "Incoming Bookings",
-              href: "/owner/bookings",
-              exact: true,
-            },
-          ]
+        ? [{ label: t("nav.ownerDashboard"), href: "/owner", exact: false }]
         : [
-            { label: "Browse Properties", href: "/properties", exact: true },
-            { label: "My Bookings", href: "/my-bookings", exact: true },
-            { label: "My Disputes", href: "/my-disputes", exact: true },
+            { label: t("nav.browseProperties"), href: "/properties", exact: true },
+            { label: t("nav.myBookings"), href: "/my-bookings", exact: true },
+            { label: t("nav.myDisputes"), href: "/my-disputes", exact: true },
           ];
 
   const handleLogout = () => {
@@ -104,9 +96,9 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
         {/* Logo */}
         <Link to="/" className="flex items-center shrink-0 group">
           <img
-            src="/Makanak_logo.ico"
+            src="/Makanak_logo.png"
             alt="Makanak"
-            className="h-9 object-contain transition-transform group-hover:scale-105"
+            className="h-20 object-contain transition-transform group-hover:scale-105"
           />
         </Link>
 
@@ -125,6 +117,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
 
         {/* Right side actions */}
         <div className="flex items-center gap-1.5">
+          <LanguageSwitcher />
           <ThemeToggle />
           {isAuthenticated ? (
             <>
@@ -154,7 +147,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                     </div>
                   )}
                   <span className="hidden lg:inline text-sm font-medium truncate max-w-[100px]">
-                    {userName || "Profile"}
+                    {userName || t("common.profile")}
                   </span>
                 </Link>
               </Button>
@@ -168,7 +161,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                 className="hidden md:flex items-center gap-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               >
                 <LogOut className="h-4 w-4" />
-                <span className="hidden lg:inline">Logout</span>
+                <span className="hidden lg:inline">{t("common.logout")}</span>
               </Button>
 
               {/* Mobile hamburger */}
@@ -176,7 +169,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="md:hidden">
                     <Menu className="h-5 w-5" />
-                    <span className="sr-only">Open menu</span>
+                    <span className="sr-only">{t("nav.openMenu")}</span>
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-72 p-0">
@@ -233,7 +226,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                       )}
                     >
                       <User className="h-4 w-4" />
-                      Profile
+                      {t("common.profile")}
                     </Link>
                     <button
                       onClick={handleLogout}
@@ -241,7 +234,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                       className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                     >
                       <LogOut className="h-4 w-4" />
-                      Logout
+                      {t("common.logout")}
                     </button>
                   </nav>
                 </SheetContent>
@@ -250,10 +243,10 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
           ) : (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/login">Sign In</Link>
+                <Link to="/login">{t("common.signIn")}</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link to="/register">Sign Up</Link>
+                <Link to="/register">{t("common.signUp")}</Link>
               </Button>
             </>
           )}

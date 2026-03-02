@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
+import { useTranslation } from "react-i18next";
 import { ThemeProvider } from "next-themes";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import AuthGuard from "@/components/AuthGuard";
@@ -79,14 +80,17 @@ const AdminDisputesDashboard = lazy(
   () => import("./features/disputes/pages/AdminDisputesDashboard"),
 );
 // Loading fallback component for lazy routes
-const PageLoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="flex flex-col items-center gap-4">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-      <p className="text-sm text-muted-foreground">Loading page...</p>
+const PageLoadingFallback = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <p className="text-sm text-muted-foreground">{t("common.loadingPage")}</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {

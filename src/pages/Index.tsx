@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
-  Building2,
   ArrowRight,
   Search,
   LayoutDashboard,
   CalendarCheck,
   PlusCircle,
   Users,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UserNavbar from "@/components/UserNavbar";
@@ -14,6 +15,7 @@ import { useAuthStore } from "@/features/auth/store/authStore";
 import { useProfile } from "@/features/auth/hooks/useAuth";
 
 const Index = () => {
+  const { t } = useTranslation();
   const token = useAuthStore((s) => s.token);
   const { data: profileData } = useProfile();
   const storeUser = useAuthStore((s) => s.user);
@@ -29,24 +31,30 @@ const Index = () => {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6">
-        <div className="text-center space-y-6 max-w-lg">
-          <div className="flex justify-center">
+        <div className="text-center space-y-8 max-w-xl">
+          <div className="flex justify-center animate-fade-in">
             <img
-              src="/Makanak_logo.ico"
+              src="/Makanak_logoo.png"
               alt="Makanak Logo"
-              className="h-16 object-contain"
+              width={480}
+              height={480}
+              className="w-[22rem] sm:w-[28rem] h-auto object-contain drop-shadow-2xl"
             />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">
-            Welcome to Makanak
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground animate-fade-in-up">
+            {t("index.welcomeTo")} <span className="text-gradient">{t("index.makanak")}</span>
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Discover amazing properties and book your next stay.
+          <p className="text-lg text-muted-foreground max-w-md mx-auto animate-fade-in-up">
+            {t("index.discoverSubtitle")}
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button asChild size="lg" className="h-12 px-8 font-semibold">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center animate-fade-in-up">
+            <Button
+              asChild
+              size="lg"
+              className="h-12 px-8 font-semibold shadow-glow-sm hover:shadow-glow transition-premium"
+            >
               <Link to="/properties">
-                <Search className="mr-2 h-4 w-4" /> Browse Properties
+                <Search className="mr-2 h-5 w-5" /> {t("nav.browseProperties")}
               </Link>
             </Button>
             <Button
@@ -56,7 +64,7 @@ const Index = () => {
               className="h-12 px-8 font-semibold"
             >
               <Link to="/login">
-                Sign In <ArrowRight className="ml-2 h-4 w-4" />
+                {t("common.signIn")} <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
@@ -69,19 +77,19 @@ const Index = () => {
   const quickActions = isAdmin
     ? [
         {
-          label: "Admin Dashboard",
+          label: t("index.adminDashboard"),
           href: "/admin",
           icon: LayoutDashboard,
           primary: true,
         },
         {
-          label: "Manage Users",
+          label: t("index.manageUsers"),
           href: "/admin/users",
           icon: Users,
           primary: false,
         },
         {
-          label: "Manage Properties",
+          label: t("index.manageProperties"),
           href: "/admin/properties",
           icon: Building2,
           primary: false,
@@ -90,19 +98,19 @@ const Index = () => {
     : isOwner
       ? [
           {
-            label: "My Properties",
+            label: t("index.myProperties"),
             href: "/owner",
             icon: LayoutDashboard,
             primary: true,
           },
           {
-            label: "Add Property",
+            label: t("index.addProperty"),
             href: "/owner/properties/new",
             icon: PlusCircle,
             primary: false,
           },
           {
-            label: "Incoming Bookings",
+            label: t("index.incomingBookings"),
             href: "/owner/bookings",
             icon: CalendarCheck,
             primary: false,
@@ -110,13 +118,13 @@ const Index = () => {
         ]
       : [
           {
-            label: "Browse Properties",
+            label: t("nav.browseProperties"),
             href: "/properties",
             icon: Search,
             primary: true,
           },
           {
-            label: "My Bookings",
+            label: t("nav.myBookings"),
             href: "/my-bookings",
             icon: CalendarCheck,
             primary: false,
@@ -124,10 +132,10 @@ const Index = () => {
         ];
 
   const subtitle = isAdmin
-    ? "Manage users, properties, and platform health from the admin panel."
+    ? t("index.adminSubtitle")
     : isOwner
-      ? "Manage your properties, track bookings, and grow your portfolio."
-      : "Discover and book your perfect stay from thousands of listed properties.";
+      ? t("index.ownerSubtitle")
+      : t("index.tenantSubtitle");
 
   return (
     <div className="min-h-screen bg-background">
@@ -136,13 +144,15 @@ const Index = () => {
         <div className="text-center space-y-6 max-w-lg">
           <div className="flex justify-center">
             <img
-              src="/Makanak_logo.ico"
+              src="/Makanak_logoo.png"
               alt="Makanak Logo"
-              className="h-16 object-contain"
+              width={280}
+              height={280}
+              className="w-44 sm:w-56 h-auto object-contain drop-shadow-lg"
             />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">
-            {firstName ? `Hello, ${firstName}!` : "Welcome back!"}
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
+            {firstName ? t("index.hello", { name: firstName }) : t("index.welcomeBack")}
           </h1>
           <p className="text-lg text-muted-foreground">{subtitle}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">

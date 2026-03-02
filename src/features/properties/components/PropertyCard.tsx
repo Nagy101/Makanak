@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Star, MapPin, BedDouble } from "lucide-react";
 import { encodeId } from "@/lib/idEncoder";
 import type { PropertyListing } from "../property.types";
@@ -9,6 +10,7 @@ interface Props {
 
 export default function PropertyCard({ property }: Props) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <article
@@ -57,12 +59,12 @@ export default function PropertyCard({ property }: Props) {
         <div className="flex items-center justify-between pt-1 border-t border-border">
           <div className="flex items-baseline gap-1">
             <span className="text-base font-bold text-primary">
-              {property.pricePerNight.toLocaleString()} EGP
+              {property.pricePerNight.toLocaleString()} {t("common.egp")}
             </span>
-            <span className="text-xs text-muted-foreground">/ night</span>
+            <span className="text-xs text-muted-foreground">{t("common.perNight")}</span>
           </div>
           <span className="text-xs text-muted-foreground rounded-full bg-secondary px-2 py-0.5">
-            View &rarr;
+            {t("properties.view")} &rarr;
           </span>
         </div>
       </div>

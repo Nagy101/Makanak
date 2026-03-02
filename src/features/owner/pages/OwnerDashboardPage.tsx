@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Plus,
   Search,
@@ -46,6 +47,7 @@ const PropertyReviewsSection = lazy(
 );
 
 export default function OwnerDashboardPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [params, setParams] = useState<MyPropertiesParams>({
     PageIndex: 1,
@@ -121,12 +123,14 @@ export default function OwnerDashboardPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                My Properties
+                {t("index.myProperties")}
               </h1>
               <p className="text-sm text-muted-foreground mt-0.5">
                 {data
-                  ? `${data.totalCount} propert${data.totalCount === 1 ? "y" : "ies"} listed`
-                  : "Manage your property listings"}
+                  ? data.totalCount === 1
+                    ? t("owner.propertyListed", { count: data.totalCount })
+                    : t("owner.propertiesListed", { count: data.totalCount })
+                  : t("owner.manageListings")}
               </p>
             </div>
           </div>
@@ -135,7 +139,7 @@ export default function OwnerDashboardPage() {
             className="font-semibold shadow-sm"
             size="lg"
           >
-            <Plus className="h-4 w-4 mr-2" /> Add New Property
+            <Plus className="h-4 w-4 mr-2" /> {t("owner.addNewProperty")}
           </Button>
         </div>
       </div>
@@ -165,7 +169,7 @@ export default function OwnerDashboardPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search properties…"
+              placeholder={t("owner.searchProperties")}
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -225,12 +229,12 @@ export default function OwnerDashboardPage() {
             <SearchX className="h-14 w-14 text-muted-foreground/50" />
           </div>
           <h2 className="text-xl font-bold text-foreground mb-2">
-            No properties found
+            {t("owner.noProperties")}
           </h2>
           <p className="text-muted-foreground max-w-sm text-sm">
             {activeTab === "All"
-              ? "You haven't listed any properties yet. Add your first to get started."
-              : `No properties with "${activeTab}" status.`}
+              ? t("owner.noPropertiesHint")
+              : t("owner.noPropertiesStatusHint", { status: activeTab })}
           </p>
           {activeTab === "All" && (
             <Button
@@ -238,7 +242,7 @@ export default function OwnerDashboardPage() {
               size="lg"
               onClick={() => navigate("/owner/properties/new")}
             >
-              <Plus className="h-4 w-4 mr-2" /> Add Your First Property
+              <Plus className="h-4 w-4 mr-2" /> {t("owner.addFirstProperty")}
             </Button>
           )}
         </div>
@@ -330,7 +334,7 @@ export default function OwnerDashboardPage() {
         <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-primary flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" /> Property Reviews
+              <MessageSquare className="h-5 w-5" /> {t("owner.propertyReviews")}
             </DialogTitle>
           </DialogHeader>
           {reviewPropertyId && (
@@ -361,12 +365,12 @@ export default function OwnerDashboardPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

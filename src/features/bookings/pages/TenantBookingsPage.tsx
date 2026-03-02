@@ -8,6 +8,7 @@ import {
   Suspense,
 } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useMyBookings, useCancelBooking } from "../useBookings";
 import BookingStatusBadge from "../components/BookingStatusBadge";
 import BookingDetailsModal from "../components/BookingDetailsModal";
@@ -211,6 +212,7 @@ const BookingCard = memo(
 BookingCard.displayName = "BookingCard";
 
 export default function TenantBookingsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: profileData } = useProfile();
   const storeUser = useAuthStore((s) => s.user);
@@ -304,7 +306,7 @@ export default function TenantBookingsPage() {
     <div className="min-h-screen bg-secondary/30">
       <UserNavbar />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-foreground mb-6">My Bookings</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-6">{t("bookings.title")}</h1>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -365,7 +367,7 @@ export default function TenantBookingsPage() {
               variant="secondary"
               className="hover:bg-primary hover:text-primary-foreground"
             >
-              <Search className="h-4 w-4 mr-1" /> Search
+              <Search className="h-4 w-4 mr-1" /> {t("common.search")}
             </Button>
           </div>
         </div>
@@ -379,9 +381,9 @@ export default function TenantBookingsPage() {
           </div>
         ) : !data?.data.length ? (
           <div className="text-center py-20 text-muted-foreground">
-            <p className="text-lg font-medium">No bookings found</p>
+            <p className="text-lg font-medium">{t("bookings.noBookings")}</p>
             <p className="text-sm mt-1">
-              Your bookings will appear here once you make a reservation.
+              {t("bookings.noBookingsHint")}
             </p>
           </div>
         ) : (
@@ -413,7 +415,7 @@ export default function TenantBookingsPage() {
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-sm text-muted-foreground">
-              Page {page} of {totalPages}
+              {t("bookings.pageOf", { page, total: totalPages })}
             </span>
             <Button
               variant="outline"

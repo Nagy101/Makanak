@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useProperties } from "../useProperties";
 import type { PropertySearchParams } from "../property.types";
 import PropertySearchFilter from "../components/PropertySearchFilter";
@@ -10,18 +11,21 @@ import { ChevronLeft, ChevronRight, SearchX } from "lucide-react";
 import UserNavbar from "@/components/UserNavbar";
 
 // ── Helper: build initial params from URL query string ────────
-function buildInitialParams(searchParams: URLSearchParams): PropertySearchParams {
-  const base: PropertySearchParams = { PageIndex: 1, PageSize: 6 };
-  const search      = searchParams.get("Search");
-  const govId       = searchParams.get("GovernorateId");
-  const pageIndex   = searchParams.get("PageIndex");
-  if (search)    base.Search        = search;
-  if (govId)     base.GovernorateId = Number(govId);
-  if (pageIndex) base.PageIndex     = Number(pageIndex);
+function buildInitialParams(
+  searchParams: URLSearchParams,
+): PropertySearchParams {
+  const base: PropertySearchParams = { PageIndex: 1, PageSize: 8 };
+  const search = searchParams.get("Search");
+  const govId = searchParams.get("GovernorateId");
+  const pageIndex = searchParams.get("PageIndex");
+  if (search) base.Search = search;
+  if (govId) base.GovernorateId = Number(govId);
+  if (pageIndex) base.PageIndex = Number(pageIndex);
   return base;
 }
 
 export default function PropertiesPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
 
   const [params, setParams] = useState<PropertySearchParams>(() =>
@@ -38,8 +42,8 @@ export default function PropertiesPage() {
   const { data, isLoading, isFetching } = useProperties(params);
 
   const currentPage = params.PageIndex ?? 1;
-  const totalPages  = data
-    ? Math.ceil(data.totalCount / (params.PageSize || 6))
+  const totalPages = data
+    ? Math.ceil(data.totalCount / (params.PageSize || 8))
     : 0;
 
   // ── Pagination helper ──────────────────────────────────────
@@ -77,17 +81,16 @@ export default function PropertiesPage() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Properties</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("properties.title")}</h1>
             {data && (
               <p className="mt-1 text-sm text-muted-foreground">
-                {data.totalCount}{" "}
-                {data.totalCount === 1 ? "property" : "properties"} found
+                {t("properties.propertiesFound", { count: data.totalCount })}
               </p>
             )}
           </div>
           {isFetching && !isLoading && (
             <div className="text-sm text-muted-foreground animate-pulse">
-              Updating…
+              {t("common.updating")}
             </div>
           )}
         </div>
@@ -96,7 +99,10 @@ export default function PropertiesPage() {
         {isLoading && (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="overflow-hidden rounded-xl border bg-card">
+              <div
+                key={i}
+                className="overflow-hidden rounded-xl border bg-card"
+              >
                 <Skeleton className="aspect-[4/3] w-full" />
                 <div className="space-y-3 p-4">
                   <Skeleton className="h-5 w-3/4" />
@@ -115,18 +121,17 @@ export default function PropertiesPage() {
               <SearchX className="h-12 w-12 text-muted-foreground" />
             </div>
             <h2 className="mb-2 text-xl font-semibold text-foreground">
-              No properties found
+              {t("properties.noPropertiesFound")}
             </h2>
             <p className="max-w-md text-muted-foreground">
-              Try adjusting your search or filters to find what you are looking
-              for.
+              {t("properties.noPropertiesHint")}
             </p>
             <Button
               variant="outline"
               className="mt-6"
-              onClick={() => setParams({ PageIndex: 1, PageSize: 6 })}
+              onClick={() => setParams({ PageIndex: 1, PageSize: 8 })}
             >
-              Clear all filters
+              {t("properties.clearAllFilters")}
             </Button>
           </div>
         )}
@@ -151,7 +156,7 @@ export default function PropertiesPage() {
                     setParams({ ...params, PageIndex: currentPage - 1 })
                   }
                 >
-                  <ChevronLeft className="mr-1 h-4 w-4" /> Previous
+                  <ChevronLeft className="mr-1 h-4 w-4" /> {t("properties.previous")}
                 </Button>
 
                 <div className="flex items-center gap-1">
@@ -175,7 +180,7 @@ export default function PropertiesPage() {
                     setParams({ ...params, PageIndex: currentPage + 1 })
                   }
                 >
-                  Next <ChevronRight className="ml-1 h-4 w-4" />
+                  {t("properties.next")} <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
             )}

@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDisputesList, useDisputeDetails, useCancelDispute } from '../useDisputes';
 import type { DisputeListParams, DisputeStatusType, DisputeSortType } from '../dispute.types';
 import DisputeStatusBadge from '../components/DisputeStatusBadge';
@@ -81,6 +82,7 @@ const DisputeRow = memo(
 DisputeRow.displayName = 'DisputeRow';
 
 export default function MyDisputesPage() {
+  const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<DisputeStatusType | 'All'>('All');
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
@@ -128,7 +130,7 @@ export default function MyDisputesPage() {
       <UserNavbar />
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-foreground">My Disputes</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("disputes.title")}</h1>
         </div>
 
         {/* Filters */}
@@ -162,7 +164,7 @@ export default function MyDisputesPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search disputes..."
+                placeholder={t("disputes.searchDisputes")}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -184,8 +186,8 @@ export default function MyDisputesPage() {
           </div>
         ) : !data?.data.length ? (
           <div className="text-center py-20 text-muted-foreground">
-            <p className="text-lg font-medium">No disputes found</p>
-            <p className="text-sm mt-1">Your disputes will appear here.</p>
+            <p className="text-lg font-medium">{t("disputes.noDisputes")}</p>
+            <p className="text-sm mt-1">{t("disputes.noDisputesHint")}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -207,7 +209,7 @@ export default function MyDisputesPage() {
             <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+            <span className="text-sm text-muted-foreground">{t("bookings.pageOf", { page, total: totalPages })}</span>
             <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -219,7 +221,7 @@ export default function MyDisputesPage() {
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Dispute Details</DialogTitle>
+            <DialogTitle>{t("disputes.disputeDetails")}</DialogTitle>
           </DialogHeader>
           {selectedDispute ? (
             <DisputeDetailsView dispute={selectedDispute} />

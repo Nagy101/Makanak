@@ -291,7 +291,7 @@ const AdminPropertiesPage = memo(() => {
                     {p.propertyType}
                   </TableCell>
                   <TableCell className="font-semibold">
-                    ${p.pricePerNight}
+                    {p.pricePerNight} EGP
                   </TableCell>
                   <TableCell>
                     <Badge

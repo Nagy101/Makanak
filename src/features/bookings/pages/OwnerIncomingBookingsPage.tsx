@@ -1,4 +1,5 @@
 ﻿import { useCallback, useMemo, useState, lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { useIncomingBookings } from "../useBookings";
 import BookingStatusBadge from "../components/BookingStatusBadge";
 import BookingDetailsModal from "../components/BookingDetailsModal";
@@ -54,6 +55,7 @@ const toUrl = (path: string | null | undefined) =>
   !path ? "/placeholder.svg" : path.startsWith("http") ? path : `/${path}`;
 
 export default function OwnerIncomingBookingsPage() {
+  const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<BookingStatusType | "All">(
     "All",
   );
@@ -111,7 +113,7 @@ export default function OwnerIncomingBookingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Incoming Bookings</h1>
+      <h1 className="text-2xl font-bold text-foreground">{t("bookings.incomingBookings")}</h1>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -160,7 +162,7 @@ export default function OwnerIncomingBookingsPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by property or tenant..."
+              placeholder={t("bookings.searchByPropertyOrTenant")}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleSearchKeyDown}
@@ -172,7 +174,7 @@ export default function OwnerIncomingBookingsPage() {
             variant="secondary"
             className="hover:bg-primary hover:text-primary-foreground"
           >
-            <Search className="h-4 w-4 mr-1" /> Search
+            <Search className="h-4 w-4 mr-1" /> {t("common.search")}
           </Button>
         </div>
       </div>
@@ -186,9 +188,9 @@ export default function OwnerIncomingBookingsPage() {
         </div>
       ) : !data?.data.length ? (
         <div className="text-center py-20 text-muted-foreground">
-          <p className="text-lg font-medium">No incoming bookings</p>
+          <p className="text-lg font-medium">{t("bookings.noIncomingBookings")}</p>
           <p className="text-sm mt-1">
-            Bookings from tenants will appear here.
+            {t("bookings.noIncomingBookingsHint")}
           </p>
         </div>
       ) : (
@@ -196,15 +198,15 @@ export default function OwnerIncomingBookingsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Property</TableHead>
-                <TableHead>Tenant</TableHead>
-                <TableHead>Check-in</TableHead>
-                <TableHead>Check-out</TableHead>
-                <TableHead>Nights</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Owner Payout</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t("bookings.property")}</TableHead>
+                <TableHead>{t("bookings.tenant")}</TableHead>
+                <TableHead>{t("properties.checkIn")}</TableHead>
+                <TableHead>{t("properties.checkOut")}</TableHead>
+                <TableHead>{t("bookings.nights")}</TableHead>
+                <TableHead>{t("bookings.total")}</TableHead>
+                <TableHead>{t("bookings.ownerPayout")}</TableHead>
+                <TableHead>{t("bookings.status")}</TableHead>
+                <TableHead className="text-right">{t("bookings.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -292,7 +294,7 @@ export default function OwnerIncomingBookingsPage() {
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
+            {t("bookings.pageOf", { page, total: totalPages })}
           </span>
           <Button
             variant="outline"

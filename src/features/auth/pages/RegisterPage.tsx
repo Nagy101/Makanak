@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { useState, useCallback, memo } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,6 +49,7 @@ const schema = z
 type RegisterFormData = z.output<typeof schema>;
 
 const RegisterPage = memo(() => {
+  const { t } = useTranslation();
   const [showPw, setShowPw] = useState(false);
   const { mutate, isPending } = useRegister();
   const {
@@ -82,12 +84,12 @@ const RegisterPage = memo(() => {
 
   return (
     <AuthLayout
-      title="Create your account"
-      subtitle="Join Makanak and start exploring properties"
+      title={t("auth.createAccount")}
+      subtitle={t("auth.joinSubtitle")}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
+          <Label htmlFor="name">{t("auth.fullName")}</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -103,7 +105,7 @@ const RegisterPage = memo(() => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("auth.email")}</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -120,7 +122,7 @@ const RegisterPage = memo(() => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone (optional)</Label>
+          <Label htmlFor="phone">{t("auth.phoneOptional")}</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -133,7 +135,7 @@ const RegisterPage = memo(() => {
         </div>
 
         <div className="space-y-2">
-          <Label>Choose Your Account Type</Label>
+          <Label>{t("auth.chooseAccountType")}</Label>
           <div className="grid grid-cols-2 gap-4">
             <label
               className={`flex items-center space-x-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-150 ${
@@ -150,7 +152,7 @@ const RegisterPage = memo(() => {
               />
               <div className="flex items-center space-x-2">
                 <Users className="h-5 w-5" />
-                <span className="font-medium">Tenant</span>
+                <span className="font-medium">{t("auth.tenantLabel")}</span>
               </div>
             </label>
             <label
@@ -168,7 +170,7 @@ const RegisterPage = memo(() => {
               />
               <div className="flex items-center space-x-2">
                 <Home className="h-5 w-5" />
-                <span className="font-medium">Owner</span>
+                <span className="font-medium">{t("auth.ownerLabel")}</span>
               </div>
             </label>
           </div>
@@ -180,7 +182,7 @@ const RegisterPage = memo(() => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="dateOfBirth">Date of Birth</Label>
+          <Label htmlFor="dateOfBirth">{t("auth.dateOfBirth")}</Label>
           <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} />
           {errors.dateOfBirth && (
             <p className="text-sm text-destructive">
@@ -191,7 +193,7 @@ const RegisterPage = memo(() => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("auth.password")}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -222,7 +224,7 @@ const RegisterPage = memo(() => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm</Label>
+            <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -249,17 +251,17 @@ const RegisterPage = memo(() => {
           {isPending ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
-            "Create Account"
+            t("auth.createAccount")
           )}
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t("auth.alreadyHaveAccount")}{" "}
           <Link
             to="/login"
             className="font-semibold text-primary hover:underline"
           >
-            Sign in
+            {t("auth.signInLink")}
           </Link>
         </p>
       </form>

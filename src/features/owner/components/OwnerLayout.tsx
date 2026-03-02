@@ -1,5 +1,6 @@
 import { memo, useCallback, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -35,6 +36,7 @@ const NAV_ITEMS = [
 ] as const;
 
 const OwnerLayout = memo(() => {
+  const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const userName = useAuthStore((s) => s.user?.name ?? "Owner");
   const userAvatar = useAuthStore((s) => s.user?.profilePictureUrl ?? null);
@@ -67,7 +69,7 @@ const OwnerLayout = memo(() => {
         <div className="flex h-16 items-center gap-3 border-b border-border px-6">
           <Link to="/" className="flex items-center min-w-0">
             <img
-              src="/Makanak_logo.ico"
+              src="/Makanak_logo.png"
               alt="Makanak Logo"
               className="h-9 object-contain"
             />
@@ -111,7 +113,7 @@ const OwnerLayout = memo(() => {
             onClick={handleLogout}
           >
             <LogOut className="h-4 w-4" />
-            Logout
+            {t("common.logout")}
           </Button>
         </div>
       </aside>
@@ -127,7 +129,7 @@ const OwnerLayout = memo(() => {
             <Menu className="h-5 w-5" />
           </Button>
           <h2 className="text-sm font-medium text-muted-foreground">
-            Owner Panel
+            {t("owner.ownerDashboard")}
           </h2>
           <div className="ml-auto flex items-center gap-3">
             <NotificationBell />

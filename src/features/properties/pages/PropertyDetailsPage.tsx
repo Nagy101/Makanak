@@ -19,6 +19,8 @@ import {
   Home,
 } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocalizedField } from "@/hooks/useLocalizedField";
 import UserNavbar from "@/components/UserNavbar";
 import PropertyReviewsSection from "@/features/reviews/components/PropertyReviewsSection";
 
@@ -27,6 +29,8 @@ const CreateBookingWidget = lazy(
 );
 
 export default function PropertyDetailsPage() {
+  const { t } = useTranslation();
+  const localized = useLocalizedField();
   const { id: encodedId } = useParams<{ id: string }>();
   const propertyId = encodedId ? decodeId(encodedId) : null;
   const { data: property, isLoading } = useProperty(propertyId ?? 0);
@@ -70,13 +74,13 @@ export default function PropertyDetailsPage() {
           <div className="rounded-3xl bg-muted/60 p-10 mb-6">
             <Home className="h-14 w-14 text-muted-foreground/50" />
           </div>
-          <h2 className="text-xl font-bold mb-2">Property not found</h2>
+          <h2 className="text-xl font-bold mb-2">{t("properties.propertyNotFound")}</h2>
           <p className="text-muted-foreground text-sm mb-6">
-            This listing may have been removed or doesn't exist.
+            {t("properties.propertyNotFoundDesc")}
           </p>
           <Button asChild variant="outline">
             <Link to="/properties">
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back to listings
+              <ArrowLeft className="h-4 w-4 mr-2" /> {t("properties.backToListings")}
             </Link>
           </Button>
         </div>
@@ -102,7 +106,7 @@ export default function PropertyDetailsPage() {
           className="mb-5 -ml-2 text-muted-foreground hover:text-foreground"
         >
           <Link to="/properties">
-            <ArrowLeft className="h-4 w-4 mr-1.5" /> Back to search
+            <ArrowLeft className="h-4 w-4 mr-1.5" /> {t("properties.backToSearch")}
           </Link>
         </Button>
 
@@ -213,7 +217,7 @@ export default function PropertyDetailsPage() {
               </Suspense>
               <div className="rounded-2xl border bg-card px-5 py-4 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
-                  Address
+                  {t("properties.address")}
                 </p>
                 <p className="text-sm font-medium text-foreground">
                   {property.address}
@@ -263,7 +267,7 @@ export default function PropertyDetailsPage() {
                   <Star className="h-4 w-4 fill-primary text-primary" />
                   {property.averageRating.toFixed(1)}
                   <span className="text-muted-foreground font-normal">
-                    rating
+                    {t("properties.rating")}
                   </span>
                 </span>
               )}
@@ -275,10 +279,10 @@ export default function PropertyDetailsPage() {
           {/* Key stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: Bed, label: "Bedrooms", value: property.bedrooms },
-              { icon: Bath, label: "Bathrooms", value: property.bathrooms },
-              { icon: Users, label: "Max Guests", value: property.maxGuests },
-              { icon: Maximize2, label: "Area", value: `${property.area} m²` },
+              { icon: Bed, label: t("properties.bedrooms"), value: property.bedrooms },
+              { icon: Bath, label: t("properties.bathrooms"), value: property.bathrooms },
+              { icon: Users, label: t("properties.maxGuests"), value: property.maxGuests },
+              { icon: Maximize2, label: t("properties.area"), value: `${property.area} ${t("properties.sqm")}` },
             ].map(({ icon: Icon, label, value }) => (
               <div
                 key={label}
@@ -298,7 +302,7 @@ export default function PropertyDetailsPage() {
           {/* Description */}
           <div className="rounded-2xl border bg-card p-6 shadow-sm">
             <h2 className="text-base font-semibold text-foreground mb-3">
-              About this property
+              {t("properties.aboutThisProperty")}
             </h2>
             <p className="text-muted-foreground leading-relaxed text-sm">
               {property.description}
@@ -309,16 +313,12 @@ export default function PropertyDetailsPage() {
           {property.amenities.length > 0 && (
             <div>
               <h2 className="text-base font-semibold text-foreground mb-4">
-                Amenities
+                {t("properties.amenities")}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {property.amenities.map((amenity) => {
                   const Icon = mapIcon(amenity.icon);
-                  const label =
-                    amenity.name ||
-                    amenity.nameEn ||
-                    amenity.nameAr ||
-                    "Unknown";
+                  const label = localized(amenity.nameEn, amenity.nameAr) || amenity.name || "Unknown";
                   return (
                     <div
                       key={amenity.id}

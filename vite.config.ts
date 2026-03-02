@@ -31,4 +31,23 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Target modern browsers for smaller bundles
+    target: "es2020",
+    // Manual chunk splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          query: ["@tanstack/react-query"],
+          ui: [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tooltip",
+          ],
+        },
+      },
+    },
+  },
 });

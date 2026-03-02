@@ -19,6 +19,7 @@
 //  └──────────────────────────────────────────────────────────┘
 // ═══════════════════════════════════════════════════════════════
 import { lazy, Suspense, memo } from "react";
+import { useTranslation } from "react-i18next";
 import { TrendingUp, Wallet, Landmark, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
@@ -75,6 +76,7 @@ SectionTitle.displayName = "SectionTitle";
 //  Main Page
 // ══════════════════════════════════════════════════════════════
 const AdminDashboardPage = memo(function AdminDashboardPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
 
   // ── 4 parallel queries — NO chaining ─────────────────────
@@ -100,10 +102,10 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">
-            Analytics Dashboard
+            {t("admin.dashboard")}
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Real-time overview of the Makanak platform
+            {t("admin.dashboardSubtitle")}
           </p>
         </div>
         <Button
@@ -116,7 +118,7 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
           <RefreshCw
             className={`h-4 w-4 ${isAnyRefetching ? "animate-spin" : ""}`}
           />
-          Refresh
+          {t("admin.refresh")}
         </Button>
       </div>
 
@@ -126,7 +128,7 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
           completely independent of the other 3 queries.
       ════════════════════════════════════════════════════════ */}
       <section className="space-y-3">
-        <SectionTitle>Financial Overview</SectionTitle>
+        <SectionTitle>{t("admin.financialOverview")}</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {financial.isLoading ? (
             <>
@@ -137,25 +139,25 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
           ) : financial.data ? (
             <>
               <FinancialCard
-                label="Total Booking Volume"
+                label={t("admin.totalBookingVolume")}
                 amount={financial.data.totalBookingVolume}
                 icon={TrendingUp}
                 accentClass="bg-primary/10 text-primary"
-                description="Gross revenue across all bookings"
+                description={t("admin.grossRevenue")}
               />
               <FinancialCard
-                label="Platform Earnings"
+                label={t("admin.platformEarnings")}
                 amount={financial.data.totalPlatformEarnings}
                 icon={Wallet}
                 accentClass="bg-emerald-50 text-emerald-600"
-                description="Makanak's net commission"
+                description={t("admin.netCommission")}
               />
               <FinancialCard
-                label="Cash Owed to Owners"
+                label={t("admin.ownerPayouts")}
                 amount={financial.data.totalCashExpectedByOwners}
                 icon={Landmark}
                 accentClass="bg-amber-50 text-amber-600"
-                description="Pending owner payouts"
+                description={t("admin.pendingOwnerPayouts")}
               />
             </>
           ) : null}
@@ -167,7 +169,7 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
           Each renders independently from its own query.
       ════════════════════════════════════════════════════════ */}
       <section className="space-y-3">
-        <SectionTitle>Properties &amp; Bookings</SectionTitle>
+        <SectionTitle>{t("admin.propertiesAndBookings")}</SectionTitle>
         <div className="grid gap-4 lg:grid-cols-2">
           {/* Properties Donut */}
           {properties.isLoading ? (
@@ -194,7 +196,7 @@ const AdminDashboardPage = memo(function AdminDashboardPage() {
           Renders independently from its own query.
       ════════════════════════════════════════════════════════ */}
       <section className="space-y-3">
-        <SectionTitle>User Demographics</SectionTitle>
+        <SectionTitle>{t("admin.userDemographics")}</SectionTitle>
         {users.isLoading ? (
           <ChartSkeleton height={280} />
         ) : users.data ? (

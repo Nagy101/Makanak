@@ -1,5 +1,6 @@
 import { memo, useCallback } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   Users,
@@ -17,13 +18,14 @@ import NotificationBell from "@/features/notifications/components/NotificationBe
 import { useState } from "react";
 
 const NAV_ITEMS = [
-  { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
-  { to: "/admin/users", icon: Users, label: "Users", end: false },
-  { to: "/admin/properties", icon: Building2, label: "Properties", end: false },
-  { to: "/admin/disputes", icon: AlertTriangle, label: "Disputes", end: false },
+  { to: "/admin", icon: LayoutDashboard, labelKey: "admin.sidebarDashboard", end: true },
+  { to: "/admin/users", icon: Users, labelKey: "admin.sidebarUsers", end: false },
+  { to: "/admin/properties", icon: Building2, labelKey: "admin.sidebarProperties", end: false },
+  { to: "/admin/disputes", icon: AlertTriangle, labelKey: "admin.sidebarDisputes", end: false },
 ] as const;
 
 const AdminLayout = memo(() => {
+  const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const userName = useAuthStore((s) => s.user?.name ?? "Admin");
   const userAvatar = useAuthStore((s) => s.user?.profilePictureUrl ?? null);
@@ -58,7 +60,7 @@ const AdminLayout = memo(() => {
         <div className="flex h-16 items-center gap-3 border-b border-border px-6">
           <Link to="/" className="flex items-center min-w-0">
             <img
-              src="/Makanak_logo.ico"
+              src="/Makanak_logo.png"
               alt="Makanak Logo"
               className="h-9 object-contain"
             />
@@ -91,7 +93,7 @@ const AdminLayout = memo(() => {
               }
             >
               <item.icon className="h-4 w-4" />
-              {item.label}
+              {t(item.labelKey)}
             </NavLink>
           ))}
         </nav>
@@ -104,7 +106,7 @@ const AdminLayout = memo(() => {
             onClick={handleLogout}
           >
             <LogOut className="h-4 w-4" />
-            Logout
+            {t("common.logout")}
           </Button>
         </div>
       </aside>
@@ -122,7 +124,7 @@ const AdminLayout = memo(() => {
             <Menu className="h-5 w-5" />
           </Button>
           <h2 className="text-sm font-medium text-muted-foreground">
-            Admin Panel
+            {t("nav.adminDashboard")}
           </h2>
           <div className="ml-auto flex items-center gap-3">
             <NotificationBell />

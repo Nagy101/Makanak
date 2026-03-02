@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,6 +25,7 @@ import {
 } from "@/features/lookup";
 import { useCreateProperty, useUpdateProperty } from "../useOwnerProperties";
 import { useProperty } from "@/features/properties/useProperties";
+import { useLocalizedField } from "@/hooks/useLocalizedField";
 import type {
   CreatePropertyPayload,
   EditPropertyPayload,
@@ -51,6 +53,8 @@ const propertySchema = z.object({
 type FormValues = z.infer<typeof propertySchema>;
 
 export default function AddEditPropertyPage() {
+  const { t } = useTranslation();
+  const localized = useLocalizedField();
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
   const propertyId = id ? Number(id) : 0;
@@ -262,7 +266,7 @@ export default function AddEditPropertyPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-2xl font-bold text-foreground">
-          {isEdit ? "Edit Property" : "Add New Property"}
+          {isEdit ? t("owner.editProperty") : t("owner.addNewProperty")}
         </h1>
       </div>
 
@@ -270,15 +274,15 @@ export default function AddEditPropertyPage() {
         {/* Basic Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Basic Information</CardTitle>
+            <CardTitle className="text-lg">{t("owner.basicInfo")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="Title">Title</Label>
+              <Label htmlFor="Title">{t("owner.title")}</Label>
               <Input
                 id="Title"
                 {...register("Title")}
-                placeholder="Property title"
+                placeholder={t("owner.titlePlaceholder")}
               />
               {errors.Title && (
                 <p className="text-sm text-destructive">
@@ -287,11 +291,11 @@ export default function AddEditPropertyPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="Description">Description</Label>
+              <Label htmlFor="Description">{t("owner.description")}</Label>
               <Textarea
                 id="Description"
                 {...register("Description")}
-                placeholder="Describe your property…"
+                placeholder={t("owner.descPlaceholder")}
                 rows={4}
               />
               {errors.Description && (
@@ -302,13 +306,13 @@ export default function AddEditPropertyPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Property Type</Label>
+                <Label>{t("owner.propertyType")}</Label>
                 <Select
                   value={watch("PropertyType") || ""}
                   onValueChange={(v) => setValue("PropertyType", v)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("owner.selectPropertyType")} />
                   </SelectTrigger>
                   <SelectContent>
                     {propertyTypes.map((t) => (
@@ -325,7 +329,7 @@ export default function AddEditPropertyPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="PricePerNight">Price per Night (EGP)</Label>
+                <Label htmlFor="PricePerNight">{t("owner.pricePerNightEgp")}</Label>
                 <Input
                   id="PricePerNight"
                   type="number"
@@ -345,23 +349,23 @@ export default function AddEditPropertyPage() {
         {/* Location */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Location</CardTitle>
+            <CardTitle className="text-lg">{t("owner.location")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Governorate</Label>
+                <Label>{t("owner.governorate")}</Label>
                 <Select
                   value={watch("GovernorateId")?.toString() || ""}
                   onValueChange={(v) => setValue("GovernorateId", Number(v))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select governorate" />
+                    <SelectValue placeholder={t("owner.selectGovernorate")} />
                   </SelectTrigger>
                   <SelectContent>
                     {governorates.map((g) => (
                       <SelectItem key={g.id} value={g.id.toString()}>
-                        {g.nameEn || g.nameAr || "Unknown"}
+                        {localized(g.nameEn, g.nameAr)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -373,11 +377,11 @@ export default function AddEditPropertyPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="AreaName">Area Name</Label>
+                <Label htmlFor="AreaName">{t("owner.areaName")}</Label>
                 <Input
                   id="AreaName"
                   {...register("AreaName")}
-                  placeholder="e.g. Zamalek"
+                  placeholder={t("owner.areaPlaceholder")}
                 />
                 {errors.AreaName && (
                   <p className="text-sm text-destructive">
@@ -387,11 +391,11 @@ export default function AddEditPropertyPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="Address">Address</Label>
+              <Label htmlFor="Address">{t("owner.address")}</Label>
               <Input
                 id="Address"
                 {...register("Address")}
-                placeholder="Full address"
+                placeholder={t("owner.addressPlaceholder")}
               />
               {errors.Address && (
                 <p className="text-sm text-destructive">
@@ -402,7 +406,7 @@ export default function AddEditPropertyPage() {
 
             {/* Map */}
             <div className="space-y-2">
-              <Label>Pin Location on Map</Label>
+              <Label>{t("owner.pickLocation")}</Label>
               <div
                 className="rounded-lg border overflow-hidden"
                 style={{ height: 350, isolation: "isolate" }}
@@ -410,7 +414,7 @@ export default function AddEditPropertyPage() {
                 <Suspense
                   fallback={
                     <div className="h-full flex items-center justify-center bg-muted text-muted-foreground text-sm">
-                      Loading map…
+                      {t("owner.loadingMap")}
                     </div>
                   }
                 >
@@ -428,12 +432,12 @@ export default function AddEditPropertyPage() {
         {/* Details */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Property Details</CardTitle>
+            <CardTitle className="text-lg">{t("owner.propertyDetails")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="Area">Area (m²)</Label>
+                <Label htmlFor="Area">{t("owner.area")} (m²)</Label>
                 <Input id="Area" type="number" {...register("Area")} />
                 {errors.Area && (
                   <p className="text-sm text-destructive">
@@ -442,11 +446,11 @@ export default function AddEditPropertyPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="Bedrooms">Bedrooms</Label>
+                <Label htmlFor="Bedrooms">{t("owner.bedrooms")}</Label>
                 <Input id="Bedrooms" type="number" {...register("Bedrooms")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="Bathrooms">Bathrooms</Label>
+                <Label htmlFor="Bathrooms">{t("owner.bathrooms")}</Label>
                 <Input
                   id="Bathrooms"
                   type="number"
@@ -454,7 +458,7 @@ export default function AddEditPropertyPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="MaxGuests">Max Guests</Label>
+                <Label htmlFor="MaxGuests">{t("owner.maxGuests")}</Label>
                 <Input
                   id="MaxGuests"
                   type="number"
@@ -470,7 +474,7 @@ export default function AddEditPropertyPage() {
 
             {/* Amenities */}
             <div className="space-y-3">
-              <Label className="text-sm font-semibold">Amenities</Label>
+              <Label className="text-sm font-semibold">{t("owner.amenities")}</Label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {amenities.map((a) => (
                   <label
@@ -482,7 +486,7 @@ export default function AddEditPropertyPage() {
                       onCheckedChange={() => toggleAmenity(a.id)}
                     />
                     <span className="text-sm">
-                      {a.nameEn || a.name || a.nameAr || "Unknown"}
+                      {localized(a.nameEn, a.nameAr)}
                     </span>
                   </label>
                 ))}
@@ -494,13 +498,13 @@ export default function AddEditPropertyPage() {
         {/* Media */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Photos</CardTitle>
+            <CardTitle className="text-lg">{t("owner.photos")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Main Image */}
             <div className="space-y-2">
               <Label>
-                Main Image{" "}
+                {t("owner.mainImage")}{" "}
                 {!isEdit && <span className="text-destructive">*</span>}
               </Label>
               <div className="flex items-center gap-4">
@@ -526,7 +530,7 @@ export default function AddEditPropertyPage() {
                   <label className="flex h-32 w-48 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors">
                     <Upload className="h-6 w-6 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground">
-                      Upload Main Image
+                      {t("owner.uploadMainImage")}
                     </span>
                     <input
                       type="file"
@@ -541,7 +545,7 @@ export default function AddEditPropertyPage() {
 
             {/* Gallery */}
             <div className="space-y-2">
-              <Label>Gallery Images</Label>
+              <Label>{t("owner.galleryImages")}</Label>
               <div className="flex flex-wrap gap-3">
                 {/* Existing images (edit mode) */}
                 {existingGallery.map((img) => (
@@ -590,7 +594,7 @@ export default function AddEditPropertyPage() {
 
                 <label className="flex h-24 w-32 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors">
                   <ImagePlus className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Add</span>
+                  <span className="text-xs text-muted-foreground">{t("owner.addImage")}</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -612,7 +616,7 @@ export default function AddEditPropertyPage() {
             onClick={() => navigate("/owner")}
             className="hover:bg-muted hover:text-foreground"
           >
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="submit"
@@ -620,7 +624,7 @@ export default function AddEditPropertyPage() {
             className="min-w-[140px] font-semibold"
           >
             {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {isEdit ? "Update Property" : "Create Property"}
+            {isEdit ? t("owner.updateProperty") : t("owner.createProperty")}
           </Button>
         </div>
       </form>

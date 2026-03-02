@@ -18,6 +18,7 @@
 
 import { memo, useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
   Search,
@@ -36,6 +37,7 @@ import PropertyCard from "@/features/properties/components/PropertyCard";
 import * as propertyService from "@/features/properties/property.service";
 import { useLookupStore } from "@/features/lookup";
 import { useAuthStore } from "@/features/auth/store/authStore";
+import { useLocalizedField } from "@/hooks/useLocalizedField";
 
 // ─────────────────────────────────────────────────────────────
 // Hero Section — memoised, no internal navigation handler calls
@@ -45,6 +47,7 @@ const HeroSection = memo(function HeroSection({
 }: {
   onSearch: (query: string) => void;
 }) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
 
   const handleSubmit = useCallback(() => {
@@ -62,6 +65,9 @@ const HeroSection = memo(function HeroSection({
         alt="Properties in Egypt"
         width={1920}
         height={1080}
+        // @ts-expect-error fetchpriority not yet in React types
+        fetchpriority="high"
+        decoding="async"
         className="absolute inset-0 h-full w-full object-cover object-center scale-105 blur-[2px]"
       />
 
@@ -74,20 +80,17 @@ const HeroSection = memo(function HeroSection({
         <div className="mb-5 flex justify-center animate-fade-in-down">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-4 py-1.5 text-sm font-medium backdrop-blur-sm text-white">
             <Star className="h-4 w-4 fill-white text-white" />
-            Egypt's Premier Real Estate Platform
+            {t("home.heroBadge")}
           </span>
         </div>
 
         {/* Headline */}
-        <h1 className="mb-6 text-4xl font-bold leading-tight drop-shadow-xl sm:text-5xl md:text-6xl animate-fade-in-up">
-          Find your perfect place
-          <br className="hidden sm:block" />
-          to call home
+        <h1 className="mb-6 text-4xl font-bold leading-tight drop-shadow-xl sm:text-5xl md:text-6xl animate-fade-in-up whitespace-pre-line">
+          {t("home.heroTitle")}
         </h1>
 
         <p className="mx-auto mb-10 max-w-2xl text-lg text-white/90 drop-shadow md:text-xl animate-fade-in-up">
-          Discover thousands of verified properties across Egypt — apartments,
-          chalets, villas and more.
+          {t("home.heroSubtitle")}
         </p>
 
         {/* Search bar */}
@@ -97,7 +100,7 @@ const HeroSection = memo(function HeroSection({
               <MapPin className="h-5 w-5 shrink-0 text-primary" />
               <input
                 type="text"
-                placeholder="Search by location, title, or property type..."
+                placeholder={t("home.searchPlaceholder")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
@@ -110,7 +113,7 @@ const HeroSection = memo(function HeroSection({
               className="h-12 w-full shrink-0 rounded-xl px-8 text-base font-semibold sm:w-auto shadow-glow-sm hover:shadow-glow transition-premium"
             >
               <Search className="mr-2 h-4 w-4" />
-              Search
+              {t("common.search")}
             </Button>
           </div>
         </div>
@@ -118,9 +121,9 @@ const HeroSection = memo(function HeroSection({
         {/* Quick stats */}
         <div className="mt-10 flex flex-wrap justify-center gap-8 text-sm text-white drop-shadow-md">
           {[
-            { label: "Properties", value: "10,000+" },
-            { label: "Governorates", value: "27" },
-            { label: "Happy Tenants", value: "50,000+" },
+            { label: t("home.statsProperties"), value: "10,000+" },
+            { label: t("home.statsGovernorates"), value: "27" },
+            { label: t("home.statsHappyTenants"), value: "50,000+" },
           ].map(({ label, value }) => (
             <div key={label} className="text-center">
               <p className="text-2xl font-bold text-white">{value}</p>
@@ -163,12 +166,13 @@ const GovernorateCard = memo(function GovernorateCard({
   imageSrc: string;
   onSelect: (id: number) => void;
 }) {
+  const { t } = useTranslation();
   const handleClick = useCallback(() => onSelect(id), [id, onSelect]);
 
   return (
     <button
       onClick={handleClick}
-      aria-label={`Browse properties in ${name}`}
+      aria-label={`${t("home.browse")} — ${name}`}
       className="group relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl shadow-card transition-premium hover:-translate-y-1 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 min-h-[11rem]"
     >
       {/* Background image — no blur */}
@@ -176,6 +180,8 @@ const GovernorateCard = memo(function GovernorateCard({
         src={imageSrc}
         alt=""
         aria-hidden="true"
+        loading="lazy"
+        decoding="async"
         className="absolute inset-0 h-full w-full object-cover"
       />
 
@@ -188,7 +194,7 @@ const GovernorateCard = memo(function GovernorateCard({
           {name}
         </span>
         <span className="flex items-center gap-1 text-sm font-medium text-white/90 drop-shadow">
-          Browse
+          {t("home.browse")}
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
@@ -199,31 +205,14 @@ const GovernorateCard = memo(function GovernorateCard({
 // ─────────────────────────────────────────────────────────────
 // How It Works Section
 // ─────────────────────────────────────────────────────────────
-const STEPS = [
-  {
-    icon: Search,
-    number: 1,
-    title: "Search & Discover",
-    description:
-      "Browse thousands of verified properties by location, dates, guests, and budget.",
-  },
-  {
-    icon: CalendarCheck,
-    number: 2,
-    title: "Choose & Book",
-    description:
-      "Select your perfect stay, check availability, and confirm your booking securely.",
-  },
-  {
-    icon: CheckCircle,
-    number: 3,
-    title: "Move In & Enjoy",
-    description:
-      "Check in with ease, enjoy your stay, and leave a review for future guests.",
-  },
+const STEPS_KEYS = [
+  { icon: Search, number: 1, titleKey: "home.step1Title", descKey: "home.step1Desc" },
+  { icon: CalendarCheck, number: 2, titleKey: "home.step2Title", descKey: "home.step2Desc" },
+  { icon: CheckCircle, number: 3, titleKey: "home.step3Title", descKey: "home.step3Desc" },
 ] as const;
 
 const HowItWorksSection = memo(function HowItWorksSection() {
+  const { t } = useTranslation();
   return (
     <section
       className="px-4 py-20 bg-slate-50 dark:bg-background border-t border-slate-200/70 dark:border-border/40"
@@ -233,16 +222,16 @@ const HowItWorksSection = memo(function HowItWorksSection() {
         {/* Header */}
         <div className="mb-14 text-center">
           <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">
-            Simple &amp; Fast
+            {t("home.howItWorksBadge")}
           </p>
           <h2
             id="how-it-works-heading"
             className="text-3xl font-extrabold text-foreground sm:text-4xl"
           >
-            How Makanak Works
+            {t("home.howItWorksTitle")}
           </h2>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-            Book your perfect property in three easy steps.
+            {t("home.howItWorksSubtitle")}
           </p>
         </div>
 
@@ -254,7 +243,7 @@ const HowItWorksSection = memo(function HowItWorksSection() {
             className="absolute left-[calc(16.667%+2rem)] right-[calc(16.667%+2rem)] top-[2.75rem] hidden h-px bg-primary/25 sm:block"
           />
 
-          {STEPS.map(({ icon: Icon, number, title, description }) => (
+          {STEPS_KEYS.map(({ icon: Icon, number, titleKey, descKey }) => (
             <div
               key={number}
               className="relative flex flex-col items-center text-center gap-5"
@@ -275,9 +264,9 @@ const HowItWorksSection = memo(function HowItWorksSection() {
 
               {/* Text */}
               <div>
-                <h3 className="text-lg font-bold text-foreground">{title}</h3>
+                <h3 className="text-lg font-bold text-foreground">{t(titleKey)}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {description}
+                  {t(descKey)}
                 </p>
               </div>
             </div>
@@ -308,8 +297,10 @@ const PropertyCardSkeleton = memo(function PropertyCardSkeleton() {
 // HomePage — main export
 // ─────────────────────────────────────────────────────────────
 export default function HomePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((s) => !!s.token);
+  const localized = useLocalizedField();
 
   // ── Navigation handlers (stable references via useCallback) ───
   const handleHeroSearch = useCallback(
@@ -375,16 +366,16 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl">
             <div className="mb-10 text-center">
               <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">
-                Explore Egypt
+                {t("home.exploreEgypt")}
               </p>
               <h2
                 id="governorates-heading"
                 className="text-2xl font-bold text-foreground sm:text-3xl"
               >
-                Browse by Governorate
+                {t("home.browseByGovernorate")}
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-                Find the perfect property in Egypt's top destinations
+                {t("home.governorateSubtitle")}
               </p>
             </div>
 
@@ -393,7 +384,7 @@ export default function HomePage() {
                 <GovernorateCard
                   key={gov.id}
                   id={gov.id}
-                  name={gov.nameEn ?? gov.nameAr ?? "Governorate"}
+                  name={localized(gov.nameEn, gov.nameAr)}
                   imageSrc={img}
                   onSelect={handleGovernorateSelect}
                 />
@@ -409,13 +400,13 @@ export default function HomePage() {
           <div className="mb-10 flex items-end justify-between gap-4">
             <div>
               <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">
-                Hand-picked for you
+                {t("home.handPicked")}
               </p>
               <h2
                 id="featured-heading"
                 className="text-2xl font-bold text-foreground sm:text-3xl"
               >
-                Featured Properties
+                {t("home.featuredProperties")}
               </h2>
             </div>
             <Button
@@ -437,10 +428,10 @@ export default function HomePage() {
             <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
               <Home className="h-12 w-12 text-muted" />
               <p className="text-muted-foreground">
-                No properties available at the moment.
+                {t("home.noProperties")}
               </p>
               <Button variant="outline" onClick={handleBrowseAll}>
-                Browse all listings
+                {t("home.browseAllListings")}
               </Button>
             </div>
           ) : (
@@ -483,17 +474,13 @@ export default function HomePage() {
 
                 <h2
                   id="owner-cta-heading"
-                  className="mb-4 text-2xl font-bold leading-tight sm:text-3xl md:text-4xl"
+                  className="mb-4 text-2xl font-bold leading-tight sm:text-3xl md:text-4xl whitespace-pre-line"
                 >
-                  Have a property?
-                  <br />
-                  List it with Makanak today
+                  {t("home.ownerCtaTitle")}
                 </h2>
 
                 <p className="mx-auto mb-8 max-w-xl text-lg text-white/80">
-                  Join thousands of property owners earning through Makanak.
-                  Full listing control, instant bookings, and dedicated owner
-                  support — all in one platform.
+                  {t("home.ownerCtaSubtitle")}
                 </p>
 
                 <div className="flex flex-col justify-center gap-4 sm:flex-row">
@@ -502,7 +489,7 @@ export default function HomePage() {
                     size="lg"
                     className="h-14 rounded-xl bg-white px-10 text-base font-bold text-primary transition-transform hover:scale-[1.02] hover:bg-white/90"
                   >
-                    Get Started as Owner
+                    {t("home.getStartedAsOwner")}
                   </Button>
                   <Button
                     asChild
@@ -510,7 +497,7 @@ export default function HomePage() {
                     size="lg"
                     className="h-14 rounded-xl border-white/40 bg-white/10 text-base text-white backdrop-blur hover:bg-white/20"
                   >
-                    <Link to="/login">Sign In as Owner</Link>
+                    <Link to="/login">{t("home.signInAsOwner")}</Link>
                   </Button>
                 </div>
               </div>
@@ -525,18 +512,21 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-6 py-14 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
           <div className="flex flex-col gap-4">
-            <Link to="/" className="flex items-center w-fit">
+            <Link
+              to="/"
+              className="flex items-center w-fit rounded-xlpx-3 py-1.5 transition-opacity hover:opacity-90"
+            >
               <img
-                src="/Makanak_logo.ico"
+                src="/Makanak_logo.png"
                 alt="Makanak"
-                width={120}
-                height={40}
-                className="object-contain brightness-0 invert"
+                width={40}
+                height={10}
+                loading="lazy"
+                className="h-20 w-auto object-contain"
               />
             </Link>
             <p className="text-sm leading-relaxed">
-              Egypt's trusted platform for finding and listing properties.
-              Transparent, fast, and reliable.
+              {t("home.footerBrand")}
             </p>
             {/* Social links */}
             <div className="flex gap-3 mt-1">
@@ -606,7 +596,7 @@ export default function HomePage() {
           {/* Explore column */}
           <div>
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
-              Explore
+              {t("home.footerExplore")}
             </h3>
             <ul className="space-y-2.5 text-sm">
               <li>
@@ -614,7 +604,7 @@ export default function HomePage() {
                   to="/properties"
                   className="transition-colors hover:text-white"
                 >
-                  Browse Properties
+                  {t("nav.browseProperties")}
                 </Link>
               </li>
               <li>
@@ -622,7 +612,7 @@ export default function HomePage() {
                   to="/properties?sort=newest"
                   className="transition-colors hover:text-white"
                 >
-                  New Listings
+                  {t("home.footerNewListings")}
                 </Link>
               </li>
               <li>
@@ -630,7 +620,7 @@ export default function HomePage() {
                   to="/properties?GovernorateId=1"
                   className="transition-colors hover:text-white"
                 >
-                  Cairo Properties
+                  {t("home.footerCairoProperties")}
                 </Link>
               </li>
               <li>
@@ -638,7 +628,7 @@ export default function HomePage() {
                   to="/properties?GovernorateId=2"
                   className="transition-colors hover:text-white"
                 >
-                  Alexandria Properties
+                  {t("home.footerAlexProperties")}
                 </Link>
               </li>
             </ul>
@@ -647,7 +637,7 @@ export default function HomePage() {
           {/* Company column */}
           <div>
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
-              Company
+              {t("home.footerCompany")}
             </h3>
             <ul className="space-y-2.5 text-sm">
               <li>
@@ -655,7 +645,7 @@ export default function HomePage() {
                   to="/register"
                   className="transition-colors hover:text-white"
                 >
-                  Create Account
+                  {t("home.footerCreateAccount")}
                 </Link>
               </li>
               <li>
@@ -663,7 +653,7 @@ export default function HomePage() {
                   to="/login"
                   className="transition-colors hover:text-white"
                 >
-                  Sign In
+                  {t("common.signIn")}
                 </Link>
               </li>
               <li>
@@ -671,7 +661,7 @@ export default function HomePage() {
                   href="mailto:support@makanak.com"
                   className="transition-colors hover:text-white"
                 >
-                  Contact Support
+                  {t("home.footerContactSupport")}
                 </a>
               </li>
             </ul>
@@ -680,7 +670,7 @@ export default function HomePage() {
           {/* For Owners column */}
           <div>
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
-              For Owners
+              {t("home.footerForOwners")}
             </h3>
             <ul className="space-y-2.5 text-sm">
               <li>
@@ -688,7 +678,7 @@ export default function HomePage() {
                   to="/register"
                   className="transition-colors hover:text-white"
                 >
-                  List Your Property
+                  {t("home.footerListProperty")}
                 </Link>
               </li>
               <li>
@@ -696,7 +686,7 @@ export default function HomePage() {
                   to="/login"
                   className="transition-colors hover:text-white"
                 >
-                  Owner Sign In
+                  {t("home.footerOwnerSignIn")}
                 </Link>
               </li>
               <li>
@@ -704,7 +694,7 @@ export default function HomePage() {
                   to="/owner"
                   className="transition-colors hover:text-white"
                 >
-                  Owner Dashboard
+                  {t("home.footerOwnerDashboard")}
                 </Link>
               </li>
             </ul>
@@ -714,8 +704,8 @@ export default function HomePage() {
         {/* Bottom bar */}
         <div className="border-t border-white/8">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-5 text-xs sm:flex-row">
-            <p>© {new Date().getFullYear()} Makanak. All rights reserved.</p>
-            <p className="text-slate-600">Built with ♥ in Egypt</p>
+            <p>{t("home.footerCopyright", { year: new Date().getFullYear() })}</p>
+            <p className="text-slate-600">{t("home.footerBuiltWith")}</p>
           </div>
         </div>
       </footer>

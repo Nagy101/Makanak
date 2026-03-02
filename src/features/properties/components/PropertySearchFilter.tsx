@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, SlidersHorizontal, X, MapPin, Calendar as CalendarIcon } from 'lucide-react';
+import { useLocalizedField } from '@/hooks/useLocalizedField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +19,8 @@ interface Props {
 }
 
 export default function PropertySearchFilter({ params, onParamsChange }: Props) {
+  const { t } = useTranslation();
+  const localized = useLocalizedField();
   const [localSearch, setLocalSearch] = useState(params.Search || '');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [draft, setDraft] = useState<PropertySearchParams>({ ...params });
@@ -66,7 +70,7 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
         <div className="relative flex-1 max-w-xl">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by title, location…"
+            placeholder={t("properties.searchPlaceholder")}
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -82,11 +86,11 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
         >
           <SelectTrigger className="w-[180px] h-11 hidden md:flex">
             <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-            <SelectValue placeholder={loadingGov ? "Loading..." : "All Locations"} />
+            <SelectValue placeholder={loadingGov ? t("common.loading") : t("properties.allLocations")} />
           </SelectTrigger>
           <SelectContent>
             {governorates.map((g) => (
-              <SelectItem key={g.id} value={g.id.toString()}>{g.nameEn || g.nameAr || 'Unknown'}</SelectItem>
+              <SelectItem key={g.id} value={g.id.toString()}>{localized(g.nameEn, g.nameAr)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -100,14 +104,14 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
 
         {/* Search button */}
         <Button onClick={handleSearch} size="lg" className="h-11 px-6 font-semibold">
-          <Search className="h-4 w-4 mr-2" /> Search
+          <Search className="h-4 w-4 mr-2" /> {t("common.search")}
         </Button>
 
         {/* Filters sheet */}
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" className="h-11 relative">
-              <SlidersHorizontal className="h-4 w-4 mr-2" /> Filters
+              <SlidersHorizontal className="h-4 w-4 mr-2" /> {t("properties.filters")}
               {activeFilterCount > 0 && (
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
                   {activeFilterCount}
@@ -117,19 +121,19 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
           </SheetTrigger>
           <SheetContent className="w-[380px] sm:w-[420px] overflow-y-auto">
             <SheetHeader>
-              <SheetTitle className="text-xl font-bold">Filters</SheetTitle>
+              <SheetTitle className="text-xl font-bold">{t("properties.filters")}</SheetTitle>
             </SheetHeader>
 
             <div className="mt-6 space-y-8">
               {/* Property Type */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-foreground">Property Type</Label>
+                <Label className="text-sm font-semibold text-foreground">{t("properties.propertyType")}</Label>
                 <Select 
                   value={draft.Type || ''} 
                   onValueChange={(v) => setDraft({ ...draft, Type: v || undefined })}
                   disabled={loadingTypes}
                 >
-                  <SelectTrigger><SelectValue placeholder={loadingTypes ? "Loading..." : "Any type"} /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={loadingTypes ? t("common.loading") : t("properties.anyType")} /></SelectTrigger>
                   <SelectContent>
                     {propertyTypes.map((t) => (
                       <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>
@@ -141,7 +145,7 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
               {/* Price Range */}
               <div className="space-y-3">
                 <Label className="text-sm font-semibold text-foreground">
-                  Price Range <span className="text-muted-foreground font-normal">(EGP/night)</span>
+                  {t("properties.priceRange")} <span className="text-muted-foreground font-normal">{t("properties.priceRangeUnit")}</span>
                 </Label>
                 <div className="px-1">
                   <Slider
@@ -153,14 +157,14 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
                   />
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{(draft.MinPrice || 0).toLocaleString()} EGP</span>
-                  <span>{(draft.MaxPrice || 10000).toLocaleString()} EGP</span>
+                  <span>{(draft.MinPrice || 0).toLocaleString()} {t("common.egp")}</span>
+                  <span>{(draft.MaxPrice || 10000).toLocaleString()} {t("common.egp")}</span>
                 </div>
               </div>
 
               {/* Bedrooms */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-foreground">Min Bedrooms</Label>
+                <Label className="text-sm font-semibold text-foreground">{t("properties.minBedrooms")}</Label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((n) => (
                     <Button
@@ -178,7 +182,7 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
 
               {/* Guests */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-foreground">Min Guests</Label>
+                <Label className="text-sm font-semibold text-foreground">{t("properties.minGuests")}</Label>
                 <div className="flex gap-2">
                   {[2, 4, 6, 8, 10].map((n) => (
                     <Button
@@ -196,7 +200,7 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
 
               {/* Dates */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-foreground">Dates</Label>
+                <Label className="text-sm font-semibold text-foreground">{t("properties.dates")}</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
                     <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -223,9 +227,9 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
 
               {/* Amenities */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold text-foreground">Amenities</Label>
+                <Label className="text-sm font-semibold text-foreground">{t("properties.amenities")}</Label>
                 {loadingAmenities ? (
-                  <p className="text-sm text-muted-foreground">Loading amenities...</p>
+                  <p className="text-sm text-muted-foreground">{t("properties.loadingAmenities")}</p>
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
                     {amenities.map((a) => (
@@ -237,7 +241,7 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
                           checked={(draft.AmenityIds || []).includes(a.id)}
                           onCheckedChange={() => toggleAmenity(a.id)}
                         />
-                        <span className="text-sm">{a.nameEn || a.name || a.nameAr || 'Unknown'}</span>
+                        <span className="text-sm">{localized(a.nameEn, a.nameAr) || a.name || 'Unknown'}</span>
                       </label>
                     ))}
                   </div>
@@ -246,16 +250,16 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
 
               {/* Governorate (mobile) */}
               <div className="space-y-3 md:hidden">
-                <Label className="text-sm font-semibold text-foreground">Location</Label>
+                <Label className="text-sm font-semibold text-foreground">{t("properties.location")}</Label>
                 <Select
                   value={draft.GovernorateId?.toString() || ''}
                   onValueChange={(v) => setDraft({ ...draft, GovernorateId: v ? Number(v) : undefined })}
                   disabled={loadingGov}
                 >
-                  <SelectTrigger><SelectValue placeholder={loadingGov ? "Loading..." : "All Locations"} /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={loadingGov ? t("common.loading") : t("properties.allLocations")} /></SelectTrigger>
                   <SelectContent>
                     {governorates.map((g) => (
-                      <SelectItem key={g.id} value={g.id.toString()}>{g.nameEn || g.nameAr || 'Unknown'}</SelectItem>
+                      <SelectItem key={g.id} value={g.id.toString()}>{localized(g.nameEn, g.nameAr)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -264,10 +268,10 @@ export default function PropertySearchFilter({ params, onParamsChange }: Props) 
               {/* Actions */}
               <div className="flex gap-3 pt-4 border-t">
                 <Button variant="outline" className="flex-1" onClick={handleClearFilters}>
-                  <X className="h-4 w-4 mr-2" /> Clear All
+                  <X className="h-4 w-4 mr-2" /> {t("common.clearAll")}
                 </Button>
                 <Button className="flex-1 font-semibold" onClick={handleApplyFilters}>
-                  Apply Filters
+                  {t("properties.applyFilters")}
                 </Button>
               </div>
             </div>
@@ -291,6 +295,8 @@ interface SortSelectProps {
 function SortSelect({ params, onParamsChange }: SortSelectProps) {
   const { sortingOptions, loading: loadingSortingOptions } = useSortingOptions();
 
+  const { t } = useTranslation();
+
   return (
     <Select
       value={params.Sort?.toString() || ''}
@@ -298,7 +304,7 @@ function SortSelect({ params, onParamsChange }: SortSelectProps) {
       disabled={loadingSortingOptions}
     >
       <SelectTrigger className="w-[170px] h-11 hidden lg:flex">
-        <SelectValue placeholder={loadingSortingOptions ? "Loading..." : "Sort by"} />
+        <SelectValue placeholder={loadingSortingOptions ? t("common.loading") : t("properties.sortBy")} />
       </SelectTrigger>
       <SelectContent>
         {sortingOptions.map((s) => (
