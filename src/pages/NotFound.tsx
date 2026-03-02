@@ -34,9 +34,7 @@ const NotFound = () => {
           <p className="text-xl font-semibold text-foreground">
             {t("notFound.heading")}
           </p>
-          <p className="text-muted-foreground">
-            {t("notFound.description")}
-          </p>
+          <p className="text-muted-foreground">{t("notFound.description")}</p>
         </div>
         <Button asChild size="lg" className="h-12 px-8 font-semibold">
           <Link to="/">

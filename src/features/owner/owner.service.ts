@@ -1,6 +1,6 @@
 import axios from "axios";
 import { storage } from "@/lib/storage";
-import { setup401Interceptor } from "@/lib/api";
+import { setup401Interceptor, API_BASE } from "@/lib/api";
 import type {
   OwnerApiResponse,
   OwnerPropertyListing,
@@ -11,7 +11,7 @@ import type {
 } from "./owner.types";
 
 const api = axios.create({
-  baseURL: "/api/Property",
+  baseURL: `${API_BASE}/Property`,
 });
 
 api.interceptors.request.use((config) => {

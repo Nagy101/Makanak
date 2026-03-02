@@ -7,6 +7,7 @@
 //  the initial JS bundle.
 // ═══════════════════════════════════════════════════════════════
 import { memo, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   PieChart,
   Pie,
@@ -38,27 +39,28 @@ interface PropertiesDonutChartProps {
 const PropertiesDonutChart = memo(function PropertiesDonutChart({
   data,
 }: PropertiesDonutChartProps) {
+  const { t } = useTranslation();
   // ── Memoised transformation ────────────────────────────────
   const chartData = useMemo<PropertyChartEntry[]>(
     () =>
       [
         {
-          name: "Active",
+          name: t("admin.activeLabel"),
           value: data.activeProperties,
           fill: PROPERTY_COLORS.Active,
         },
         {
-          name: "Pending",
+          name: t("admin.pendingLabel"),
           value: data.pendingApprovalProperties,
           fill: PROPERTY_COLORS.Pending,
         },
         {
-          name: "Rejected",
+          name: t("admin.rejectedLabel"),
           value: data.rejectedProperties,
           fill: PROPERTY_COLORS.Rejected,
         },
       ].filter((e) => e.value > 0),
-    [data],
+    [data, t],
   );
 
   const total = data.totalProperties;
@@ -67,9 +69,11 @@ const PropertiesDonutChart = memo(function PropertiesDonutChart({
     <Card className="border-border shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold text-foreground">
-          Property Distribution
+          {t("admin.propertyDistribution")}
         </CardTitle>
-        <CardDescription>{total} total properties</CardDescription>
+        <CardDescription>
+          {t("admin.totalPropertiesCount", { count: total })}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={260}>

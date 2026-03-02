@@ -16,6 +16,7 @@
 //    ✓ Atomic Zustand selector used inside child components.
 // ═══════════════════════════════════════════════════════════════
 import { memo, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { MessageSquare, Loader2 } from "lucide-react";
 import { usePropertyReviews, useDeleteReview } from "../useReviews";
 import ReviewItem from "./ReviewItem";
@@ -49,14 +50,17 @@ const ReviewSkeletons = memo(function ReviewSkeletons() {
 
 // ── Sub-component: Empty State ────────────────────────────────
 const EmptyReviews = memo(function EmptyReviews() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center py-14 gap-3 text-center">
       <div className="h-14 w-14 rounded-full bg-primary/8 flex items-center justify-center">
         <MessageSquare className="h-7 w-7 text-primary/50" />
       </div>
-      <p className="font-semibold text-foreground">No reviews yet</p>
+      <p className="font-semibold text-foreground">
+        {t("reviews.noReviewsYet")}
+      </p>
       <p className="text-sm text-muted-foreground">
-        Be the first to share your experience with this property.
+        {t("reviews.beFirstToReview")}
       </p>
     </div>
   );
@@ -66,6 +70,7 @@ const EmptyReviews = memo(function EmptyReviews() {
 const PropertyReviewsSection = memo(function PropertyReviewsSection({
   propertyId,
 }: PropertyReviewsSectionProps) {
+  const { t } = useTranslation();
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
     usePropertyReviews(propertyId);
 
@@ -98,7 +103,7 @@ const PropertyReviewsSection = memo(function PropertyReviewsSection({
       {/* ── Section Header ─────────────────────────────────── */}
       <div className="flex items-center justify-between mb-4">
         <h2 id="reviews-heading" className="text-xl font-bold text-foreground">
-          Guest Reviews
+          {t("reviews.guestReviews")}
         </h2>
 
         {!isLoading && totalCount > 0 && (
@@ -108,7 +113,7 @@ const PropertyReviewsSection = memo(function PropertyReviewsSection({
               {averageRating}
             </span>
             <span className="text-sm text-muted-foreground">
-              ({totalCount} review{totalCount !== 1 ? "s" : ""})
+              ({t("reviews.reviewCount", { count: totalCount })})
             </span>
           </div>
         )}
@@ -151,10 +156,10 @@ const PropertyReviewsSection = memo(function PropertyReviewsSection({
                 {isFetchingNextPage ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Loading…
+                    {t("reviews.loadingReviews")}
                   </>
                 ) : (
-                  "Load More Reviews"
+                  t("reviews.loadMoreReviews")
                 )}
               </Button>
             </div>

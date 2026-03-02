@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -51,6 +52,7 @@ export default function CreateDisputeModal({
   bookingId,
   role = "tenant",
 }: Props) {
+  const { t } = useTranslation();
   const [images, setImages] = useState<File[]>([]);
 
   // Fetch reasons on-demand (only when the modal is actually open)
@@ -109,10 +111,8 @@ export default function CreateDisputeModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>File a Dispute</DialogTitle>
-          <DialogDescription>
-            Report an issue with your booking
-          </DialogDescription>
+          <DialogTitle>{t("disputes.fileDispute")}</DialogTitle>
+          <DialogDescription>{t("disputes.reportIssue")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -123,7 +123,7 @@ export default function CreateDisputeModal({
 
           {/* Reason */}
           <div className="space-y-1.5">
-            <Label>Reason</Label>
+            <Label>{t("disputes.reason")}</Label>
             <Select
               disabled={reasonsLoading}
               onValueChange={(v) =>
@@ -133,7 +133,9 @@ export default function CreateDisputeModal({
               <SelectTrigger>
                 <SelectValue
                   placeholder={
-                    reasonsLoading ? "Loading reasons…" : "Select a reason"
+                    reasonsLoading
+                      ? t("disputes.loadingReasons")
+                      : t("disputes.selectReason")
                   }
                 />
               </SelectTrigger>
@@ -155,10 +157,10 @@ export default function CreateDisputeModal({
 
           {/* Description */}
           <div className="space-y-1.5">
-            <Label>Description</Label>
+            <Label>{t("disputes.description")}</Label>
             <Textarea
               rows={4}
-              placeholder="Describe the issue..."
+              placeholder={t("disputes.describeIssue")}
               {...register("Description")}
             />
             {errors.Description && (
@@ -170,10 +172,10 @@ export default function CreateDisputeModal({
 
           {/* Images */}
           <div className="space-y-1.5">
-            <Label>Evidence Images (optional)</Label>
+            <Label>{t("disputes.evidenceImages")}</Label>
             <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-4 text-sm text-muted-foreground hover:border-primary/50 hover:bg-secondary/50 transition-colors">
               <Upload className="h-4 w-4" />
-              Click to upload images
+              {t("disputes.clickToUpload")}
               <Input
                 type="file"
                 accept="image/*"
@@ -213,7 +215,7 @@ export default function CreateDisputeModal({
               onClick={() => onOpenChange(false)}
               className="hover:bg-muted hover:text-foreground"
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"
@@ -222,7 +224,7 @@ export default function CreateDisputeModal({
               {createMutation.isPending && (
                 <Loader2 className="h-4 w-4 animate-spin mr-1" />
               )}
-              Submit Dispute
+              {t("disputes.submitDispute")}
             </Button>
           </DialogFooter>
         </form>

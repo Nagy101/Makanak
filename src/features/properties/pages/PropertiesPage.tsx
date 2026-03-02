@@ -81,7 +81,9 @@ export default function PropertiesPage() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{t("properties.title")}</h1>
+            <h1 className="text-2xl font-bold text-foreground">
+              {t("properties.title")}
+            </h1>
             {data && (
               <p className="mt-1 text-sm text-muted-foreground">
                 {t("properties.propertiesFound", { count: data.totalCount })}
@@ -156,7 +158,8 @@ export default function PropertiesPage() {
                     setParams({ ...params, PageIndex: currentPage - 1 })
                   }
                 >
-                  <ChevronLeft className="mr-1 h-4 w-4" /> {t("properties.previous")}
+                  <ChevronLeft className="mr-1 h-4 w-4" />{" "}
+                  {t("properties.previous")}
                 </Button>
 
                 <div className="flex items-center gap-1">
@@ -180,7 +183,8 @@ export default function PropertiesPage() {
                     setParams({ ...params, PageIndex: currentPage + 1 })
                   }
                 >
-                  {t("properties.next")} <ChevronRight className="ml-1 h-4 w-4" />
+                  {t("properties.next")}{" "}
+                  <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
             )}

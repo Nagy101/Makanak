@@ -18,10 +18,30 @@ import NotificationBell from "@/features/notifications/components/NotificationBe
 import { useState } from "react";
 
 const NAV_ITEMS = [
-  { to: "/admin", icon: LayoutDashboard, labelKey: "admin.sidebarDashboard", end: true },
-  { to: "/admin/users", icon: Users, labelKey: "admin.sidebarUsers", end: false },
-  { to: "/admin/properties", icon: Building2, labelKey: "admin.sidebarProperties", end: false },
-  { to: "/admin/disputes", icon: AlertTriangle, labelKey: "admin.sidebarDisputes", end: false },
+  {
+    to: "/admin",
+    icon: LayoutDashboard,
+    labelKey: "admin.sidebarDashboard",
+    end: true,
+  },
+  {
+    to: "/admin/users",
+    icon: Users,
+    labelKey: "admin.sidebarUsers",
+    end: false,
+  },
+  {
+    to: "/admin/properties",
+    icon: Building2,
+    labelKey: "admin.sidebarProperties",
+    end: false,
+  },
+  {
+    to: "/admin/disputes",
+    icon: AlertTriangle,
+    labelKey: "admin.sidebarDisputes",
+    end: false,
+  },
 ] as const;
 
 const AdminLayout = memo(() => {

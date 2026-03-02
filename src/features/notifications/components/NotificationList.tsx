@@ -1,10 +1,12 @@
 import { memo, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNotificationList, useMarkAsRead } from "../useNotifications";
 import NotificationItem from "./NotificationItem";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell } from "lucide-react";
 
 const NotificationList = memo(() => {
+  const { t } = useTranslation();
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const filter = showUnreadOnly ? { isRead: false } : undefined;
   const { data: notifications = [], isLoading } = useNotificationList(filter);
@@ -21,7 +23,9 @@ const NotificationList = memo(() => {
     <div className="w-80 sm:w-96 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
-        <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+        <h3 className="text-sm font-semibold text-foreground">
+          {t("notifications.title")}
+        </h3>
         <div className="flex gap-1">
           <button
             type="button"
@@ -32,7 +36,7 @@ const NotificationList = memo(() => {
                 : "text-muted-foreground hover:bg-primary hover:text-primary-foreground"
             }`}
           >
-            All
+            {t("notifications.all")}
           </button>
           <button
             type="button"
@@ -43,7 +47,7 @@ const NotificationList = memo(() => {
                 : "text-muted-foreground hover:bg-primary hover:text-primary-foreground"
             }`}
           >
-            Unread
+            {t("notifications.unread")}
           </button>
         </div>
       </div>
@@ -60,7 +64,7 @@ const NotificationList = memo(() => {
           {!isLoading && notifications.length === 0 && (
             <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground">
               <Bell className="h-8 w-8 opacity-30" />
-              <p className="text-sm">No notifications</p>
+              <p className="text-sm">{t("notifications.noNotifications")}</p>
             </div>
           )}
 

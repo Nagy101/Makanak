@@ -1,6 +1,6 @@
 import axios from "axios";
 import { storage } from "@/lib/storage";
-import { setup401Interceptor } from "@/lib/api";
+import { setup401Interceptor, API_BASE } from "@/lib/api";
 import type {
   AdminApiResponse,
   AdminUser,
@@ -11,10 +11,11 @@ import type {
   UserVerificationDetails,
   AdminPropertyListing,
   AdminPropertySearchParams,
+  StrikeApiResponse,
 } from "./admin.types";
 
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: API_BASE,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -48,6 +49,17 @@ export const getUserVerificationDetails = (userId: string) =>
 export const updatePropertyStatus = (data: UpdatePropertyStatusRequest) =>
   api
     .put<AdminApiResponse<null>>("/Admin/properties/status", data)
+    .then((r) => r.data);
+
+// ── Strikes ──
+export const addStrike = (userId: string) =>
+  api
+    .post<StrikeApiResponse>(`/Admin/users/${userId}/strike`)
+    .then((r) => r.data);
+
+export const removeStrike = (userId: string) =>
+  api
+    .delete<StrikeApiResponse>(`/Admin/users/${userId}/strike`)
     .then((r) => r.data);
 
 // ── Admin Properties ──

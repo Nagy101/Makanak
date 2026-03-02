@@ -1,6 +1,6 @@
 import axios from "axios";
 import { storage } from "@/lib/storage";
-import { setup401Interceptor } from "@/lib/api";
+import { setup401Interceptor, API_BASE } from "@/lib/api";
 import type {
   Notification,
   NotificationApiResponse,
@@ -9,7 +9,7 @@ import type {
 } from "./notifications.types";
 
 const api = axios.create({
-  baseURL: "/api/Notifications",
+  baseURL: `${API_BASE}/Notifications`,
   headers: { "Content-Type": "application/json" },
 });
 

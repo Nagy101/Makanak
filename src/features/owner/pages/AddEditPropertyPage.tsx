@@ -329,7 +329,9 @@ export default function AddEditPropertyPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="PricePerNight">{t("owner.pricePerNightEgp")}</Label>
+                <Label htmlFor="PricePerNight">
+                  {t("owner.pricePerNightEgp")}
+                </Label>
                 <Input
                   id="PricePerNight"
                   type="number"
@@ -432,7 +434,9 @@ export default function AddEditPropertyPage() {
         {/* Details */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">{t("owner.propertyDetails")}</CardTitle>
+            <CardTitle className="text-lg">
+              {t("owner.propertyDetails")}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -474,7 +478,9 @@ export default function AddEditPropertyPage() {
 
             {/* Amenities */}
             <div className="space-y-3">
-              <Label className="text-sm font-semibold">{t("owner.amenities")}</Label>
+              <Label className="text-sm font-semibold">
+                {t("owner.amenities")}
+              </Label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {amenities.map((a) => (
                   <label
@@ -594,7 +600,9 @@ export default function AddEditPropertyPage() {
 
                 <label className="flex h-24 w-32 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors">
                   <ImagePlus className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">{t("owner.addImage")}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t("owner.addImage")}
+                  </span>
                   <input
                     type="file"
                     accept="image/*"

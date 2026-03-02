@@ -51,7 +51,11 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
   const userName = user?.name ?? "";
   const userInitials = userName ? userName.charAt(0).toUpperCase() : "U";
   const userAvatar = storedAvatar || profileData?.profilePictureUrl || null;
-  const userRoleLabel = isAdmin ? t("nav.admin") : isOwner ? t("nav.owner") : t("nav.tenant");
+  const userRoleLabel = isAdmin
+    ? t("nav.admin")
+    : isOwner
+      ? t("nav.owner")
+      : t("nav.tenant");
 
   // Active state helper — exact match or path prefix
   const isActive = (href: string, exact = false) =>
@@ -75,7 +79,11 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
       : isOwner
         ? [{ label: t("nav.ownerDashboard"), href: "/owner", exact: false }]
         : [
-            { label: t("nav.browseProperties"), href: "/properties", exact: true },
+            {
+              label: t("nav.browseProperties"),
+              href: "/properties",
+              exact: true,
+            },
             { label: t("nav.myBookings"), href: "/my-bookings", exact: true },
             { label: t("nav.myDisputes"), href: "/my-disputes", exact: true },
           ];
@@ -189,7 +197,7 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                         )}
                         <div className="text-left min-w-0">
                           <p className="text-sm font-semibold truncate">
-                            {userName || "User"}
+                            {userName || t("common.profile")}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {userRoleLabel}

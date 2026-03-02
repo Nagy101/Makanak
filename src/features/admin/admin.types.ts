@@ -19,6 +19,16 @@ export interface AdminUser {
   userType: UserType;
   userStatus: UserStatus;
   joinAt: string;
+  strikeCount: number;
+}
+
+// ── Strike API Response ──
+export interface StrikeApiResponse {
+  statusCode: number;
+  isSuccess: boolean;
+  message: string;
+  data: string;
+  errors: string[];
 }
 
 export interface AdminUserSearchParams {

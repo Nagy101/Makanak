@@ -1,6 +1,6 @@
 import axios from "axios";
 import { storage } from "@/lib/storage";
-import { setup401Interceptor } from "@/lib/api";
+import { setup401Interceptor, API_BASE } from "@/lib/api";
 import type {
   PaymentApiResponse,
   PaymentIntentData,
@@ -9,7 +9,7 @@ import type {
 } from "./payment.types";
 
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: API_BASE,
   headers: { "Content-Type": "application/json" },
 });
 

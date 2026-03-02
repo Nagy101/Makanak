@@ -1,4 +1,5 @@
 import { memo, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   X,
   CheckCircle2,
@@ -9,6 +10,8 @@ import {
   Phone,
   Calendar,
   Shield,
+  AlertTriangle,
+  MinusCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +24,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useUserVerification, useUpdateUserStatus } from "../useAdmin";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  useUserVerification,
+  useUpdateUserStatus,
+  useAddStrike,
+  useRemoveStrike,
+} from "../useAdmin";
 import type { UserStatus } from "../admin.types";
 import { toast } from "sonner";
 
@@ -38,12 +57,38 @@ const statusBadge: Record<UserStatus, string> = {
   Banned: "bg-destructive/10 text-destructive",
 };
 
+// ── Memoized strike count display (primitive props) ──
+const StrikeCountBadge = memo(function StrikeCountBadge({
+  count,
+}: {
+  count: number;
+}) {
+  const colorClass =
+    count === 0
+      ? "bg-success/10 text-success border-success/20"
+      : count >= 3
+        ? "bg-destructive/10 text-destructive border-destructive/20"
+        : "bg-warning/10 text-warning border-warning/20";
+
+  return (
+    <Badge variant="outline" className={`text-sm font-semibold ${colorClass}`}>
+      {count}/3
+    </Badge>
+  );
+});
+StrikeCountBadge.displayName = "StrikeCountBadge";
+
 const UserVerificationModal = memo<UserVerificationModalProps>(
   ({ userId, onClose }) => {
+    const { t } = useTranslation();
     const { data, isLoading } = useUserVerification(userId);
     const mutation = useUpdateUserStatus();
+    const addStrikeMutation = useAddStrike();
+    const removeStrikeMutation = useRemoveStrike();
     const [rejectReason, setRejectReason] = useState("");
     const [showRejectInput, setShowRejectInput] = useState(false);
+    const isStrikePending =
+      addStrikeMutation.isPending || removeStrikeMutation.isPending;
 
     const handleAction = useCallback(
       (newStatus: UserStatus, reason?: string) => {
@@ -51,15 +96,31 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
           { userId, newStatus, rejectedReason: reason ?? "" },
           {
             onSuccess: () => {
-              toast.success(`User status updated to ${newStatus}`);
+              toast.success(
+                t("admin.userStatusUpdated", { status: newStatus }),
+              );
               onClose();
             },
-            onError: () => toast.error("Failed to update status"),
+            onError: () => toast.error(t("admin.failedUpdateUserStatus")),
           },
         );
       },
-      [userId, mutation, onClose],
+      [userId, mutation, onClose, t],
     );
+
+    const handleAddStrike = useCallback(() => {
+      addStrikeMutation.mutate(userId, {
+        onSuccess: () => toast.success(t("admin.strikeAdded")),
+        onError: () => toast.error(t("admin.strikeAddFailed")),
+      });
+    }, [userId, addStrikeMutation, t]);
+
+    const handleRemoveStrike = useCallback(() => {
+      removeStrikeMutation.mutate(userId, {
+        onSuccess: () => toast.success(t("admin.strikeRemoved")),
+        onError: () => toast.error(t("admin.strikeRemoveFailed")),
+      });
+    }, [userId, removeStrikeMutation, t]);
 
     const handleReject = useCallback(() => {
       if (showRejectInput) {
@@ -75,7 +136,7 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-primary" />
-              User Verification Details
+              {t("admin.userVerificationDetails")}
             </DialogTitle>
           </DialogHeader>
 
@@ -87,7 +148,7 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
             </div>
           ) : !data ? (
             <p className="py-8 text-center text-muted-foreground">
-              No data found
+              {t("admin.noDataFound")}
             </p>
           ) : (
             <div className="space-y-5 py-2">
@@ -129,13 +190,23 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
                     <Phone className="h-4 w-4" /> {data.phoneNumber}
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" /> Joined{" "}
+                    <Calendar className="h-4 w-4" /> {t("admin.joined")}{" "}
                     {new Date(data.joinAt).toLocaleDateString()}
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Shield className="h-4 w-4" /> {data.userType} · Strikes:{" "}
-                    {data.strikeCount}
+                    <Shield className="h-4 w-4" /> {data.userType}
                   </div>
+                </div>
+
+                {/* Strike Count — Prominent Display */}
+                <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-warning" />
+                    <span className="text-sm font-medium text-foreground">
+                      {t("admin.strikes")}
+                    </span>
+                  </div>
+                  <StrikeCountBadge count={data.strikeCount} />
                 </div>
               </div>
 
@@ -144,7 +215,7 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
               {/* National ID */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-foreground">
-                  National ID Documents
+                  {t("admin.nationalIdDocuments")}
                 </h4>
                 {data.nationalId && (
                   <p className="text-sm text-muted-foreground">
@@ -153,7 +224,9 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
                 )}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Front</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("admin.front")}
+                    </p>
                     {data.nationalIdImageFrontUrl ? (
                       <a
                         href={data.nationalIdImageFrontUrl}
@@ -171,12 +244,14 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
                       </a>
                     ) : (
                       <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
-                        Not provided
+                        {t("admin.notProvided")}
                       </div>
                     )}
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Back</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("admin.back")}
+                    </p>
                     {data.nationalIdImageBackUrl ? (
                       <a
                         href={data.nationalIdImageBackUrl}
@@ -194,7 +269,7 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
                       </a>
                     ) : (
                       <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
-                        Not provided
+                        {t("admin.notProvided")}
                       </div>
                     )}
                   </div>
@@ -206,7 +281,7 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
               {/* Reject reason input */}
               {showRejectInput && (
                 <Textarea
-                  placeholder="Reason for rejection..."
+                  placeholder={t("admin.reasonForRejection")}
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                 />
@@ -220,7 +295,7 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
                   disabled={mutation.isPending}
                   onClick={() => handleAction("Active")}
                 >
-                  <CheckCircle2 className="mr-1 h-4 w-4" /> Approve
+                  <CheckCircle2 className="mr-1 h-4 w-4" /> {t("admin.approve")}
                 </Button>
                 <Button
                   size="sm"
@@ -229,7 +304,9 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
                   onClick={handleReject}
                 >
                   <XCircle className="mr-1 h-4 w-4" />
-                  {showRejectInput ? "Confirm Reject" : "Reject"}
+                  {showRejectInput
+                    ? t("admin.confirmReject")
+                    : t("admin.reject")}
                 </Button>
                 <Button
                   size="sm"
@@ -238,7 +315,55 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
                   disabled={mutation.isPending}
                   onClick={() => handleAction("Banned")}
                 >
-                  <Ban className="mr-1 h-4 w-4" /> Ban
+                  <Ban className="mr-1 h-4 w-4" /> {t("admin.ban")}
+                </Button>
+
+                <Separator orientation="vertical" className="h-8 mx-1" />
+
+                {/* Issue Strike with confirmation */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-warning border-warning/30 hover:bg-warning hover:text-warning-foreground"
+                      disabled={isStrikePending || (data.strikeCount ?? 0) >= 3}
+                    >
+                      <AlertTriangle className="mr-1 h-4 w-4" />{" "}
+                      {t("admin.issueStrike")}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t("admin.confirmStrikeTitle")}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("admin.confirmStrikeDesc")}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={handleAddStrike}
+                      >
+                        {t("admin.confirmStrikeAction")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
+                {/* Revoke Strike */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-primary border-primary/30 hover:bg-primary hover:text-primary-foreground"
+                  disabled={isStrikePending || (data.strikeCount ?? 0) === 0}
+                  onClick={handleRemoveStrike}
+                >
+                  <MinusCircle className="mr-1 h-4 w-4" />{" "}
+                  {t("admin.revokeStrike")}
                 </Button>
               </div>
             </div>

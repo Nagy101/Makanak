@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { useAuthStore } from "./store/authStore";
-import { createApi } from "../../lib/api";
+import { createApi, API_BASE } from "../../lib/api";
 import type {
   LoginRequest,
   LoginResponse,
@@ -18,7 +18,7 @@ import type {
   ApiResponse,
 } from "./auth.types";
 
-const authApi = createApi("/api/Auth");
+const authApi = createApi(`${API_BASE}/Auth`);
 
 function toFormData(
   data: Record<string, File | string | number | boolean | null | undefined>,

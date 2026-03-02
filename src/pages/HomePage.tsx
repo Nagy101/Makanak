@@ -206,9 +206,24 @@ const GovernorateCard = memo(function GovernorateCard({
 // How It Works Section
 // ─────────────────────────────────────────────────────────────
 const STEPS_KEYS = [
-  { icon: Search, number: 1, titleKey: "home.step1Title", descKey: "home.step1Desc" },
-  { icon: CalendarCheck, number: 2, titleKey: "home.step2Title", descKey: "home.step2Desc" },
-  { icon: CheckCircle, number: 3, titleKey: "home.step3Title", descKey: "home.step3Desc" },
+  {
+    icon: Search,
+    number: 1,
+    titleKey: "home.step1Title",
+    descKey: "home.step1Desc",
+  },
+  {
+    icon: CalendarCheck,
+    number: 2,
+    titleKey: "home.step2Title",
+    descKey: "home.step2Desc",
+  },
+  {
+    icon: CheckCircle,
+    number: 3,
+    titleKey: "home.step3Title",
+    descKey: "home.step3Desc",
+  },
 ] as const;
 
 const HowItWorksSection = memo(function HowItWorksSection() {
@@ -264,7 +279,9 @@ const HowItWorksSection = memo(function HowItWorksSection() {
 
               {/* Text */}
               <div>
-                <h3 className="text-lg font-bold text-foreground">{t(titleKey)}</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  {t(titleKey)}
+                </h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {t(descKey)}
                 </p>
@@ -414,7 +431,7 @@ export default function HomePage() {
               onClick={handleBrowseAll}
               className="shrink-0"
             >
-              View All <ArrowRight className="ml-1.5 h-4 w-4" />
+              {t("common.viewAll")} <ArrowRight className="ml-1.5 h-4 w-4" />
             </Button>
           </div>
 
@@ -427,9 +444,7 @@ export default function HomePage() {
           ) : featuredProperties.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
               <Home className="h-12 w-12 text-muted" />
-              <p className="text-muted-foreground">
-                {t("home.noProperties")}
-              </p>
+              <p className="text-muted-foreground">{t("home.noProperties")}</p>
               <Button variant="outline" onClick={handleBrowseAll}>
                 {t("home.browseAllListings")}
               </Button>
@@ -525,9 +540,7 @@ export default function HomePage() {
                 className="h-20 w-auto object-contain"
               />
             </Link>
-            <p className="text-sm leading-relaxed">
-              {t("home.footerBrand")}
-            </p>
+            <p className="text-sm leading-relaxed">{t("home.footerBrand")}</p>
             {/* Social links */}
             <div className="flex gap-3 mt-1">
               <a
@@ -704,7 +717,9 @@ export default function HomePage() {
         {/* Bottom bar */}
         <div className="border-t border-white/8">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-5 text-xs sm:flex-row">
-            <p>{t("home.footerCopyright", { year: new Date().getFullYear() })}</p>
+            <p>
+              {t("home.footerCopyright", { year: new Date().getFullYear() })}
+            </p>
             <p className="text-slate-600">{t("home.footerBuiltWith")}</p>
           </div>
         </div>

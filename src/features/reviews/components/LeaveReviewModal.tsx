@@ -45,6 +45,7 @@
 //       )}
 // ═══════════════════════════════════════════════════════════════
 import { memo, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, Star } from "lucide-react";
 import {
   Dialog,
@@ -84,6 +85,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
   open,
   onClose,
 }: LeaveReviewModalProps) {
+  const { t } = useTranslation();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
@@ -136,18 +138,16 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
         <DialogHeader>
           <DialogTitle className="text-primary flex items-center gap-2">
             <Star className="h-5 w-5 fill-primary text-primary" />
-            Leave a Review
+            {t("reviews.leaveReview")}
           </DialogTitle>
-          <DialogDescription>
-            Share your experience to help other guests.
-          </DialogDescription>
+          <DialogDescription>{t("reviews.shareExperience")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-2">
           {/* ── Star Rating Selector ────────────────────────── */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-foreground">
-              Your Rating <span className="text-red-500">*</span>
+              {t("reviews.yourRating")} <span className="text-red-500">*</span>
             </Label>
             <StarRating
               value={rating}
@@ -156,7 +156,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
             />
             {rating === 0 && (
               <p className="text-xs text-muted-foreground">
-                Please select a star rating.
+                {t("reviews.selectStarRating")}
               </p>
             )}
           </div>
@@ -167,11 +167,11 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
               htmlFor="review-comment"
               className="text-sm font-medium text-foreground"
             >
-              Your Comment <span className="text-red-500">*</span>
+              {t("reviews.yourComment")} <span className="text-red-500">*</span>
             </Label>
             <Textarea
               id="review-comment"
-              placeholder="Describe your experience with this property…"
+              placeholder={t("reviews.describeExperience")}
               value={comment}
               onChange={handleCommentChange}
               rows={4}
@@ -184,7 +184,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
             <div className="flex justify-between items-center">
               {commentTooShort ? (
                 <p className="text-xs text-red-500">
-                  Minimum {MIN_COMMENT} characters required.
+                  {t("reviews.minCharsRequired", { count: MIN_COMMENT })}
                 </p>
               ) : (
                 <span />
@@ -203,7 +203,7 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
               onClick={handleClose}
               disabled={isPending}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"
@@ -213,10 +213,10 @@ const LeaveReviewModal = memo(function LeaveReviewModal({
               {isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Submitting…
+                  {t("reviews.submitting")}
                 </>
               ) : (
-                "Submit Review"
+                t("reviews.submitReview")
               )}
             </Button>
           </DialogFooter>

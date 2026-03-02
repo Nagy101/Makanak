@@ -30,7 +30,8 @@ interface AuthResponse {
 
 // ── Profile Query ──
 export function useProfile() {
-  const { token, setUser } = useAuthStore();
+  const token = useAuthStore((s) => s.token);
+  const setUser = useAuthStore((s) => s.setUser);
   return useQuery({
     queryKey: ["auth", "profile"],
     queryFn: async () => {
@@ -45,7 +46,8 @@ export function useProfile() {
 
 // ── Login ──
 export function useLogin() {
-  const { setAuth, clearAuth } = useAuthStore();
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const clearAuth = useAuthStore((s) => s.clearAuth);
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -104,7 +106,7 @@ export function useLogin() {
 
 // ── Register ──
 export function useRegister() {
-  const { setAuth } = useAuthStore();
+  const setAuth = useAuthStore((s) => s.setAuth);
   const navigate = useNavigate();
   return useMutation({
     mutationFn: (data: RegisterRequest) => authService.register(data),
@@ -119,7 +121,7 @@ export function useRegister() {
 
 // ── Logout ──
 export function useLogout() {
-  const { clearAuth } = useAuthStore();
+  const clearAuth = useAuthStore((s) => s.clearAuth);
   const navigate = useNavigate();
   const qc = useQueryClient();
   return useMutation({

@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ export default function ResolveDisputeModal({
   onOpenChange,
   disputeId,
 }: Props) {
+  const { t } = useTranslation();
   const [decision, setDecision] = useState<DisputeDecisionType | "">("");
   const [comment, setComment] = useState("");
   const resolveMutation = useResolveDispute();
@@ -58,34 +60,38 @@ export default function ResolveDisputeModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Resolve Dispute #{disputeId}</DialogTitle>
-          <DialogDescription>
-            Choose a decision and add a comment.
-          </DialogDescription>
+          <DialogTitle>
+            {t("disputes.resolveDispute")} #{disputeId}
+          </DialogTitle>
+          <DialogDescription>{t("disputes.chooseDecision")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Decision</Label>
+            <Label>{t("disputes.decision")}</Label>
             <Select
               value={decision}
               onValueChange={(v) => setDecision(v as DisputeDecisionType)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select decision" />
+                <SelectValue placeholder={t("disputes.selectDecision")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Resolved">Resolved</SelectItem>
-                <SelectItem value="Rejected">Rejected</SelectItem>
+                <SelectItem value="Resolved">
+                  {t("disputes.resolved")}
+                </SelectItem>
+                <SelectItem value="Rejected">
+                  {t("disputes.rejected")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-1.5">
-            <Label>Admin Comment</Label>
+            <Label>{t("disputes.adminComment")}</Label>
             <Textarea
               rows={4}
-              placeholder="Provide your reasoning..."
+              placeholder={t("disputes.provideReasoning")}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
@@ -98,7 +104,7 @@ export default function ResolveDisputeModal({
             onClick={() => onOpenChange(false)}
             className="hover:bg-muted hover:text-foreground"
           >
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
@@ -107,7 +113,7 @@ export default function ResolveDisputeModal({
             {resolveMutation.isPending && (
               <Loader2 className="h-4 w-4 animate-spin mr-1" />
             )}
-            Submit Decision
+            {t("disputes.submitDecision")}
           </Button>
         </DialogFooter>
       </DialogContent>

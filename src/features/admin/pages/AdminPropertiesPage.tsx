@@ -1,4 +1,6 @@
 import { memo, useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocalizedField } from "@/hooks/useLocalizedField";
 import {
   Search,
   ChevronLeft,
@@ -75,6 +77,8 @@ const statusColor: Record<string, string> = {
 };
 
 const AdminPropertiesPage = memo(() => {
+  const { t } = useTranslation();
+  const localized = useLocalizedField();
   const [params, setParams] = useState<AdminPropertySearchParams>({
     PageIndex: 1,
     PageSize: PAGE_SIZE,
@@ -148,7 +152,7 @@ const AdminPropertiesPage = memo(() => {
     (propertyId: number) => {
       mutation.mutate(
         { propertyId, newStatus: "Accepted" },
-        { onSuccess: () => toast.success("Property approved") },
+        { onSuccess: () => toast.success(t("admin.propertyApproved")) },
       );
     },
     [mutation],
@@ -164,7 +168,7 @@ const AdminPropertiesPage = memo(() => {
       },
       {
         onSuccess: () => {
-          toast.success("Property rejected");
+          toast.success(t("admin.propertyRejected"));
           setRejectTarget(null);
           setRejectReason("");
         },
@@ -180,10 +184,10 @@ const AdminPropertiesPage = memo(() => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">
-          Property Management
+          {t("admin.propertyManagement")}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Review and manage property listings
+          {t("admin.reviewManageListings")}
         </p>
       </div>
 
@@ -192,7 +196,7 @@ const AdminPropertiesPage = memo(() => {
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search properties..."
+            placeholder={t("admin.searchPropertiesPlaceholder")}
             className="pl-9"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -201,10 +205,10 @@ const AdminPropertiesPage = memo(() => {
         </div>
         <Select onValueChange={handleStatusFilter} defaultValue="all">
           <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t("admin.statusColumn")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="all">{t("admin.allStatus")}</SelectItem>
             {propertyStatuses.map((status) => (
               <SelectItem key={status.id} value={status.name}>
                 {status.name}
@@ -217,7 +221,7 @@ const AdminPropertiesPage = memo(() => {
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="all">{t("admin.allTypes")}</SelectItem>
             {propertyTypes.map((type) => (
               <SelectItem key={type.id} value={type.name}>
                 {type.name}
@@ -230,10 +234,10 @@ const AdminPropertiesPage = memo(() => {
             <SelectValue placeholder="Governorate" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Governorates</SelectItem>
+            <SelectItem value="all">{t("admin.allGovernorates")}</SelectItem>
             {governorates.map((gov) => (
               <SelectItem key={gov.id} value={gov.id.toString()}>
-                {gov.nameEn || gov.nameAr}
+                {localized(gov.nameEn, gov.nameAr)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -243,7 +247,7 @@ const AdminPropertiesPage = memo(() => {
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">Default Sort</SelectItem>
+            <SelectItem value="none">{t("admin.defaultSort")}</SelectItem>
             {sortingOptions.map((option) => (
               <SelectItem key={option.id} value={option.id.toString()}>
                 {option.name}
@@ -252,7 +256,7 @@ const AdminPropertiesPage = memo(() => {
           </SelectContent>
         </Select>
         <Button onClick={handleSearch} size="sm">
-          Search
+          {t("common.search")}
         </Button>
       </div>
 
@@ -266,19 +270,27 @@ const AdminPropertiesPage = memo(() => {
           </div>
         ) : !data?.data?.length ? (
           <div className="flex h-40 items-center justify-center text-muted-foreground">
-            No properties found
+            {t("admin.noPropertiesFound")}
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead className="hidden sm:table-cell">Type</TableHead>
-                <TableHead>Price/Night</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden md:table-cell">Location</TableHead>
-                <TableHead className="hidden lg:table-cell">Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t("admin.titleColumn")}</TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  {t("admin.typeColumn")}
+                </TableHead>
+                <TableHead>{t("admin.priceNightColumn")}</TableHead>
+                <TableHead>{t("admin.statusColumn")}</TableHead>
+                <TableHead className="hidden md:table-cell">
+                  {t("admin.locationColumn")}
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">
+                  {t("admin.createdColumn")}
+                </TableHead>
+                <TableHead className="text-right">
+                  {t("admin.actionsColumn")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -319,7 +331,7 @@ const AdminPropertiesPage = memo(() => {
                         size="sm"
                         className="text-primary hover:bg-primary/15 hover:text-primary"
                         onClick={() => setSelectedPropertyId(p.id)}
-                        title="View details"
+                        title={t("admin.viewDetails")}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -391,10 +403,10 @@ const AdminPropertiesPage = memo(() => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Property</DialogTitle>
+            <DialogTitle>{t("admin.rejectProperty")}</DialogTitle>
           </DialogHeader>
           <Textarea
-            placeholder="Reason for rejection..."
+            placeholder={t("admin.reasonForRejection")}
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
           />
@@ -404,14 +416,14 @@ const AdminPropertiesPage = memo(() => {
               onClick={() => setRejectTarget(null)}
               className="hover:bg-muted hover:text-foreground hover:border-border"
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleRejectSubmit}
               disabled={mutation.isPending}
             >
-              Reject
+              {t("admin.reject")}
             </Button>
           </DialogFooter>
         </DialogContent>

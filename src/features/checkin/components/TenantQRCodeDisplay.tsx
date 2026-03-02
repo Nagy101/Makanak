@@ -1,8 +1,9 @@
-import { memo } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { QrCode } from 'lucide-react';
-import { encodeId } from '@/lib/idEncoder';
+import { memo } from "react";
+import { useTranslation } from "react-i18next";
+import { QRCodeSVG } from "qrcode.react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { QrCode } from "lucide-react";
+import { encodeId } from "@/lib/idEncoder";
 
 interface TenantQRCodeDisplayProps {
   qrCodeValue: string;
@@ -12,15 +13,16 @@ interface TenantQRCodeDisplayProps {
 
 const TenantQRCodeDisplay = memo(
   ({ qrCodeValue, bookingId, propertyName }: TenantQRCodeDisplayProps) => {
+    const { t } = useTranslation();
     return (
       <Card className="border-0 ring-1 ring-border">
         <CardHeader className="pb-3 text-center">
           <CardTitle className="flex items-center justify-center gap-2 text-base">
             <QrCode className="h-5 w-5 text-primary" />
-            Check-in QR Code
+            {t("checkin.checkinQrCode")}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Show this QR code to the property owner upon arrival
+            {t("checkin.showQrToOwner")}
           </p>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4 pb-6">
@@ -35,8 +37,12 @@ const TenantQRCodeDisplay = memo(
             />
           </div>
           <div className="text-center">
-            <p className="text-sm font-medium text-foreground">{propertyName}</p>
-            <p className="text-xs text-muted-foreground">Ref. {encodeId(bookingId)}</p>
+            <p className="text-sm font-medium text-foreground">
+              {propertyName}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t("bookings.ref")} {encodeId(bookingId)}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -44,5 +50,5 @@ const TenantQRCodeDisplay = memo(
   },
 );
 
-TenantQRCodeDisplay.displayName = 'TenantQRCodeDisplay';
+TenantQRCodeDisplay.displayName = "TenantQRCodeDisplay";
 export default TenantQRCodeDisplay;

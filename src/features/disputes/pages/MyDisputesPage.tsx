@@ -1,37 +1,52 @@
-import { memo, useCallback, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useDisputesList, useDisputeDetails, useCancelDispute } from '../useDisputes';
-import type { DisputeListParams, DisputeStatusType, DisputeSortType } from '../dispute.types';
-import DisputeStatusBadge from '../components/DisputeStatusBadge';
-import DisputeDetailsView from '../components/DisputeDetailsView';
-import CreateDisputeModal from '../components/CreateDisputeModal';
-import UserNavbar from '@/components/UserNavbar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { memo, useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  useDisputesList,
+  useDisputeDetails,
+  useCancelDispute,
+} from "../useDisputes";
+import type {
+  DisputeListParams,
+  DisputeStatusType,
+  DisputeSortType,
+} from "../dispute.types";
+import DisputeStatusBadge from "../components/DisputeStatusBadge";
+import DisputeDetailsView from "../components/DisputeDetailsView";
+import CreateDisputeModal from "../components/CreateDisputeModal";
+import UserNavbar from "@/components/UserNavbar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Search, Eye, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format } from 'date-fns';
+} from "@/components/ui/dialog";
+import { Search, Eye, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { format } from "date-fns";
 
-const STATUS_OPTIONS: { label: string; value: DisputeStatusType | 'All' }[] = [
-  { label: 'All Statuses', value: 'All' },
-  { label: 'Pending', value: 'Pending' },
-  { label: 'Resolved', value: 'Resolved' },
-  { label: 'Rejected', value: 'Rejected' },
-  { label: 'Cancelled', value: 'Cancelled' },
-];
+const STATUS_OPTIONS: { labelKey: string; value: DisputeStatusType | "All" }[] =
+  [
+    { labelKey: "disputes.allStatuses", value: "All" },
+    { labelKey: "disputes.pending", value: "Pending" },
+    { labelKey: "disputes.resolved", value: "Resolved" },
+    { labelKey: "disputes.rejected", value: "Rejected" },
+    { labelKey: "disputes.cancelled", value: "Cancelled" },
+  ];
 
-const SORT_OPTIONS: { label: string; value: DisputeSortType }[] = [
-  { label: 'Newest First', value: 'DateDesc' },
-  { label: 'Oldest First', value: 'DateAsc' },
-  { label: 'Status', value: 'StatusAsc' },
+const SORT_OPTIONS: { labelKey: string; value: DisputeSortType }[] = [
+  { labelKey: "disputes.newestFirst", value: "DateDesc" },
+  { labelKey: "disputes.oldestFirst", value: "DateAsc" },
+  { labelKey: "disputes.status", value: "StatusAsc" },
 ];
 
 const PAGE_SIZE = 8;
@@ -43,51 +58,69 @@ const DisputeRow = memo(
     onCancel,
     isCancelling,
   }: {
-    dispute: { id: number; propertyName: string; reason: string; status: string; createdAt: string };
+    dispute: {
+      id: number;
+      propertyName: string;
+      reason: string;
+      status: string;
+      createdAt: string;
+    };
     onView: (id: number) => void;
     onCancel: (id: number) => void;
     isCancelling: boolean;
-  }) => (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-foreground truncate">{dispute.propertyName}</h3>
-            <DisputeStatusBadge status={dispute.status} />
+  }) => {
+    const { t } = useTranslation();
+    return (
+      <Card className="hover:shadow-md transition-shadow">
+        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-foreground truncate">
+                {dispute.propertyName}
+              </h3>
+              <DisputeStatusBadge status={dispute.status} />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {dispute.reason} ·{" "}
+              {format(new Date(dispute.createdAt), "MMM dd, yyyy")}
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {dispute.reason} · {format(new Date(dispute.createdAt), 'MMM dd, yyyy')}
-          </p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <Button variant="outline" size="sm" onClick={() => onView(dispute.id)}>
-            <Eye className="h-3.5 w-3.5 mr-1" /> Details
-          </Button>
-          {dispute.status === 'Pending' && (
+          <div className="flex gap-2 shrink-0">
             <Button
               variant="outline"
               size="sm"
-              className="text-destructive border-destructive/30 hover:bg-destructive/10"
-              onClick={() => onCancel(dispute.id)}
-              disabled={isCancelling}
+              onClick={() => onView(dispute.id)}
             >
-              <XCircle className="h-3.5 w-3.5 mr-1" /> Cancel
+              <Eye className="h-3.5 w-3.5 mr-1" /> {t("common.details")}
             </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  ),
+            {dispute.status === "Pending" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                onClick={() => onCancel(dispute.id)}
+                disabled={isCancelling}
+              >
+                <XCircle className="h-3.5 w-3.5 mr-1" /> {t("common.cancel")}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  },
 );
-DisputeRow.displayName = 'DisputeRow';
+DisputeRow.displayName = "DisputeRow";
 
 export default function MyDisputesPage() {
   const { t } = useTranslation();
-  const [statusFilter, setStatusFilter] = useState<DisputeStatusType | 'All'>('All');
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<DisputeStatusType | "All">(
+    "All",
+  );
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [sort, setSort] = useState<DisputeSortType>('DateDesc');
+  const [sort, setSort] = useState<DisputeSortType>("DateDesc");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -95,7 +128,7 @@ export default function MyDisputesPage() {
 
   const params = useMemo<DisputeListParams>(
     () => ({
-      Status: statusFilter === 'All' ? undefined : statusFilter,
+      Status: statusFilter === "All" ? undefined : statusFilter,
       Search: search || undefined,
       PageIndex: page,
       PageSize: PAGE_SIZE,
@@ -106,7 +139,9 @@ export default function MyDisputesPage() {
 
   const { data, isLoading } = useDisputesList(params);
   const cancelMutation = useCancelDispute();
-  const { data: selectedDispute } = useDisputeDetails(detailsOpen ? selectedId : null);
+  const { data: selectedDispute } = useDisputeDetails(
+    detailsOpen ? selectedId : null,
+  );
 
   const handleSearch = useCallback(() => {
     setSearch(searchInput);
@@ -130,32 +165,47 @@ export default function MyDisputesPage() {
       <UserNavbar />
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-foreground">{t("disputes.title")}</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t("disputes.title")}
+          </h1>
         </div>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <Select
             value={statusFilter}
-            onValueChange={(v) => { setStatusFilter(v as DisputeStatusType | 'All'); setPage(1); }}
+            onValueChange={(v) => {
+              setStatusFilter(v as DisputeStatusType | "All");
+              setPage(1);
+            }}
           >
             <SelectTrigger className="w-full sm:w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {STATUS_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                <SelectItem key={o.value} value={o.value}>
+                  {t(o.labelKey)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          <Select value={sort} onValueChange={(v) => { setSort(v as DisputeSortType); setPage(1); }}>
+          <Select
+            value={sort}
+            onValueChange={(v) => {
+              setSort(v as DisputeSortType);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="w-full sm:w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {SORT_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                <SelectItem key={o.value} value={o.value}>
+                  {t(o.labelKey)}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -167,7 +217,7 @@ export default function MyDisputesPage() {
                 placeholder={t("disputes.searchDisputes")}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 className="pl-9 w-full"
               />
             </div>
@@ -206,11 +256,23 @@ export default function MyDisputesPage() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-8">
-            <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+            >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-sm text-muted-foreground">{t("bookings.pageOf", { page, total: totalPages })}</span>
-            <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+            <span className="text-sm text-muted-foreground">
+              {t("bookings.pageOf", { page, total: totalPages })}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+            >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

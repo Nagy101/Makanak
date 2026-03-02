@@ -61,7 +61,9 @@ export default function PropertyCard({ property }: Props) {
             <span className="text-base font-bold text-primary">
               {property.pricePerNight.toLocaleString()} {t("common.egp")}
             </span>
-            <span className="text-xs text-muted-foreground">{t("common.perNight")}</span>
+            <span className="text-xs text-muted-foreground">
+              {t("common.perNight")}
+            </span>
           </div>
           <span className="text-xs text-muted-foreground rounded-full bg-secondary px-2 py-0.5">
             {t("properties.view")} &rarr;

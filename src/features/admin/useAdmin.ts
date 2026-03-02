@@ -26,10 +26,33 @@ export function useUpdateUserStatus() {
 // ── Verification Details ──
 export function useUserVerification(userId: string | null) {
   return useQuery({
-    queryKey: ['admin', 'verification', userId],
+    queryKey: ['admin', 'users', userId, 'verification-details'],
     queryFn: () => adminService.getUserVerificationDetails(userId!),
     enabled: !!userId,
     staleTime: 60 * 1000,
+  });
+}
+
+// ── Strikes ──
+export function useAddStrike() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => adminService.addStrike(userId),
+    onSuccess: (_data, userId) => {
+      qc.invalidateQueries({ queryKey: ['admin', 'users'] });
+      qc.invalidateQueries({ queryKey: ['admin', 'users', userId, 'verification-details'] });
+    },
+  });
+}
+
+export function useRemoveStrike() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => adminService.removeStrike(userId),
+    onSuccess: (_data, userId) => {
+      qc.invalidateQueries({ queryKey: ['admin', 'users'] });
+      qc.invalidateQueries({ queryKey: ['admin', 'users', userId, 'verification-details'] });
+    },
   });
 }
 

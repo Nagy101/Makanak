@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, memo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { storage } from "@/lib/storage";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,6 +64,7 @@ const confirmEmailSchema = z.object({
 });
 
 const ProfilePage = memo(() => {
+  const { t } = useTranslation();
   const { data: user, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const verifyIdentity = useVerifyIdentity();
@@ -177,7 +179,7 @@ const ProfilePage = memo(() => {
       { otp: d.otp!, Email: d.Email! },
       {
         onSuccess: () => {
-          toast.success("Email changed successfully! Logging out...");
+          toast.success(t("profile.emailChangedSuccess"));
           setTimeout(() => {
             storage.clear();
             sessionStorage.clear();
@@ -185,7 +187,7 @@ const ProfilePage = memo(() => {
           }, 1500);
         },
         onError: (error: unknown) => {
-          let errorMsg = "Failed to confirm email change. Please try again.";
+          let errorMsg = t("profile.emailChangeFailed");
           if (error && typeof error === "object" && "response" in error) {
             const apiError = error as {
               response?: { data?: { message?: string } };
@@ -283,7 +285,7 @@ const ProfilePage = memo(() => {
               <button
                 onClick={handleAvatarClick}
                 className="absolute bottom-0 right-0 rounded-full bg-primary p-1.5 text-primary-foreground shadow opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label="Change avatar"
+                aria-label={t("profile.changeAvatar", "Change avatar")}
               >
                 <Camera className="h-3.5 w-3.5" />
               </button>
@@ -307,11 +309,11 @@ const ProfilePage = memo(() => {
               <div className="flex gap-2 flex-wrap mt-3 justify-center sm:justify-start">
                 {isIdentityVerified ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-                    <CheckCircle2 className="h-3 w-3" /> Verified
+                    <CheckCircle2 className="h-3 w-3" /> {t("profile.verified")}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-border">
-                    <Clock className="h-3 w-3" /> Unverified
+                    <Clock className="h-3 w-3" /> {t("profile.unverified")}
                   </span>
                 )}
                 {user?.userStatus && (
@@ -341,19 +343,19 @@ const ProfilePage = memo(() => {
               value="profile"
               className="gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-150"
             >
-              <User className="h-4 w-4" /> Profile
+              <User className="h-4 w-4" /> {t("profile.profileTab")}
             </TabsTrigger>
             <TabsTrigger
               value="identity"
               className="gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-150"
             >
-              <Shield className="h-4 w-4" /> Identity
+              <Shield className="h-4 w-4" /> {t("profile.identityTab")}
             </TabsTrigger>
             <TabsTrigger
               value="security"
               className="gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-150"
             >
-              <KeyRound className="h-4 w-4" /> Security
+              <KeyRound className="h-4 w-4" /> {t("profile.securityTab")}
             </TabsTrigger>
           </TabsList>
 
@@ -361,16 +363,16 @@ const ProfilePage = memo(() => {
           <TabsContent value="profile">
             <Card>
               <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
+                <CardTitle>{t("profile.personalInfo")}</CardTitle>
                 <CardDescription>
-                  Update your name, phone number, and profile picture
+                  {t("profile.updateDescription")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleProfileSubmit} className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
+                      <Label htmlFor="name">{t("profile.fullName")}</Label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -386,7 +388,7 @@ const ProfilePage = memo(() => {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
+                      <Label htmlFor="phone">{t("profile.phoneNumber")}</Label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -399,7 +401,7 @@ const ProfilePage = memo(() => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">{t("profile.email")}</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -412,7 +414,9 @@ const ProfilePage = memo(() => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="userType">Account Type</Label>
+                      <Label htmlFor="userType">
+                        {t("profile.accountType")}
+                      </Label>
                       <Input
                         id="userType"
                         className="bg-muted"
@@ -423,7 +427,7 @@ const ProfilePage = memo(() => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <Label htmlFor="age">Age</Label>
+                      <Label htmlFor="age">{t("profile.age")}</Label>
                       <Input
                         id="age"
                         type="number"
@@ -433,7 +437,7 @@ const ProfilePage = memo(() => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="address">Address</Label>
+                      <Label htmlFor="address">{t("profile.address")}</Label>
                       <Input
                         id="address"
                         {...profileForm.register("Address")}
@@ -441,7 +445,7 @@ const ProfilePage = memo(() => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="joinAt">Member Since</Label>
+                    <Label htmlFor="joinAt">{t("profile.memberSince")}</Label>
                     <Input
                       id="joinAt"
                       className="bg-muted"
@@ -455,7 +459,7 @@ const ProfilePage = memo(() => {
                       {updateProfile.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       ) : null}
-                      Save Changes
+                      {t("profile.saveChanges")}
                     </Button>
                   </div>
                 </form>
@@ -467,10 +471,10 @@ const ProfilePage = memo(() => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-primary" />
-                  Account Status
+                  {t("profile.accountStatus")}
                 </CardTitle>
                 <CardDescription>
-                  Your current account status and verification information
+                  {t("profile.accountStatusDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -489,12 +493,12 @@ const ProfilePage = memo(() => {
                                 : "bg-primary/10 text-primary"
                         }`}
                       >
-                        {user?.userStatus ?? "Unknown"}
+                        {user?.userStatus ?? t("profile.unknown")}
                       </Badge>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Strike Count</Label>
+                    <Label>{t("profile.strikeCount")}</Label>
                     <Input
                       type="number"
                       className="bg-muted"
@@ -506,18 +510,17 @@ const ProfilePage = memo(() => {
                 {user?.userStatus === "Banned" && (
                   <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
                     <p className="text-sm text-destructive font-medium">
-                      Account Suspended
+                      {t("profile.accountSuspended")}
                     </p>
                     <p className="text-sm text-destructive/80 mt-1">
-                      Your account has been suspended. Please contact support
-                      for more information.
+                      {t("profile.accountSuspendedMsg")}
                     </p>
                   </div>
                 )}
                 {user?.userStatus === "Rejected" && user?.rejectedReason && (
                   <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
                     <p className="text-sm text-destructive font-medium">
-                      Verification Rejected
+                      {t("profile.verificationRejected")}
                     </p>
                     <p className="text-sm text-destructive/80 mt-1">
                       {user.rejectedReason}
@@ -527,11 +530,10 @@ const ProfilePage = memo(() => {
                 {user?.userStatus === "Pending" && (
                   <div className="p-3 bg-warning/10 rounded-lg border border-warning/20">
                     <p className="text-sm text-warning font-medium">
-                      Verification Pending
+                      {t("profile.verificationPending")}
                     </p>
                     <p className="text-sm text-warning/80 mt-1">
-                      Your account verification is in progress. We'll notify you
-                      once it's complete.
+                      {t("profile.verificationPendingMsg")}
                     </p>
                   </div>
                 )}
@@ -544,29 +546,30 @@ const ProfilePage = memo(() => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  Identity Verification
+                  {t("profile.identityVerification")}
                   {isIdentityVerified ? (
                     <Badge className="bg-success text-success-foreground gap-1">
-                      <CheckCircle2 className="h-3 w-3" /> Verified
+                      <CheckCircle2 className="h-3 w-3" />{" "}
+                      {t("profile.verified")}
                     </Badge>
                   ) : (
                     <Badge
                       variant="outline"
                       className="gap-1 text-muted-foreground"
                     >
-                      <XCircle className="h-3 w-3" /> Not Verified
+                      <XCircle className="h-3 w-3" /> {t("profile.notVerified")}
                     </Badge>
                   )}
                 </CardTitle>
-                <CardDescription>
-                  Your national ID information and verification status
-                </CardDescription>
+                <CardDescription>{t("profile.identityDesc")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleIdentitySubmit} className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <Label htmlFor="nationalId">National ID Number</Label>
+                      <Label htmlFor="nationalId">
+                        {t("profile.nationalIdNumber")}
+                      </Label>
                       {!canUploadIdentity ? (
                         <Input
                           id="nationalId"
@@ -578,7 +581,7 @@ const ProfilePage = memo(() => {
                         <>
                           <Input
                             id="nationalId"
-                            placeholder="Enter your national ID"
+                            placeholder={t("profile.enterNationalId")}
                             {...identityForm.register("NationalId")}
                           />
                           {identityForm.formState.errors.NationalId && (
@@ -591,7 +594,7 @@ const ProfilePage = memo(() => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="verificationStatus">
-                        Verification Status
+                        {t("profile.verificationStatus")}
                       </Label>
                       <Input
                         id="verificationStatus"
@@ -604,7 +607,9 @@ const ProfilePage = memo(() => {
 
                   {user?.strikeCount !== undefined && (
                     <div className="space-y-2">
-                      <Label htmlFor="strikeCount">Strike Count</Label>
+                      <Label htmlFor="strikeCount">
+                        {t("profile.strikeCount")}
+                      </Label>
                       <Input
                         id="strikeCount"
                         type="number"
@@ -617,7 +622,7 @@ const ProfilePage = memo(() => {
 
                   {user?.rejectedReason && (
                     <div className="space-y-2">
-                      <Label>Rejection Reason</Label>
+                      <Label>{t("profile.rejectionReason")}</Label>
                       <div className="p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
                         {user.rejectedReason}
                       </div>
@@ -627,7 +632,7 @@ const ProfilePage = memo(() => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {/* Front ID */}
                     <div className="space-y-2">
-                      <Label>ID Front</Label>
+                      <Label>{t("profile.idFront")}</Label>
                       <button
                         type="button"
                         onClick={handleFrontIdClick}
@@ -651,10 +656,10 @@ const ProfilePage = memo(() => {
                             <Upload className="h-8 w-8" />
                             <span className="text-sm font-medium">
                               {isIdentityVerified
-                                ? "Verified"
+                                ? t("profile.verified")
                                 : user?.userStatus === "Pending"
-                                  ? "Verification Pending"
-                                  : "Upload front side"}
+                                  ? t("profile.verificationPending")
+                                  : t("profile.uploadFrontSide")}
                             </span>
                           </>
                         )}
@@ -671,7 +676,7 @@ const ProfilePage = memo(() => {
                     </div>
                     {/* Back ID */}
                     <div className="space-y-2">
-                      <Label>ID Back</Label>
+                      <Label>{t("profile.idBack")}</Label>
                       <button
                         type="button"
                         onClick={handleBackIdClick}
@@ -695,10 +700,10 @@ const ProfilePage = memo(() => {
                             <Upload className="h-8 w-8" />
                             <span className="text-sm font-medium">
                               {isIdentityVerified
-                                ? "Verified"
+                                ? t("profile.verified")
                                 : user?.userStatus === "Pending"
-                                  ? "Verification Pending"
-                                  : "Upload back side"}
+                                  ? t("profile.verificationPending")
+                                  : t("profile.uploadBackSide")}
                             </span>
                           </>
                         )}
@@ -731,7 +736,7 @@ const ProfilePage = memo(() => {
                           {verifyIdentity.isPending ? (
                             <Loader2 className="h-4 w-4 animate-spin mr-2" />
                           ) : null}
-                          Submit Verification
+                          {t("profile.submitVerification")}
                         </Button>
                       </div>
                     </>
@@ -745,16 +750,16 @@ const ProfilePage = memo(() => {
           <TabsContent value="security">
             <Card>
               <CardHeader>
-                <CardTitle>Change Email</CardTitle>
+                <CardTitle>{t("profile.changeEmail")}</CardTitle>
                 <CardDescription>
-                  Manage your account security and email settings
+                  {t("profile.changeEmailDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {emailStep === "initiate" ? (
                   <form onSubmit={handleEmailInitiate} className="space-y-5">
                     <div className="space-y-2">
-                      <Label>Current Email</Label>
+                      <Label>{t("profile.currentEmail")}</Label>
                       <Input
                         value={user?.email ?? ""}
                         disabled
@@ -762,7 +767,7 @@ const ProfilePage = memo(() => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="Email">New Email</Label>
+                      <Label htmlFor="Email">{t("profile.newEmail")}</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -780,13 +785,15 @@ const ProfilePage = memo(() => {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <Label htmlFor="currentPassword">
+                        {t("profile.currentPassword")}
+                      </Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                           id="currentPassword"
                           type="password"
-                          placeholder="Enter your password"
+                          placeholder={t("profile.enterYourPassword")}
                           className="pl-10"
                           {...emailForm.register("currentPassword")}
                         />
@@ -802,23 +809,25 @@ const ProfilePage = memo(() => {
                         {initiateEmail.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         ) : null}
-                        Send Verification Code
+                        {t("profile.sendVerificationCode")}
                       </Button>
                     </div>
                   </form>
                 ) : (
                   <form onSubmit={handleEmailConfirm} className="space-y-5">
                     <p className="text-sm text-muted-foreground">
-                      We sent a code to{" "}
+                      {t("profile.codeSentTo")}{" "}
                       <span className="font-medium text-foreground">
                         {pendingEmail}
                       </span>
                     </p>
                     <div className="space-y-2">
-                      <Label htmlFor="emailOtp">Verification Code</Label>
+                      <Label htmlFor="emailOtp">
+                        {t("profile.verificationCode")}
+                      </Label>
                       <Input
                         id="emailOtp"
-                        placeholder="Enter code"
+                        placeholder={t("profile.enterCode")}
                         {...confirmEmailForm.register("otp")}
                       />
                       {confirmEmailForm.formState.errors.otp && (
@@ -833,13 +842,13 @@ const ProfilePage = memo(() => {
                         variant="ghost"
                         onClick={handleEmailStepChange}
                       >
-                        Cancel
+                        {t("common.cancel")}
                       </Button>
                       <Button type="submit" disabled={confirmEmail.isPending}>
                         {confirmEmail.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         ) : null}
-                        Confirm Change
+                        {t("profile.confirmChange")}
                       </Button>
                     </div>
                   </form>

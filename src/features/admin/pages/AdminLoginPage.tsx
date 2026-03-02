@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck } from "lucide-react";
 import { useState, useCallback, memo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -32,10 +33,12 @@ type FormData = z.infer<typeof schema>;
 const GENERIC_ERROR = "Invalid email or password.";
 
 const AdminLoginPage = memo(() => {
+  const { t } = useTranslation();
   const [showPw, setShowPw] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { setAuth, clearAuth } = useAuthStore();
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const clearAuth = useAuthStore((s) => s.clearAuth);
   const qc = useQueryClient();
 
   const {
@@ -105,9 +108,11 @@ const AdminLoginPage = memo(() => {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-card">
             <ShieldCheck className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Admin Portal</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t("admin.adminPortal")}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Restricted access — authorised personnel only
+            {t("admin.restrictedAccess")}
           </p>
         </div>
 
@@ -121,7 +126,7 @@ const AdminLoginPage = memo(() => {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="admin-email">Email</Label>
+            <Label htmlFor="admin-email">{t("auth.email")}</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -139,7 +144,7 @@ const AdminLoginPage = memo(() => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="admin-password">Password</Label>
+            <Label htmlFor="admin-password">{t("auth.password")}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -178,7 +183,7 @@ const AdminLoginPage = memo(() => {
             {isPending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              "Sign in"
+              t("admin.adminSignIn")
             )}
           </Button>
         </form>

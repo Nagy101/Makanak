@@ -29,24 +29,25 @@ const CreateDisputeModal = lazy(
   () => import("@/features/disputes/components/CreateDisputeModal"),
 );
 
-const STATUS_OPTIONS: { label: string; value: BookingStatusType | "All" }[] = [
-  { label: "All Statuses", value: "All" },
-  { label: "Pending Approval", value: "PendingOwnerApproval" },
-  { label: "Rejected", value: "RejectedByOwner" },
-  { label: "Pending Payment", value: "PendingPayment" },
-  { label: "Payment Failed", value: "PaymentFailed" },
-  { label: "Confirmed", value: "PaymentReceived" },
-  { label: "Checked In", value: "CheckedIn" },
-  { label: "Completed", value: "Completed" },
-  { label: "Cancelled", value: "Cancelled" },
-  { label: "Disputed", value: "Disputed" },
-];
+const STATUS_OPTIONS: { labelKey: string; value: BookingStatusType | "All" }[] =
+  [
+    { labelKey: "bookings.allStatuses", value: "All" },
+    { labelKey: "bookings.pendingApproval", value: "PendingOwnerApproval" },
+    { labelKey: "bookings.rejected", value: "RejectedByOwner" },
+    { labelKey: "bookings.pendingPayment", value: "PendingPayment" },
+    { labelKey: "bookings.paymentFailed", value: "PaymentFailed" },
+    { labelKey: "bookings.confirmed", value: "PaymentReceived" },
+    { labelKey: "bookings.checkedIn", value: "CheckedIn" },
+    { labelKey: "bookings.completed", value: "Completed" },
+    { labelKey: "bookings.cancelled", value: "Cancelled" },
+    { labelKey: "bookings.disputed", value: "Disputed" },
+  ];
 
 const SORT_OPTIONS = [
-  { label: "Newest First", value: "DateCreatedDesc" },
-  { label: "Oldest First", value: "DateCreatedAsc" },
-  { label: "Price High to Low", value: "PriceDesc" },
-  { label: "Price Low to High", value: "PriceAsc" },
+  { labelKey: "bookings.newestFirst", value: "DateCreatedDesc" },
+  { labelKey: "bookings.oldestFirst", value: "DateCreatedAsc" },
+  { labelKey: "bookings.priceHighToLow", value: "PriceDesc" },
+  { labelKey: "bookings.priceLowToHigh", value: "PriceAsc" },
 ];
 
 const PAGE_SIZE = 10;
@@ -113,7 +114,9 @@ export default function OwnerIncomingBookingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">{t("bookings.incomingBookings")}</h1>
+      <h1 className="text-2xl font-bold text-foreground">
+        {t("bookings.incomingBookings")}
+      </h1>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -126,12 +129,12 @@ export default function OwnerIncomingBookingsPage() {
           }}
         >
           <SelectTrigger className="w-full sm:w-52">
-            <SelectValue placeholder="Filter by status" />
+            <SelectValue placeholder={t("bookings.filterByStatus")} />
           </SelectTrigger>
           <SelectContent>
             {STATUS_OPTIONS.map((o) => (
               <SelectItem key={o.value} value={o.value}>
-                {o.label}
+                {t(o.labelKey)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -151,7 +154,7 @@ export default function OwnerIncomingBookingsPage() {
           <SelectContent>
             {SORT_OPTIONS.map((o) => (
               <SelectItem key={o.value} value={o.value}>
-                {o.label}
+                {t(o.labelKey)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -188,10 +191,10 @@ export default function OwnerIncomingBookingsPage() {
         </div>
       ) : !data?.data.length ? (
         <div className="text-center py-20 text-muted-foreground">
-          <p className="text-lg font-medium">{t("bookings.noIncomingBookings")}</p>
-          <p className="text-sm mt-1">
-            {t("bookings.noIncomingBookingsHint")}
+          <p className="text-lg font-medium">
+            {t("bookings.noIncomingBookings")}
           </p>
+          <p className="text-sm mt-1">{t("bookings.noIncomingBookingsHint")}</p>
         </div>
       ) : (
         <div className="rounded-lg border bg-card overflow-x-auto">
@@ -206,7 +209,9 @@ export default function OwnerIncomingBookingsPage() {
                 <TableHead>{t("bookings.total")}</TableHead>
                 <TableHead>{t("bookings.ownerPayout")}</TableHead>
                 <TableHead>{t("bookings.status")}</TableHead>
-                <TableHead className="text-right">{t("bookings.actions")}</TableHead>
+                <TableHead className="text-right">
+                  {t("bookings.actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -258,10 +263,11 @@ export default function OwnerIncomingBookingsPage() {
                     {booking.totalDays}
                   </TableCell>
                   <TableCell className="font-semibold text-primary whitespace-nowrap">
-                    {booking.totalPrice.toLocaleString()} EGP
+                    {booking.totalPrice.toLocaleString()} {t("common.egp")}
                   </TableCell>
                   <TableCell className="text-sm whitespace-nowrap">
-                    {booking.amountToPayToOwner.toLocaleString()} EGP
+                    {booking.amountToPayToOwner.toLocaleString()}{" "}
+                    {t("common.egp")}
                   </TableCell>
                   <TableCell>
                     <BookingStatusBadge status={booking.status} />
@@ -272,7 +278,7 @@ export default function OwnerIncomingBookingsPage() {
                       size="sm"
                       onClick={() => handleView(booking.id)}
                     >
-                      <Eye className="h-4 w-4 mr-1" /> View
+                      <Eye className="h-4 w-4 mr-1" /> {t("common.view")}
                     </Button>
                   </TableCell>
                 </TableRow>

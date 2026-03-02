@@ -5,20 +5,26 @@ import { Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { useState, useCallback, memo } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AuthLayout from "../components/AuthLayout";
 import { useLogin } from "../hooks/useAuth";
 
-const schema = z.object({
-  email: z.string().min(1, "Email is required").email("Enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-type LoginFormData = z.infer<typeof schema>;
+const createSchema = (t: TFunction) =>
+  z.object({
+    email: z
+      .string()
+      .min(1, t("auth.emailRequired"))
+      .email(t("auth.enterValidEmail")),
+    password: z.string().min(6, t("auth.passwordMinChars")),
+  });
+type LoginFormData = z.infer<ReturnType<typeof createSchema>>;
 
 const LoginPage = memo(() => {
   const { t } = useTranslation();
+  const schema = createSchema(t);
   const [showPw, setShowPw] = useState(false);
   const { mutate, isPending } = useLogin();
   const {
@@ -44,7 +50,10 @@ const LoginPage = memo(() => {
   );
 
   return (
-    <AuthLayout title={t("auth.welcomeBackTitle")} subtitle={t("auth.signInSubtitle")}>
+    <AuthLayout
+      title={t("auth.welcomeBackTitle")}
+      subtitle={t("auth.signInSubtitle")}
+    >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="email">{t("auth.email")}</Label>
@@ -86,7 +95,9 @@ const LoginPage = memo(() => {
               type="button"
               onClick={togglePasswordVisibility}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
-              aria-label={showPw ? "Hide password" : "Show password"}
+              aria-label={
+                showPw ? t("auth.hidePassword") : t("auth.showPassword")
+              }
             >
               {showPw ? (
                 <EyeOff className="h-4 w-4" />
@@ -107,7 +118,11 @@ const LoginPage = memo(() => {
           className="w-full h-12 text-base font-semibold"
           disabled={isPending}
         >
-          {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : t("common.signIn")}
+          {isPending ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            t("common.signIn")
+          )}
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">

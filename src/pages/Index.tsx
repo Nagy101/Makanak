@@ -42,7 +42,8 @@ const Index = () => {
             />
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground animate-fade-in-up">
-            {t("index.welcomeTo")} <span className="text-gradient">{t("index.makanak")}</span>
+            {t("index.welcomeTo")}{" "}
+            <span className="text-gradient">{t("index.makanak")}</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-md mx-auto animate-fade-in-up">
             {t("index.discoverSubtitle")}
@@ -152,7 +153,9 @@ const Index = () => {
             />
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-            {firstName ? t("index.hello", { name: firstName }) : t("index.welcomeBack")}
+            {firstName
+              ? t("index.hello", { name: firstName })
+              : t("index.welcomeBack")}
           </h1>
           <p className="text-lg text-muted-foreground">{subtitle}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">

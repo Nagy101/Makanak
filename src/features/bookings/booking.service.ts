@@ -1,6 +1,6 @@
 import axios from "axios";
 import { storage } from "@/lib/storage";
-import { setup401Interceptor } from "@/lib/api";
+import { setup401Interceptor, API_BASE } from "@/lib/api";
 import type {
   BookingApiResponse,
   Booking,
@@ -13,7 +13,7 @@ import type {
 } from "./booking.types";
 
 const api = axios.create({
-  baseURL: "/api/Booking",
+  baseURL: `${API_BASE}/Booking`,
   headers: { "Content-Type": "application/json" },
 });
 

@@ -55,24 +55,25 @@ const LeaveReviewModal = lazy(
     ),
 );
 
-const STATUS_OPTIONS: { label: string; value: BookingStatusType | "All" }[] = [
-  { label: "All Statuses", value: "All" },
-  { label: "Pending Approval", value: "PendingOwnerApproval" },
-  { label: "Rejected", value: "RejectedByOwner" },
-  { label: "Pending Payment", value: "PendingPayment" },
-  { label: "Payment Failed", value: "PaymentFailed" },
-  { label: "Confirmed", value: "PaymentReceived" },
-  { label: "Checked In", value: "CheckedIn" },
-  { label: "Completed", value: "Completed" },
-  { label: "Cancelled", value: "Cancelled" },
-  { label: "Disputed", value: "Disputed" },
-];
+const STATUS_OPTIONS: { labelKey: string; value: BookingStatusType | "All" }[] =
+  [
+    { labelKey: "bookings.allStatuses", value: "All" },
+    { labelKey: "bookings.pendingApproval", value: "PendingOwnerApproval" },
+    { labelKey: "bookings.rejected", value: "RejectedByOwner" },
+    { labelKey: "bookings.pendingPayment", value: "PendingPayment" },
+    { labelKey: "bookings.paymentFailed", value: "PaymentFailed" },
+    { labelKey: "bookings.confirmed", value: "PaymentReceived" },
+    { labelKey: "bookings.checkedIn", value: "CheckedIn" },
+    { labelKey: "bookings.completed", value: "Completed" },
+    { labelKey: "bookings.cancelled", value: "Cancelled" },
+    { labelKey: "bookings.disputed", value: "Disputed" },
+  ];
 
 const SORT_OPTIONS = [
-  { label: "Newest First", value: "DateCreatedDesc" },
-  { label: "Oldest First", value: "DateCreatedAsc" },
-  { label: "Price High to Low", value: "PriceDesc" },
-  { label: "Price Low to High", value: "PriceAsc" },
+  { labelKey: "bookings.newestFirst", value: "DateCreatedDesc" },
+  { labelKey: "bookings.oldestFirst", value: "DateCreatedAsc" },
+  { labelKey: "bookings.priceHighToLow", value: "PriceDesc" },
+  { labelKey: "bookings.priceLowToHigh", value: "PriceAsc" },
 ];
 
 const PAGE_SIZE = 8;
@@ -109,6 +110,7 @@ const BookingCard = memo(
     onReview: (bookingId: number, propertyId: number) => void;
     isCancelling: boolean;
   }) => {
+    const { t } = useTranslation();
     const canCancel = ["PendingOwnerApproval", "PendingPayment"].includes(
       booking.status,
     );
@@ -144,14 +146,17 @@ const BookingCard = memo(
                   {format(new Date(booking.checkOutDate), "MMM dd, yyyy")}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {booking.totalDays} night{booking.totalDays !== 1 ? "s" : ""}
+                  {booking.totalDays}{" "}
+                  {booking.totalDays !== 1
+                    ? t("common.nights")
+                    : t("common.night")}
                 </p>
               </div>
               <BookingStatusBadge status={booking.status} />
             </div>
             <div className="flex items-center justify-between">
               <span className="text-lg font-bold text-primary">
-                {booking.totalPrice.toLocaleString()} EGP
+                {booking.totalPrice.toLocaleString()} {t("common.egp")}
               </span>
               <div className="flex gap-2 flex-wrap">
                 <Button
@@ -159,7 +164,7 @@ const BookingCard = memo(
                   size="sm"
                   onClick={() => onView(booking.id)}
                 >
-                  <Eye className="h-3.5 w-3.5 mr-1" /> Details
+                  <Eye className="h-3.5 w-3.5 mr-1" /> {t("common.details")}
                 </Button>
                 {canPay && (
                   <Button
@@ -167,7 +172,8 @@ const BookingCard = memo(
                     onClick={() => onPay(booking.id)}
                     className="gap-1"
                   >
-                    <CreditCard className="h-3.5 w-3.5" /> Pay Now
+                    <CreditCard className="h-3.5 w-3.5" />{" "}
+                    {t("bookings.payNow")}
                   </Button>
                 )}
                 {canCancel && (
@@ -178,7 +184,8 @@ const BookingCard = memo(
                     onClick={() => onCancel(booking.id)}
                     disabled={isCancelling}
                   >
-                    <XCircle className="h-3.5 w-3.5 mr-1" /> Cancel
+                    <XCircle className="h-3.5 w-3.5 mr-1" />{" "}
+                    {t("common.cancel")}
                   </Button>
                 )}
                 {canDispute && (
@@ -188,7 +195,8 @@ const BookingCard = memo(
                     className="text-warning border-warning/30 hover:bg-warning hover:text-white hover:border-warning"
                     onClick={() => onDispute(booking.id)}
                   >
-                    <AlertTriangle className="h-3.5 w-3.5 mr-1" /> Dispute
+                    <AlertTriangle className="h-3.5 w-3.5 mr-1" />{" "}
+                    {t("bookings.dispute")}
                   </Button>
                 )}
                 {canReview && (
@@ -198,7 +206,7 @@ const BookingCard = memo(
                     className="text-primary border-primary/30 hover:bg-primary hover:text-primary-foreground hover:border-primary"
                     onClick={() => onReview(booking.id, booking.propertyId)}
                   >
-                    <Star className="h-3.5 w-3.5 mr-1" /> Review
+                    <Star className="h-3.5 w-3.5 mr-1" /> {t("bookings.review")}
                   </Button>
                 )}
               </div>
@@ -306,7 +314,9 @@ export default function TenantBookingsPage() {
     <div className="min-h-screen bg-secondary/30">
       <UserNavbar />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-foreground mb-6">{t("bookings.title")}</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-6">
+          {t("bookings.title")}
+        </h1>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -319,12 +329,12 @@ export default function TenantBookingsPage() {
             }}
           >
             <SelectTrigger className="w-full sm:w-52">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t("bookings.filterByStatus")} />
             </SelectTrigger>
             <SelectContent>
               {STATUS_OPTIONS.map((o) => (
                 <SelectItem key={o.value} value={o.value}>
-                  {o.label}
+                  {t(o.labelKey)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -344,7 +354,7 @@ export default function TenantBookingsPage() {
             <SelectContent>
               {SORT_OPTIONS.map((o) => (
                 <SelectItem key={o.value} value={o.value}>
-                  {o.label}
+                  {t(o.labelKey)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -355,7 +365,7 @@ export default function TenantBookingsPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by property name..."
+                placeholder={t("bookings.searchByProperty")}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
@@ -382,9 +392,7 @@ export default function TenantBookingsPage() {
         ) : !data?.data.length ? (
           <div className="text-center py-20 text-muted-foreground">
             <p className="text-lg font-medium">{t("bookings.noBookings")}</p>
-            <p className="text-sm mt-1">
-              {t("bookings.noBookingsHint")}
-            </p>
+            <p className="text-sm mt-1">{t("bookings.noBookingsHint")}</p>
           </div>
         ) : (
           <div className="space-y-4">

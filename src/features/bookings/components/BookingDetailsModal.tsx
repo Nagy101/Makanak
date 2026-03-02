@@ -1,5 +1,7 @@
 import { memo, useCallback, lazy, Suspense, Component } from "react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "i18next";
 import {
   Dialog,
   DialogContent,
@@ -59,10 +61,10 @@ class ModalErrorBoundary extends Component<
       return (
         <div className="py-10 text-center space-y-2">
           <p className="text-destructive font-medium">
-            Something went wrong loading this booking.
+            {i18n.t("bookings.somethingWentWrong")}
           </p>
           <p className="text-sm text-muted-foreground">
-            Please close and try again.
+            {i18n.t("bookings.pleaseCloseAndTry")}
           </p>
         </div>
       );
@@ -126,6 +128,7 @@ const TenantBookingContent = memo(
     onClose,
     isCancelling,
   }: TenantContentProps) => {
+    const { t } = useTranslation();
     const canCancel = ["PendingOwnerApproval", "PendingPayment"].includes(
       booking.status,
     );
@@ -178,7 +181,7 @@ const TenantBookingContent = memo(
               {booking.propertyName}
             </h3>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Ref. {encodeId(booking.id)}
+              {t("bookings.ref")} {encodeId(booking.id)}
             </p>
           </div>
           <BookingStatusBadge status={booking.status} />
@@ -189,20 +192,20 @@ const TenantBookingContent = memo(
         {/* Stay dates */}
         <div>
           <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
-            Stay
+            {t("bookings.stay")}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
             <InfoRow
-              label="Check-in"
+              label={t("bookings.checkIn")}
               value={format(new Date(booking.checkInDate), "MMM dd, yyyy")}
             />
             <InfoRow
-              label="Check-out"
+              label={t("bookings.checkOut")}
               value={format(new Date(booking.checkOutDate), "MMM dd, yyyy")}
             />
             <InfoRow
-              label="Total Nights"
-              value={`${booking.totalDays} night${booking.totalDays !== 1 ? "s" : ""}`}
+              label={t("bookings.totalNights")}
+              value={`${booking.totalDays} ${booking.totalDays !== 1 ? t("common.nights") : t("common.night")}`}
             />
           </div>
         </div>
@@ -212,7 +215,7 @@ const TenantBookingContent = memo(
         {/* Pricing — full transparent breakdown for tenant */}
         <div>
           <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
-            Cost Breakdown
+            {t("bookings.costBreakdown")}
           </p>
 
           {/* Post-payment breakdown */}
@@ -223,10 +226,10 @@ const TenantBookingContent = memo(
                 <div>
                   <p className="font-medium text-foreground flex items-center gap-1">
                     <CreditCard className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                    Platform Fee
+                    {t("bookings.platformFee")}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Paid online via card ✔
+                    {t("bookings.paidOnline")}
                   </p>
                 </div>
                 <div className="text-right">
@@ -236,7 +239,8 @@ const TenantBookingContent = memo(
                       : "—"}
                   </p>
                   <span className="text-xs text-green-600 dark:text-green-400 flex items-center justify-end gap-0.5">
-                    <CheckCircle2 className="h-3 w-3" /> Paid
+                    <CheckCircle2 className="h-3 w-3" />{" "}
+                    {t("bookings.paidLabel")}
                   </span>
                 </div>
               </div>
@@ -246,10 +250,10 @@ const TenantBookingContent = memo(
                 <div>
                   <p className="font-medium text-foreground flex items-center gap-1">
                     <Banknote className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                    Owner Payment
+                    {t("bookings.ownerPayment")}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Pay in cash directly to owner at arrival
+                    {t("bookings.payInCash")}
                   </p>
                 </div>
                 <div className="text-right">
@@ -259,7 +263,7 @@ const TenantBookingContent = memo(
                       : "—"}
                   </p>
                   <span className="text-xs text-amber-600 dark:text-amber-400">
-                    Cash at arrival
+                    {t("bookings.cashAtArrival")}
                   </span>
                 </div>
               </div>
@@ -267,7 +271,7 @@ const TenantBookingContent = memo(
               <Separator className="my-0.5" />
 
               <div className="flex justify-between font-bold text-foreground text-base">
-                <span>Total Cost</span>
+                <span>{t("bookings.totalCost")}</span>
                 <span>{booking.totalPrice.toLocaleString()} EGP</span>
               </div>
             </div>
@@ -280,10 +284,10 @@ const TenantBookingContent = memo(
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-foreground">
-                          Platform Fee
+                          {t("bookings.platformFee")}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Pay now online via card
+                          {t("bookings.payNowOnline")}
                         </p>
                       </div>
                       <p className="font-semibold text-foreground">
@@ -293,10 +297,10 @@ const TenantBookingContent = memo(
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-foreground">
-                          Owner Payment
+                          {t("bookings.ownerPayment")}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Cash to owner at arrival
+                          {t("bookings.cashToOwner")}
                         </p>
                       </div>
                       <p className="font-semibold text-amber-600 dark:text-amber-400">
@@ -307,7 +311,7 @@ const TenantBookingContent = memo(
                   </>
                 )}
               <div className="flex justify-between font-bold text-foreground text-base">
-                <span>Total Cost</span>
+                <span>{t("bookings.totalCost")}</span>
                 <span>{booking.totalPrice.toLocaleString()} EGP</span>
               </div>
             </div>
@@ -318,11 +322,9 @@ const TenantBookingContent = memo(
             <div className="mt-2 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 px-3 py-2.5 text-sm">
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <p className="text-amber-800 dark:text-amber-300">
-                Remember to bring{" "}
-                <span className="font-semibold">
-                  {derivedOwnerAmount.toLocaleString()} EGP cash
-                </span>{" "}
-                to pay the owner upon arrival.
+                {t("bookings.rememberCash", {
+                  amount: derivedOwnerAmount.toLocaleString(),
+                })}
               </p>
             </div>
           )}
@@ -334,7 +336,7 @@ const TenantBookingContent = memo(
             <Separator />
             <div>
               <p className="text-xs font-semibold uppercase text-muted-foreground mb-1">
-                Special Requests
+                {t("bookings.specialRequests")}
               </p>
               <p className="text-sm text-foreground bg-secondary/30 rounded-lg p-3">
                 {booking.specialRequests}
@@ -351,7 +353,7 @@ const TenantBookingContent = memo(
             <Separator />
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase text-muted-foreground">
-                Check-in Info
+                {t("bookings.checkinInfo")}
               </p>
               {booking.checkInInstructions && (
                 <div className="flex gap-2 text-sm bg-secondary/30 rounded-lg p-3">
@@ -377,7 +379,7 @@ const TenantBookingContent = memo(
                   className="flex items-center gap-2 text-sm text-primary hover:underline"
                 >
                   <MapPin className="h-4 w-4" />
-                  View Exact Location
+                  {t("bookings.viewExactLocation")}
                 </a>
               )}
             </div>
@@ -402,7 +404,7 @@ const TenantBookingContent = memo(
                 variant="secondary"
                 className="text-xs mx-auto block w-fit"
               >
-                QR already scanned
+                {t("bookings.qrAlreadyScanned")}
               </Badge>
             )}
           </>
@@ -422,8 +424,10 @@ const TenantBookingContent = memo(
             >
               <CreditCard className="h-4 w-4" />
               {booking.commissionPaid != null
-                ? `Pay Platform Fee — ${booking.commissionPaid.toLocaleString()} EGP`
-                : "Pay Now"}
+                ? t("bookings.payPlatformFee", {
+                    amount: booking.commissionPaid.toLocaleString(),
+                  })
+                : t("bookings.payNow")}
             </Button>
           )}
           {canCancel && (
@@ -432,7 +436,7 @@ const TenantBookingContent = memo(
               onClick={onCancel}
               disabled={isCancelling}
             >
-              Cancel Booking
+              {t("bookings.cancelBooking")}
             </Button>
           )}
         </div>
@@ -461,6 +465,7 @@ const OwnerBookingContent = memo(
     isUpdating,
     onDispute,
   }: OwnerContentProps) => {
+    const { t } = useTranslation();
     const canOwnerAct = booking.status === "PendingOwnerApproval";
     const canDispute = ["PaymentReceived", "CheckedIn", "Completed"].includes(
       booking.status,
@@ -475,7 +480,7 @@ const OwnerBookingContent = memo(
               {booking.propertyName}
             </h3>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Ref. {encodeId(booking.id)}
+              {t("bookings.ref")} {encodeId(booking.id)}
             </p>
           </div>
           <BookingStatusBadge status={booking.status} />
@@ -486,7 +491,7 @@ const OwnerBookingContent = memo(
         {/* Tenant identity */}
         <div>
           <p className="text-xs font-semibold uppercase text-muted-foreground mb-3 flex items-center gap-1">
-            <User className="h-3.5 w-3.5" /> Tenant
+            <User className="h-3.5 w-3.5" /> {t("bookings.tenant")}
           </p>
           <div className="flex items-center gap-3">
             <img
@@ -514,7 +519,8 @@ const OwnerBookingContent = memo(
           {booking.tenantIdentityImage && (
             <div className="mt-3">
               <p className="text-xs font-semibold uppercase text-muted-foreground mb-2 flex items-center gap-1">
-                <ShieldCheck className="h-3.5 w-3.5" /> Identity Document
+                <ShieldCheck className="h-3.5 w-3.5" />{" "}
+                {t("bookings.identityDocument")}
               </p>
               <img
                 src={toUrl(booking.tenantIdentityImage)}
@@ -534,20 +540,20 @@ const OwnerBookingContent = memo(
         {/* Stay dates */}
         <div>
           <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
-            Stay
+            {t("bookings.stay")}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
             <InfoRow
-              label="Check-in"
+              label={t("bookings.checkIn")}
               value={format(new Date(booking.checkInDate), "MMM dd, yyyy")}
             />
             <InfoRow
-              label="Check-out"
+              label={t("bookings.checkOut")}
               value={format(new Date(booking.checkOutDate), "MMM dd, yyyy")}
             />
             <InfoRow
-              label="Total Nights"
-              value={`${booking.totalDays} night${booking.totalDays !== 1 ? "s" : ""}`}
+              label={t("bookings.totalNights")}
+              value={`${booking.totalDays} ${booking.totalDays !== 1 ? t("common.nights") : t("common.night")}`}
             />
           </div>
         </div>
@@ -555,7 +561,7 @@ const OwnerBookingContent = memo(
         {/* QR scan status */}
         {booking.isQrScanned && (
           <Badge variant="secondary" className="text-xs w-fit">
-            Check-in QR Scanned
+            {t("bookings.checkinQrScanned")}
           </Badge>
         )}
 
@@ -564,15 +570,15 @@ const OwnerBookingContent = memo(
         {/* Financial — owner only sees what the tenant will bring in cash */}
         <div>
           <p className="text-xs font-semibold uppercase text-muted-foreground mb-2 flex items-center gap-1">
-            <Banknote className="h-3.5 w-3.5" /> Expected Payment
+            <Banknote className="h-3.5 w-3.5" /> {t("bookings.expectedPayment")}
           </p>
           <div className="rounded-lg border bg-primary/5 p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-foreground">
-                Cash from tenant at check-in
+                {t("bookings.cashFromTenant")}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Tenant pays this directly to you upon arrival
+                {t("bookings.tenantPaysDirectly")}
               </p>
             </div>
             <p className="text-2xl font-bold text-primary">
@@ -588,7 +594,7 @@ const OwnerBookingContent = memo(
             <Separator />
             <div>
               <p className="text-xs font-semibold uppercase text-muted-foreground mb-1">
-                Special Requests
+                {t("bookings.specialRequests")}
               </p>
               <p className="text-sm text-foreground bg-secondary/30 rounded-lg p-3">
                 {booking.specialRequests}
@@ -610,13 +616,13 @@ const OwnerBookingContent = memo(
                   onClick={() => onStatusUpdate("RejectedByOwner")}
                   disabled={isUpdating}
                 >
-                  Reject
+                  {t("bookings.rejectBooking")}
                 </Button>
                 <Button
                   onClick={() => onStatusUpdate("PendingPayment")}
                   disabled={isUpdating}
                 >
-                  Approve
+                  {t("bookings.approveBooking")}
                 </Button>
               </>
             )}
@@ -627,7 +633,7 @@ const OwnerBookingContent = memo(
                 onClick={() => onDispute(bookingId)}
               >
                 <AlertTriangle className="h-4 w-4 mr-1" />
-                Open Dispute
+                {t("bookings.openDispute")}
               </Button>
             )}
           </div>
@@ -659,6 +665,7 @@ const BookingDetailsModal = memo(
     onPayNow,
     onDispute,
   }: BookingDetailsModalProps) => {
+    const { t } = useTranslation();
     const activeId = open ? bookingId : null;
 
     // Both hooks are always called (React hook rules).
@@ -695,7 +702,7 @@ const BookingDetailsModal = memo(
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Booking Details</DialogTitle>
+            <DialogTitle>{t("bookings.bookingDetails")}</DialogTitle>
           </DialogHeader>
 
           <ModalErrorBoundary>
@@ -720,7 +727,7 @@ const BookingDetailsModal = memo(
               />
             ) : (
               <p className="py-8 text-center text-muted-foreground">
-                Booking not found.
+                {t("bookings.bookingNotFound")}
               </p>
             )}
           </ModalErrorBoundary>

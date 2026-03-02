@@ -15,6 +15,7 @@
 //    ✓ Atomic Zustand selector (s => s.user).
 // ═══════════════════════════════════════════════════════════════
 import { memo, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { useAuthStore } from "@/features/auth/store/authStore";
@@ -44,6 +45,7 @@ const ReviewItem = memo(function ReviewItem({
   onDelete,
   isDeleting,
 }: ReviewItemProps) {
+  const { t } = useTranslation();
   // Atomic selector — only re-renders if `user` object reference changes
   const user = useAuthStore((s) => s.user);
 
@@ -102,7 +104,7 @@ const ReviewItem = memo(function ReviewItem({
                 type="button"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                aria-label="Delete review"
+                aria-label={t("reviews.deleteReview")}
                 className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10
                            disabled:opacity-40 disabled:cursor-not-allowed transition-colors
                            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"

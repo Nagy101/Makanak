@@ -178,7 +178,7 @@ export default function OwnerDashboardPage() {
           </div>
           <Select value={params.Sort || ""} onValueChange={handleSort}>
             <SelectTrigger className="w-full sm:w-[200px] h-10">
-              <SelectValue placeholder="Sort by" />
+              <SelectValue placeholder={t("properties.sortBy")} />
             </SelectTrigger>
             <SelectContent>
               {sortingOptions.map((o) => (
@@ -189,11 +189,11 @@ export default function OwnerDashboardPage() {
             </SelectContent>
           </Select>
           <Button onClick={handleSearch} className="h-10 shrink-0">
-            <Search className="h-4 w-4 mr-2" /> Search
+            <Search className="h-4 w-4 mr-2" /> {t("common.search")}
           </Button>
           {isFetching && !isLoading && (
             <span className="self-center text-sm text-muted-foreground animate-pulse whitespace-nowrap">
-              Updating…
+              {t("common.updating")}
             </span>
           )}
         </div>
@@ -273,7 +273,7 @@ export default function OwnerDashboardPage() {
                 onClick={() => handlePageChange(currentPage - 1)}
                 className="gap-1"
               >
-                <ChevronLeft className="h-4 w-4" /> Previous
+                <ChevronLeft className="h-4 w-4" /> {t("properties.previous")}
               </Button>
 
               <div className="flex items-center gap-1">
@@ -319,7 +319,7 @@ export default function OwnerDashboardPage() {
                 onClick={() => handlePageChange(currentPage + 1)}
                 className="gap-1"
               >
-                Next <ChevronRight className="h-4 w-4" />
+                {t("properties.next")} <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           )}
@@ -341,7 +341,7 @@ export default function OwnerDashboardPage() {
             <Suspense
               fallback={
                 <div className="py-10 text-center text-muted-foreground">
-                  Loading reviews…
+                  {t("owner.loadingReviews")}
                 </div>
               }
             >
@@ -358,10 +358,9 @@ export default function OwnerDashboardPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Property</AlertDialogTitle>
+            <AlertDialogTitle>{t("owner.deleteProperty")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this property? This action cannot
-              be undone.
+              {t("owner.deleteConfirm")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -15,41 +15,47 @@ import {
 } from "lucide-react";
 import { useState, useCallback, memo } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AuthLayout from "../components/AuthLayout";
 import { useRegister } from "../hooks/useAuth";
 
-const schema = z
-  .object({
-    name: z.string().min(2, "Name is required").max(100),
-    email: z.string().min(1, "Email is required").email("Enter a valid email"),
-    phoneNumber: z.string().optional(),
-    password: z.string().min(6, "At least 6 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-    userType: z.enum(["Tenant", "Owner"], {
-      message: "Please select a user type",
-    }),
-    dateOfBirth: z.string().min(1, "Date of birth is required"),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  })
-  .transform((d) => ({
-    name: d.name,
-    email: d.email,
-    phoneNumber: d.phoneNumber || "",
-    password: d.password,
-    confirmPassword: d.confirmPassword,
-    userType: d.userType,
-    dateOfBirth: d.dateOfBirth,
-  }));
-type RegisterFormData = z.output<typeof schema>;
+const createSchema = (t: TFunction) =>
+  z
+    .object({
+      name: z.string().min(2, t("auth.nameRequired")).max(100),
+      email: z
+        .string()
+        .min(1, t("auth.emailRequired"))
+        .email(t("auth.enterValidEmail")),
+      phoneNumber: z.string().optional(),
+      password: z.string().min(6, t("auth.atLeast6Chars")),
+      confirmPassword: z.string().min(1, t("auth.confirmYourPassword")),
+      userType: z.enum(["Tenant", "Owner"], {
+        message: t("auth.selectUserType"),
+      }),
+      dateOfBirth: z.string().min(1, t("auth.dobRequired")),
+    })
+    .refine((d) => d.password === d.confirmPassword, {
+      message: t("auth.passwordsMustMatch"),
+      path: ["confirmPassword"],
+    })
+    .transform((d) => ({
+      name: d.name,
+      email: d.email,
+      phoneNumber: d.phoneNumber || "",
+      password: d.password,
+      confirmPassword: d.confirmPassword,
+      userType: d.userType,
+      dateOfBirth: d.dateOfBirth,
+    }));
+type RegisterFormData = z.output<ReturnType<typeof createSchema>>;
 
 const RegisterPage = memo(() => {
   const { t } = useTranslation();
+  const schema = createSchema(t);
   const [showPw, setShowPw] = useState(false);
   const { mutate, isPending } = useRegister();
   const {
@@ -94,7 +100,7 @@ const RegisterPage = memo(() => {
             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="name"
-              placeholder="John Doe"
+              placeholder={t("auth.namePlaceholder")}
               className="pl-10"
               {...register("name")}
             />
@@ -207,7 +213,9 @@ const RegisterPage = memo(() => {
                 type="button"
                 onClick={togglePasswordVisibility}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
-                aria-label={showPw ? "Hide password" : "Show password"}
+                aria-label={
+                  showPw ? t("auth.hidePassword") : t("auth.showPassword")
+                }
               >
                 {showPw ? (
                   <EyeOff className="h-4 w-4" />

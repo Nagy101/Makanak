@@ -1,4 +1,5 @@
 ﻿import { memo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -37,6 +38,7 @@ interface CreateBookingWidgetProps {
 // -- Component
 const CreateBookingWidget = memo(
   ({ propertyId, pricePerNight, maxGuests }: CreateBookingWidgetProps) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const isAuthenticated = useAuthStore((s) => !!s.token);
@@ -65,7 +67,7 @@ const CreateBookingWidget = memo(
     const onSubmit = useCallback(
       (data: BookingForm) => {
         if (!isAuthenticated) {
-          toast.error("Please login to perform this action.");
+          toast.error(t("auth.loginToPerformAction"));
           navigate("/login", { state: { from: location.pathname } });
           return;
         }
@@ -91,13 +93,15 @@ const CreateBookingWidget = memo(
               {pricePerNight.toLocaleString()} EGP
             </span>
             <span className="text-muted-foreground text-sm font-normal">
-              / night
+              {t("common.perNight")}
             </span>
           </div>
           {totalDays > 0 && (
             <p className="text-xs text-muted-foreground mt-1">
-              {totalDays} night{totalDays > 1 ? "s" : ""} ·{" "}
-              {totalPrice.toLocaleString()} EGP total
+              {totalDays}{" "}
+              {totalDays > 1 ? t("common.nights") : t("common.night")} ·{" "}
+              {totalPrice.toLocaleString()} EGP{" "}
+              {t("bookings.total").toLowerCase()}
             </p>
           )}
         </div>
@@ -109,7 +113,7 @@ const CreateBookingWidget = memo(
               {/* Check-in */}
               <div className="px-4 py-3">
                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">
-                  Check-in
+                  {t("bookings.checkIn")}
                 </Label>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -129,7 +133,7 @@ const CreateBookingWidget = memo(
               {/* Check-out */}
               <div className="px-4 py-3">
                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">
-                  Check-out
+                  {t("bookings.checkOut")}
                 </Label>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -149,7 +153,7 @@ const CreateBookingWidget = memo(
               {/* Guests */}
               <div className="px-4 py-3">
                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">
-                  Guests
+                  {t("bookings.guests")}
                 </Label>
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -159,7 +163,10 @@ const CreateBookingWidget = memo(
                   >
                     {Array.from({ length: maxGuests }, (_, i) => (
                       <option key={i + 1} value={i + 1}>
-                        {i + 1} {i === 0 ? "guest" : "guests"}
+                        {i + 1}{" "}
+                        {i === 0
+                          ? t("bookings.guest")
+                          : t("bookings.guestsPlural")}
                       </option>
                     ))}
                   </select>
@@ -175,11 +182,11 @@ const CreateBookingWidget = memo(
             {/* Special requests */}
             <div className="space-y-1.5">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Special Requests
+                {t("bookings.specialRequests")}
               </Label>
               <Textarea
                 {...register("specialRequests")}
-                placeholder="Any special requests or notes..."
+                placeholder={t("bookings.anySpecialRequests")}
                 rows={3}
                 className="resize-none rounded-xl text-sm"
               />
@@ -190,14 +197,14 @@ const CreateBookingWidget = memo(
               <div className="rounded-xl bg-muted/50 px-4 py-3 space-y-2 text-sm">
                 <div className="flex justify-between text-muted-foreground">
                   <span>
-                    {pricePerNight.toLocaleString()} EGP × {totalDays} night
-                    {totalDays > 1 ? "s" : ""}
+                    {pricePerNight.toLocaleString()} EGP × {totalDays}{" "}
+                    {totalDays > 1 ? t("common.nights") : t("common.night")}
                   </span>
                   <span>{totalPrice.toLocaleString()} EGP</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-bold text-foreground text-base">
-                  <span>Total</span>
+                  <span>{t("bookings.total")}</span>
                   <span>{totalPrice.toLocaleString()} EGP</span>
                 </div>
               </div>
@@ -213,14 +220,14 @@ const CreateBookingWidget = memo(
               {createBooking.isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                  Processing...
+                  {t("bookings.processing")}
                 </span>
               ) : isAuthenticated ? (
-                "Book Now"
+                t("bookings.bookNow")
               ) : (
                 <span className="flex items-center gap-2">
                   <LogIn className="h-4 w-4" />
-                  Login to Book
+                  {t("bookings.loginToBook")}
                 </span>
               )}
             </Button>
@@ -228,7 +235,7 @@ const CreateBookingWidget = memo(
             {/* Trust line */}
             <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
               <ShieldCheck className="h-3.5 w-3.5" />
-              You won't be charged yet
+              {t("bookings.wontBeChargedYet")}
             </div>
           </form>
         </div>

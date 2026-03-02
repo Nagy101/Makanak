@@ -5,6 +5,7 @@
 //  ⚠ Must be consumed via React.lazy().
 // ═══════════════════════════════════════════════════════════════
 import { memo, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   BarChart,
   Bar,
@@ -40,45 +41,48 @@ interface BookingsBarChartProps {
 const BookingsBarChart = memo(function BookingsBarChart({
   data,
 }: BookingsBarChartProps) {
+  const { t } = useTranslation();
   // ── Memoised transformation ────────────────────────────────
   const chartData = useMemo<BookingChartEntry[]>(
     () => [
       {
-        name: "Completed",
+        name: t("admin.completedLabel"),
         value: data.completedBookings,
-        fill: BOOKING_COLORS.Completed,
+        fill: "#1559AC",
       },
       {
-        name: "Checked In",
+        name: t("admin.checkedInLabel"),
         value: data.checkedIn,
-        fill: BOOKING_COLORS["Checked In"],
+        fill: "#2563EB",
       },
       {
-        name: "Payment Recv.",
+        name: t("admin.paymentRecvLabel"),
         value: data.paymentReceived,
-        fill: BOOKING_COLORS["Payment Recv."],
+        fill: "#3B82F6",
       },
       {
-        name: "Pending",
+        name: t("admin.pendingLabel"),
         value: data.pendingBookings,
-        fill: BOOKING_COLORS.Pending,
+        fill: "#F59E0B",
       },
       {
-        name: "Cancelled",
+        name: t("admin.cancelledLabel"),
         value: data.cancelledBookings,
-        fill: BOOKING_COLORS.Cancelled,
+        fill: "#EF4444",
       },
     ],
-    [data],
+    [data, t],
   );
 
   return (
     <Card className="border-border shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold text-foreground">
-          Booking Status Breakdown
+          {t("admin.bookingStatusBreakdown")}
         </CardTitle>
-        <CardDescription>{data.totalBookings} total bookings</CardDescription>
+        <CardDescription>
+          {t("admin.totalBookingsCount", { count: data.totalBookings })}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={260}>
@@ -116,7 +120,7 @@ const BookingsBarChart = memo(function BookingsBarChart({
                 border: "1px solid var(--color-border, #e2e8f0)",
                 color: "var(--color-foreground, #111827)",
               }}
-              formatter={(value: number) => [value, "Bookings"]}
+              formatter={(value: number) => [value, t("admin.bookingsLabel")]}
             />
             <Bar dataKey="value" radius={[0, 4, 4, 0]}>
               {chartData.map((entry) => (

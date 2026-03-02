@@ -7,6 +7,7 @@
 //  ⚠ Must be consumed via React.lazy().
 // ═══════════════════════════════════════════════════════════════
 import { memo, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   PieChart,
   Pie,
@@ -39,6 +40,7 @@ interface UsersOverviewChartProps {
 const UsersOverviewChart = memo(function UsersOverviewChart({
   data,
 }: UsersOverviewChartProps) {
+  const { t } = useTranslation();
   // ── Roles data ─────────────────────────────────────────────
   const rolesData = useMemo<UserRoleEntry[]>(
     () =>
@@ -67,9 +69,11 @@ const UsersOverviewChart = memo(function UsersOverviewChart({
     <Card className="border-border shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold text-foreground">
-          User Demographics
+          {t("admin.userDemographicsTitle")}
         </CardTitle>
-        <CardDescription>{data.totalUsers} registered users</CardDescription>
+        <CardDescription>
+          {t("admin.registeredUsers", { count: data.totalUsers })}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {/* Two responsive pie charts side by side */}
@@ -77,7 +81,7 @@ const UsersOverviewChart = memo(function UsersOverviewChart({
           {/* ── Roles ─────────────────────────────────── */}
           <div>
             <p className="text-xs font-medium text-center text-muted-foreground mb-1 uppercase tracking-wide">
-              By Role
+              {t("admin.byRole")}
             </p>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
@@ -119,7 +123,7 @@ const UsersOverviewChart = memo(function UsersOverviewChart({
           {/* ── Statuses ───────────────────────────────────────── */}
           <div>
             <p className="text-xs font-medium text-center text-muted-foreground mb-1 uppercase tracking-wide">
-              By Status
+              {t("admin.byStatus")}
             </p>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>

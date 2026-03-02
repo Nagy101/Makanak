@@ -74,13 +74,16 @@ export default function PropertyDetailsPage() {
           <div className="rounded-3xl bg-muted/60 p-10 mb-6">
             <Home className="h-14 w-14 text-muted-foreground/50" />
           </div>
-          <h2 className="text-xl font-bold mb-2">{t("properties.propertyNotFound")}</h2>
+          <h2 className="text-xl font-bold mb-2">
+            {t("properties.propertyNotFound")}
+          </h2>
           <p className="text-muted-foreground text-sm mb-6">
             {t("properties.propertyNotFoundDesc")}
           </p>
           <Button asChild variant="outline">
             <Link to="/properties">
-              <ArrowLeft className="h-4 w-4 mr-2" /> {t("properties.backToListings")}
+              <ArrowLeft className="h-4 w-4 mr-2" />{" "}
+              {t("properties.backToListings")}
             </Link>
           </Button>
         </div>
@@ -106,7 +109,8 @@ export default function PropertyDetailsPage() {
           className="mb-5 -ml-2 text-muted-foreground hover:text-foreground"
         >
           <Link to="/properties">
-            <ArrowLeft className="h-4 w-4 mr-1.5" /> {t("properties.backToSearch")}
+            <ArrowLeft className="h-4 w-4 mr-1.5" />{" "}
+            {t("properties.backToSearch")}
           </Link>
         </Button>
 
@@ -144,7 +148,7 @@ export default function PropertyDetailsPage() {
                       )
                     }
                     className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-md p-2.5 shadow-md hover:bg-black/70 transition-all hover:scale-105 border border-white/10"
-                    aria-label="Previous image"
+                    aria-label={t("properties.previousImage")}
                   >
                     <ChevronLeft className="h-5 w-5 text-white" />
                   </button>
@@ -153,7 +157,7 @@ export default function PropertyDetailsPage() {
                       setActiveImage((prev) => (prev + 1) % allImages.length)
                     }
                     className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-md p-2.5 shadow-md hover:bg-black/70 transition-all hover:scale-105 border border-white/10"
-                    aria-label="Next image"
+                    aria-label={t("properties.nextImage")}
                   >
                     <ChevronRight className="h-5 w-5 text-white" />
                   </button>
@@ -279,10 +283,26 @@ export default function PropertyDetailsPage() {
           {/* Key stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: Bed, label: t("properties.bedrooms"), value: property.bedrooms },
-              { icon: Bath, label: t("properties.bathrooms"), value: property.bathrooms },
-              { icon: Users, label: t("properties.maxGuests"), value: property.maxGuests },
-              { icon: Maximize2, label: t("properties.area"), value: `${property.area} ${t("properties.sqm")}` },
+              {
+                icon: Bed,
+                label: t("properties.bedrooms"),
+                value: property.bedrooms,
+              },
+              {
+                icon: Bath,
+                label: t("properties.bathrooms"),
+                value: property.bathrooms,
+              },
+              {
+                icon: Users,
+                label: t("properties.maxGuests"),
+                value: property.maxGuests,
+              },
+              {
+                icon: Maximize2,
+                label: t("properties.area"),
+                value: `${property.area} ${t("properties.sqm")}`,
+              },
             ].map(({ icon: Icon, label, value }) => (
               <div
                 key={label}
@@ -318,7 +338,10 @@ export default function PropertyDetailsPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {property.amenities.map((amenity) => {
                   const Icon = mapIcon(amenity.icon);
-                  const label = localized(amenity.nameEn, amenity.nameAr) || amenity.name || "Unknown";
+                  const label =
+                    localized(amenity.nameEn, amenity.nameAr) ||
+                    amenity.name ||
+                    "Unknown";
                   return (
                     <div
                       key={amenity.id}

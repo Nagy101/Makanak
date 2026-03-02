@@ -17,6 +17,13 @@ import axios, { type AxiosInstance } from "axios";
 import { toast } from "sonner";
 import { storage } from "./storage";
 
+// ── Centralised base URL from environment ─────────────────────
+// Strips any trailing slash to prevent double-slash in URLs.
+export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string).replace(
+  /\/+$/,
+  "",
+);
+
 // ── Guard: prevent redirect loops and duplicate toasts ────────
 let _401Handled = false;
 
@@ -72,7 +79,7 @@ function attachAuthHeader(instance: AxiosInstance): void {
 }
 
 // ── Factory ───────────────────────────────────────────────────
-export function createApi(baseURL: string): AxiosInstance {
+export function createApi(baseURL: string = API_BASE): AxiosInstance {
   const instance = axios.create({
     baseURL,
     headers: { "Content-Type": "application/json" },
