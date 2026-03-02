@@ -64,11 +64,7 @@ const statusBadgeClass: Record<UserStatus, string> = {
 };
 
 // ── Memoized Strike Badge (primitive props only) ──
-const StrikeBadge = memo(function StrikeBadge({
-  count,
-}: {
-  count: number;
-}) {
+const StrikeBadge = memo(function StrikeBadge({ count }: { count: number }) {
   const colorClass =
     count === 0
       ? "bg-success/10 text-success border-success/20"
@@ -180,7 +176,8 @@ const AdminUsersPage = memo(() => {
   const { userTypes } = useUserTypes();
   const addStrikeMutation = useAddStrike();
   const removeStrikeMutation = useRemoveStrike();
-  const isStrikePending = addStrikeMutation.isPending || removeStrikeMutation.isPending;
+  const isStrikePending =
+    addStrikeMutation.isPending || removeStrikeMutation.isPending;
 
   const handleAddStrike = useCallback(
     (userId: string) => {

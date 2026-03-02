@@ -8,8 +8,8 @@ export interface AdminApiResponse<T> {
 }
 
 // ── User Management ──
-export type UserStatus = 'New' | 'Pending' | 'Active' | 'Rejected' | 'Banned';
-export type UserType = 'Tenant' | 'Owner' | 'Admin';
+export type UserStatus = "New" | "Pending" | "Active" | "Rejected" | "Banned";
+export type UserType = "Tenant" | "Owner" | "Admin";
 
 export interface AdminUser {
   userId: string;
@@ -54,7 +54,7 @@ export interface UpdateUserStatusRequest {
 }
 
 // ── Property Status Update ──
-export type PropertyStatus = 'Pending' | 'Accepted' | 'Rejected' | 'Banned';
+export type PropertyStatus = "Pending" | "Accepted" | "Rejected" | "Banned";
 
 export interface UpdatePropertyStatusRequest {
   propertyId: number;

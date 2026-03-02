@@ -1,11 +1,16 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import * as adminService from './admin.service';
-import type { AdminUserSearchParams, UpdateUserStatusRequest, UpdatePropertyStatusRequest, AdminPropertySearchParams } from './admin.types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import * as adminService from "./admin.service";
+import type {
+  AdminUserSearchParams,
+  UpdateUserStatusRequest,
+  UpdatePropertyStatusRequest,
+  AdminPropertySearchParams,
+} from "./admin.types";
 
 // ── Users ──
 export function useAdminUsers(params: AdminUserSearchParams) {
   return useQuery({
-    queryKey: ['admin', 'users', params],
+    queryKey: ["admin", "users", params],
     queryFn: () => adminService.getAdminUsers(params),
     placeholderData: (prev) => prev,
     staleTime: 30 * 1000,
@@ -15,10 +20,11 @@ export function useAdminUsers(params: AdminUserSearchParams) {
 export function useUpdateUserStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdateUserStatusRequest) => adminService.updateUserStatus(data),
+    mutationFn: (data: UpdateUserStatusRequest) =>
+      adminService.updateUserStatus(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'users'] });
-      qc.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      qc.invalidateQueries({ queryKey: ["admin", "stats"] });
     },
   });
 }
@@ -26,7 +32,7 @@ export function useUpdateUserStatus() {
 // ── Verification Details ──
 export function useUserVerification(userId: string | null) {
   return useQuery({
-    queryKey: ['admin', 'users', userId, 'verification-details'],
+    queryKey: ["admin", "users", userId, "verification-details"],
     queryFn: () => adminService.getUserVerificationDetails(userId!),
     enabled: !!userId,
     staleTime: 60 * 1000,
@@ -39,8 +45,10 @@ export function useAddStrike() {
   return useMutation({
     mutationFn: (userId: string) => adminService.addStrike(userId),
     onSuccess: (_data, userId) => {
-      qc.invalidateQueries({ queryKey: ['admin', 'users'] });
-      qc.invalidateQueries({ queryKey: ['admin', 'users', userId, 'verification-details'] });
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      qc.invalidateQueries({
+        queryKey: ["admin", "users", userId, "verification-details"],
+      });
     },
   });
 }
@@ -50,8 +58,10 @@ export function useRemoveStrike() {
   return useMutation({
     mutationFn: (userId: string) => adminService.removeStrike(userId),
     onSuccess: (_data, userId) => {
-      qc.invalidateQueries({ queryKey: ['admin', 'users'] });
-      qc.invalidateQueries({ queryKey: ['admin', 'users', userId, 'verification-details'] });
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      qc.invalidateQueries({
+        queryKey: ["admin", "users", userId, "verification-details"],
+      });
     },
   });
 }
@@ -60,10 +70,11 @@ export function useRemoveStrike() {
 export function useUpdatePropertyStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdatePropertyStatusRequest) => adminService.updatePropertyStatus(data),
+    mutationFn: (data: UpdatePropertyStatusRequest) =>
+      adminService.updatePropertyStatus(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['property'] });
-      qc.invalidateQueries({ queryKey: ['admin', 'properties'] });
+      qc.invalidateQueries({ queryKey: ["property"] });
+      qc.invalidateQueries({ queryKey: ["admin", "properties"] });
     },
   });
 }
@@ -71,7 +82,7 @@ export function useUpdatePropertyStatus() {
 // ── Admin Properties ──
 export function useAdminProperties(params: AdminPropertySearchParams) {
   return useQuery({
-    queryKey: ['admin', 'properties', params],
+    queryKey: ["admin", "properties", params],
     queryFn: () => adminService.getAdminProperties(params),
     placeholderData: (prev) => prev,
     staleTime: 30 * 1000,
