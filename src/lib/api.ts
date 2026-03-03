@@ -4,18 +4,27 @@
  * createApi(baseURL)
  *   – Creates a fully configured AxiosInstance with:
  *       1. Automatic Bearer-token injection on every request.
- *       2. Global 401 response interceptor that clears auth state,
- *          shows a toast, and hard-redirects to /login.
+ *       2. Global response interceptor that:
+ *          a. Rejects when the backend returns isSuccess === false
+ *             (even on a 2xx HTTP status).
+ *          b. Normalises every API error into a structured ApiError
+ *             carrying the backend's message and errors array.
+ *          c. Handles 401 Unauthorized — clears auth, shows the
+ *             backend's message, and hard-redirects to /login.
  *
- * setup401Interceptor(instance)
- *   – Attaches only the 401 response interceptor to an existing
+ * setupResponseInterceptor(instance)
+ *   – Attaches the unified response interceptor to an existing
  *     instance (used by feature services that create their own
  *     axios.create() instead of going through createApi).
+ *
+ * @deprecated setup401Interceptor — renamed to setupResponseInterceptor.
+ *             Re-exported for backwards compatibility.
  */
 
 import axios, { type AxiosInstance } from "axios";
 import { toast } from "sonner";
 import { storage } from "./storage";
+import { ApiError } from "./apiTypes";
 
 // ── Centralised base URL from environment ─────────────────────
 // Strips any trailing slash to prevent double-slash in URLs.
@@ -27,13 +36,49 @@ export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string).replace(
 // ── Guard: prevent redirect loops and duplicate toasts ────────
 let _401Handled = false;
 
-// ── 401 Response interceptor ──────────────────────────────────
-export function setup401Interceptor(instance: AxiosInstance): void {
+// ── Unified Response Interceptor ──────────────────────────────
+export function setupResponseInterceptor(instance: AxiosInstance): void {
   instance.interceptors.response.use(
-    (response) => response,
-    (error) => {
+    // ── Fulfil handler: catch isSuccess === false on 2xx ──────
+    (response) => {
+      const body = response.data;
+
       if (
-        error.response?.status === 401 &&
+        body &&
+        typeof body === "object" &&
+        "isSuccess" in body &&
+        body.isSuccess === false
+      ) {
+        return Promise.reject(
+          new ApiError(
+            body.statusCode ?? response.status,
+            body.message || "Something went wrong.",
+            body.errors ?? null,
+          ),
+        );
+      }
+
+      return response;
+    },
+
+    // ── Reject handler: HTTP 4xx / 5xx ───────────────────────
+    (error) => {
+      // Network failure — no response received
+      if (!axios.isAxiosError(error) || !error.response) {
+        return Promise.reject(
+          new ApiError(
+            0,
+            "Network error. Please check your connection and try again.",
+            null,
+          ),
+        );
+      }
+
+      const { status, data } = error.response;
+
+      // ── 401 Unauthorized ────────────────────────────────────
+      if (
+        status === 401 &&
         !_401Handled &&
         !window.location.pathname.includes("/login")
       ) {
@@ -50,10 +95,10 @@ export function setup401Interceptor(instance: AxiosInstance): void {
             /* no-op: store not yet loaded */
           });
 
-        // 3. Inform the user
-        toast.error(
-          "Your session has expired or you are unauthorized. Please log in again.",
-        );
+        // 3. Show the API's message (fall back only if absent)
+        const authMessage =
+          data?.message || "Session expired. Please log in again.";
+        toast.error(authMessage);
 
         // 4. Hard redirect — safe even outside React Router context
         window.location.href = "/login";
@@ -64,10 +109,23 @@ export function setup401Interceptor(instance: AxiosInstance): void {
         }, 5_000);
       }
 
-      return Promise.reject(error);
+      // ── Normalise into ApiError ─────────────────────────────
+      return Promise.reject(
+        new ApiError(
+          data?.statusCode ?? status,
+          data?.message || "Something went wrong.",
+          data?.errors ?? null,
+        ),
+      );
     },
   );
 }
+
+/**
+ * @deprecated Use `setupResponseInterceptor` instead.
+ * Kept for backwards compatibility during migration.
+ */
+export const setup401Interceptor = setupResponseInterceptor;
 
 // ── Auth Request interceptor ──────────────────────────────────
 function attachAuthHeader(instance: AxiosInstance): void {
@@ -86,7 +144,7 @@ export function createApi(baseURL: string = API_BASE): AxiosInstance {
   });
 
   attachAuthHeader(instance);
-  setup401Interceptor(instance);
+  setupResponseInterceptor(instance);
 
   return instance;
 }

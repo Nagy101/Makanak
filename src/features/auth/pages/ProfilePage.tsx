@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, memo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { storage } from "@/lib/storage";
-import { validateFileSize, getApiErrorMessage } from "@/lib/apiError";
+import { validateFileSize, showApiErrorToast } from "@/lib/apiError";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -193,10 +193,7 @@ const ProfilePage = memo(() => {
             window.location.href = "/login";
           }, 1500);
         },
-        onError: (error) =>
-          toast.error(
-            getApiErrorMessage(error, t("profile.emailChangeFailed")),
-          ),
+        onError: (error) => showApiErrorToast(error),
       },
     );
   });

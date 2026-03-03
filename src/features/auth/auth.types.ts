@@ -110,8 +110,10 @@ export interface ConfirmEmailChangeRequest {
 }
 
 // ── Generic API Response ──
-export interface ApiResponse<T = void> {
-  data?: T;
-  message?: string;
-  success: boolean;
+export interface ApiResponse<T = null> {
+  statusCode: number;
+  isSuccess: boolean;
+  message: string;
+  data: T;
+  errors: string[] | null;
 }

@@ -53,7 +53,7 @@ import type {
 import UserVerificationModal from "../components/UserVerificationModal";
 import { useUserStatuses, useUserTypes } from "@/features/lookup";
 import { toast } from "sonner";
-import { getApiErrorMessage } from "@/lib/apiError";
+import { showApiErrorToast } from "@/lib/apiError";
 const PAGE_SIZE = 10;
 
 const statusBadgeClass: Record<UserStatus, string> = {
@@ -185,7 +185,7 @@ const AdminUsersPage = memo(() => {
       addStrikeMutation.mutate(userId, {
         onSuccess: () => toast.success(t("admin.strikeAdded")),
         onError: (error) =>
-          toast.error(getApiErrorMessage(error, t("admin.strikeAddFailed"))),
+          showApiErrorToast(error),
       });
     },
     [addStrikeMutation, t],
@@ -196,7 +196,7 @@ const AdminUsersPage = memo(() => {
       removeStrikeMutation.mutate(userId, {
         onSuccess: () => toast.success(t("admin.strikeRemoved")),
         onError: (error) =>
-          toast.error(getApiErrorMessage(error, t("admin.strikeRemoveFailed"))),
+          showApiErrorToast(error),
       });
     },
     [removeStrikeMutation, t],
