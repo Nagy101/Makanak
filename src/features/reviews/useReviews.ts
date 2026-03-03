@@ -14,10 +14,10 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import axios from 'axios';
 import * as reviewService from './review.service';
 import type { CreateReviewRequest, Review } from './review.types';
 import { toast } from 'sonner';
+import { showApiErrorToast } from '@/lib/apiError';
 
 // ── Constants ─────────────────────────────────────────────────
 const PAGE_SIZE = 5;
@@ -27,18 +27,6 @@ const reviewKeys = {
   all: ['reviews'] as const,
   property: (propertyId: number) => ['reviews', propertyId] as const,
 };
-
-// ── Helper: extract a useful error message ────────────────────
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (axios.isAxiosError(error)) {
-    const d = error.response?.data;
-    if (d?.errors && Array.isArray(d.errors) && d.errors.length > 0)
-      return d.errors.join(', ');
-    if (d?.message) return d.message;
-    return error.message || fallback;
-  }
-  return fallback;
-}
 
 // ── usePropertyReviews ────────────────────────────────────────
 /**
@@ -88,20 +76,11 @@ export const useCreateReview = (propertyId: number) => {
   return useMutation({
     mutationFn: (data: CreateReviewRequest) => reviewService.createReview(data),
     onSuccess: (res) => {
-      if (!res.isSuccess) {
-        const msg =
-          (res.errors?.length ? res.errors.join(', ') : null) ||
-          res.message ||
-          'Failed to submit review';
-        toast.error(msg);
-        return;
-      }
       toast.success(res.message || 'Review submitted successfully!');
       // Invalidate only the reviews for this specific property
       qc.invalidateQueries({ queryKey: reviewKeys.property(propertyId) });
     },
-    onError: (err) =>
-      toast.error(getErrorMessage(err, 'Failed to submit review')),
+    onError: (error) => showApiErrorToast(error),
   });
 };
 
@@ -116,18 +95,9 @@ export const useDeleteReview = (propertyId: number) => {
   return useMutation({
     mutationFn: (reviewId: number) => reviewService.deleteReview(reviewId),
     onSuccess: (res) => {
-      if (!res.isSuccess) {
-        const msg =
-          (res.errors?.length ? res.errors.join(', ') : null) ||
-          res.message ||
-          'Failed to delete review';
-        toast.error(msg);
-        return;
-      }
       toast.success(res.message || 'Review deleted.');
       qc.invalidateQueries({ queryKey: reviewKeys.property(propertyId) });
     },
-    onError: (err) =>
-      toast.error(getErrorMessage(err, 'Failed to delete review')),
+    onError: (error) => showApiErrorToast(error),
   });
 };

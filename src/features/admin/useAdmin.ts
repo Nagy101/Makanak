@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import * as adminService from "./admin.service";
-import { getApiErrorMessage } from "@/lib/apiError";
+import { showApiErrorToast } from "@/lib/apiError";
 import type {
   AdminUserSearchParams,
   UpdateUserStatusRequest,
@@ -28,8 +28,7 @@ export function useUpdateUserStatus() {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
       qc.invalidateQueries({ queryKey: ["admin", "stats"] });
     },
-    onError: (error) =>
-      toast.error(getApiErrorMessage(error, "Failed to update user status.")),
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -80,10 +79,7 @@ export function useUpdatePropertyStatus() {
       qc.invalidateQueries({ queryKey: ["property"] });
       qc.invalidateQueries({ queryKey: ["admin", "properties"] });
     },
-    onError: (error) =>
-      toast.error(
-        getApiErrorMessage(error, "Failed to update property status."),
-      ),
+    onError: (error) => showApiErrorToast(error),
   });
 }
 

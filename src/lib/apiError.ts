@@ -1,20 +1,29 @@
 /**
  * Shared API error handling utilities.
  *
- * Single source of truth for extracting human-readable messages from
- * backend errors. All mutation hooks should use getApiErrorMessage()
- * in their onError callbacks for consistent, informative feedback.
+ * All error display is driven by the Backend's unified response:
+ *   { statusCode, isSuccess, message, data, errors }
+ *
+ * The global Axios interceptor (see api.ts) normalises every failed
+ * response into an ApiError instance, so extracting the message is
+ * simply reading error.message — no manual response parsing needed.
+ *
+ * ── Exports ─────────────────────────────────────────────────
+ *  getApiErrorMessage(error)     → primary backend message string
+ *  getApiValidationErrors(error) → the errors[] array (or null)
+ *  showApiErrorToast(error)      → convenience: toast with message + errors
+ *  validateFileSize(file, max)   → client-side file guard
  *
  * Usage:
- *   import { getApiErrorMessage, validateFileSize } from "@/lib/apiError";
+ *   import { showApiErrorToast } from "@/lib/apiError";
+ *   onError: (error) => showApiErrorToast(error)
  *
- *   onError: (error) => toast.error(getApiErrorMessage(error, "Fallback message"))
- *
- *   const err = validateFileSize(file);
- *   if (err) { toast.error(err); return; }
+ *   import { getApiErrorMessage } from "@/lib/apiError";
+ *   onError: (error) => toast.error(getApiErrorMessage(error))
  */
 
-import axios from "axios";
+import { toast } from "sonner";
+import { ApiError } from "./apiTypes";
 
 // ── File size constants ───────────────────────────────────────
 export const MAX_FILE_SIZE_MB = 5;
@@ -36,76 +45,59 @@ export function validateFileSize(
   return null;
 }
 
+// ── Default fallback — only used when the API provides nothing ─
+const FALLBACK_MESSAGE = "Something went wrong.";
+
 /**
- * Extracts the most relevant, human-readable error message from any
- * API error response. Handles multiple .NET backend response shapes.
+ * Extracts the primary error message from any API error.
  *
- * Priority order:
- *  1. Server-supplied message from response body
- *  2. First validation field error
- *  3. HTTP status-based message
- *  4. Network / CORS failure
- *  5. Provided fallback string
+ * The interceptor guarantees that every rejected API call carries an
+ * ApiError whose `.message` is the backend-supplied string. This
+ * function simply surfaces that; a generic fallback is used *only*
+ * when no message exists at all.
+ *
+ * DO NOT pass a custom fallback — let the backend speak.
  */
-export function getApiErrorMessage(
-  error: unknown,
-  fallback = "Something went wrong. Please try again.",
-): string {
-  if (!axios.isAxiosError(error)) {
-    if (error instanceof Error) return error.message;
-    return fallback;
+export function getApiErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    return error.message || FALLBACK_MESSAGE;
   }
 
-  // Network failure — no response received (offline, CORS, server down)
-  if (!error.response) {
-    return "Network error. Please check your connection and try again.";
+  if (error instanceof Error) {
+    return error.message || FALLBACK_MESSAGE;
   }
 
-  const { status, data } = error.response;
+  return FALLBACK_MESSAGE;
+}
 
-  // ── Server-provided message extraction ───────────────────────
-  // Handles several common .NET / ASP.NET Core response shapes:
-  //   { message: "..." }
-  //   { Message: "..." }
-  //   { Messages: ["..."] }
-  //   { errors: ["..."] }   ← string array
-  //   { errors: { Field: ["..."] } }  ← validation dictionary
-  const serverMessage: string | undefined | false =
-    data?.message ||
-    data?.Message ||
-    (Array.isArray(data?.Messages) && data.Messages[0]) ||
-    (Array.isArray(data?.errors) &&
-      typeof data.errors[0] === "string" &&
-      data.errors[0]) ||
-    (data?.errors &&
-      typeof data.errors === "object" &&
-      !Array.isArray(data.errors) &&
-      Object.values(data.errors as Record<string, string[]>)[0]?.[0]);
+/**
+ * Extracts the validation `errors` array from an API error.
+ * Returns null when there are no detailed validation errors.
+ */
+export function getApiValidationErrors(error: unknown): string[] | null {
+  if (error instanceof ApiError && error.errors?.length) {
+    return error.errors;
+  }
+  return null;
+}
 
-  if (serverMessage) return String(serverMessage);
+/**
+ * Displays an error toast using the backend's message as the title
+ * and, when validation errors are present, lists them as description.
+ *
+ * This is the recommended one-liner for `onError` callbacks:
+ *   onError: (error) => showApiErrorToast(error)
+ */
+export function showApiErrorToast(error: unknown): void {
+  const message = getApiErrorMessage(error);
+  const errors = getApiValidationErrors(error);
 
-  // ── HTTP status-based fallback messages ──────────────────────
-  switch (status) {
-    case 400:
-      return "Invalid request. Please check your input and try again.";
-    case 403:
-      return "You don't have permission to perform this action.";
-    case 404:
-      return "The requested resource was not found.";
-    case 408:
-      return "Request timed out. Please try again.";
-    case 413:
-      return `File is too large. Please upload files smaller than ${MAX_FILE_SIZE_MB} MB.`;
-    case 422:
-      return "Validation failed. Please check your input.";
-    case 429:
-      return "Too many requests. Please slow down and try again shortly.";
-    case 500:
-      return "A server error occurred. Please try again later.";
-    case 502:
-    case 503:
-      return "The server is temporarily unavailable. Please try again later.";
-    default:
-      return fallback;
+  if (errors?.length) {
+    toast.error(message, {
+      description: errors.join("\n"),
+    });
+  } else {
+    toast.error(message);
   }
 }
+

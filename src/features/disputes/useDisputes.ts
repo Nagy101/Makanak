@@ -11,7 +11,7 @@ import type {
   DisputeListParams,
 } from "./dispute.types";
 import { toast } from "sonner";
-import { getApiErrorMessage } from "@/lib/apiError";
+import { showApiErrorToast } from "@/lib/apiError";
 
 const DISPUTES_KEY = "disputes";
 
@@ -41,8 +41,7 @@ export const useCreateDispute = () => {
       toast.success(res.message || "Dispute created successfully");
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
-    onError: (error) =>
-      toast.error(getApiErrorMessage(error, "Failed to create dispute")),
+    onError: (error) => showApiErrorToast(error),
   });
 };
 
@@ -56,8 +55,7 @@ export const useResolveDispute = () => {
       toast.success(res.message || "Dispute resolved");
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
-    onError: (error) =>
-      toast.error(getApiErrorMessage(error, "Failed to resolve dispute")),
+    onError: (error) => showApiErrorToast(error),
   });
 };
 
@@ -70,7 +68,6 @@ export const useCancelDispute = () => {
       toast.success(res.message || "Dispute cancelled");
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
-    onError: (error) =>
-      toast.error(getApiErrorMessage(error, "Failed to cancel dispute")),
+    onError: (error) => showApiErrorToast(error),
   });
 };

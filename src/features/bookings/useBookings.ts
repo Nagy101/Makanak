@@ -14,7 +14,7 @@ import type {
   UpdateBookingStatusRequest,
 } from "./booking.types";
 import { toast } from "sonner";
-import { getApiErrorMessage } from "@/lib/apiError";
+import { showApiErrorToast } from "@/lib/apiError";
 
 // ── Tenant: My Bookings ──
 export const useMyBookings = (params: BookingListParams) =>
@@ -56,19 +56,10 @@ export const useCreateBooking = () => {
   return useMutation({
     mutationFn: (data: CreateBookingRequest) => createBooking(data),
     onSuccess: (res) => {
-      if (!res.isSuccess) {
-        const msg =
-          (res.errors?.length ? res.errors.join(", ") : null) ||
-          res.message ||
-          "Failed to create booking";
-        toast.error(msg);
-        return;
-      }
       toast.success(res.message || "Booking created successfully");
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
-    onError: (err) =>
-      toast.error(getApiErrorMessage(err, "Failed to create booking")),
+    onError: (error) => showApiErrorToast(error),
   });
 };
 
@@ -78,15 +69,10 @@ export const useCancelBooking = () => {
   return useMutation({
     mutationFn: (id: number) => cancelBooking(id),
     onSuccess: (res) => {
-      if (!res.isSuccess) {
-        toast.error(res.message || "Failed to cancel booking");
-        return;
-      }
       toast.success(res.message || "Booking cancelled");
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
-    onError: (err) =>
-      toast.error(getApiErrorMessage(err, "Failed to cancel booking")),
+    onError: (error) => showApiErrorToast(error),
   });
 };
 
@@ -102,14 +88,9 @@ export const useUpdateBookingStatus = () => {
       data: UpdateBookingStatusRequest;
     }) => updateBookingStatus(id, data),
     onSuccess: (res) => {
-      if (!res.isSuccess) {
-        toast.error(res.message || "Failed to update status");
-        return;
-      }
       toast.success(res.message || "Booking status updated");
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
-    onError: (err) =>
-      toast.error(getApiErrorMessage(err, "Failed to update booking status")),
+    onError: (error) => showApiErrorToast(error),
   });
 };
