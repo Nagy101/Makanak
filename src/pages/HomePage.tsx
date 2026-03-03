@@ -32,6 +32,7 @@ import {
   ShieldCheck,
   CreditCard,
   Headphones,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -593,6 +594,17 @@ export default function HomePage() {
                 </svg>
               </a>
             </div>
+            {/* Phone */}
+            <a
+              href="tel:+201068057499"
+              className="flex items-center gap-2 text-sm text-slate-400 transition hover:text-white mt-1 w-fit"
+              aria-label="Call us"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-slate-400 transition hover:bg-primary hover:text-white">
+                <Phone className="h-4 w-4" />
+              </span>
+              <span dir="ltr">010 6805 7499</span>
+            </a>
           </div>
 
           {/* Explore column */}
