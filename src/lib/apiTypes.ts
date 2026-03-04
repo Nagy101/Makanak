@@ -45,3 +45,79 @@ export class ApiError extends Error {
     this.errors = errors;
   }
 }
+
+// ── Helpers ───────────────────────────────────────────────────
+
+/**
+ * Type guard: ASP.NET ValidationProblemDetails `errors` field —
+ * a dictionary mapping field names to arrays of messages.
+ *
+ *   { "Email": ["Email is already in use"], "Password": ["Too short"] }
+ */
+function isDictionaryErrors(
+  value: unknown,
+): value is Record<string, string[]> {
+  if (value == null || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+  return Object.values(value as Record<string, unknown>).every((v) =>
+    Array.isArray(v),
+  );
+}
+
+/**
+ * Flatten a ValidationProblemDetails `errors` dictionary into a
+ * single `string[]` containing every individual message.
+ */
+function flattenDictionaryErrors(
+  dict: Record<string, string[]>,
+): string[] {
+  return Object.entries(dict).flatMap(([, messages]) => messages);
+}
+
+/**
+ * Parse any Axios `response.data` payload into a normalised
+ * `{ message, errors }` pair regardless of shape.
+ *
+ * Shape 1 — Custom ApiResponse:
+ *   { statusCode, isSuccess, message, data, errors: string[] | null }
+ *
+ * Shape 2 — ASP.NET ValidationProblemDetails:
+ *   { type, title, status, errors: { Field: ["msg", …] } }
+ */
+export function parseApiError(
+  data: unknown,
+  fallbackStatus: number = 0,
+): { statusCode: number; message: string; errors: string[] | null } {
+  if (data == null || typeof data !== "object") {
+    return {
+      statusCode: fallbackStatus,
+      message: "An unexpected error occurred.",
+      errors: null,
+    };
+  }
+
+  const obj = data as Record<string, unknown>;
+
+  // Shape 2: ValidationProblemDetails (check first — more specific)
+  if (isDictionaryErrors(obj.errors)) {
+    const flat = flattenDictionaryErrors(
+      obj.errors as Record<string, string[]>,
+    );
+    return {
+      statusCode: (obj.status as number) ?? fallbackStatus,
+      message:
+        (obj.title as string) ||
+        flat[0] ||
+        "Validation failed.",
+      errors: flat.length ? flat : null,
+    };
+  }
+
+  // Shape 1: Custom ApiResponse
+  return {
+    statusCode: (obj.statusCode as number) ?? fallbackStatus,
+    message: (obj.message as string) || "Something went wrong.",
+    errors: Array.isArray(obj.errors) ? (obj.errors as string[]) : null,
+  };
+}

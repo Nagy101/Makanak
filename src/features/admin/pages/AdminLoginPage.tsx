@@ -88,7 +88,6 @@ const AdminLoginPage = memo(() => {
     },
     onError: () => {
       setFormError(GENERIC_ERROR);
-      toast.error(GENERIC_ERROR);
     },
   });
 

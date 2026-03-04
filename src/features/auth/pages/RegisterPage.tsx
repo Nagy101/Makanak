@@ -30,7 +30,10 @@ const createSchema = (t: TFunction) =>
         .string()
         .min(1, t("auth.emailRequired"))
         .email(t("auth.enterValidEmail")),
-      phoneNumber: z.string().optional(),
+      phoneNumber: z
+        .string()
+        .min(1, t("auth.phoneRequired"))
+        .regex(/^[0-9]+$/, t("auth.phoneNumbersOnly")),
       password: z.string().min(6, t("auth.atLeast6Chars")),
       confirmPassword: z.string().min(1, t("auth.confirmYourPassword")),
       userType: z.enum(["Tenant", "Owner"], {
@@ -45,7 +48,7 @@ const createSchema = (t: TFunction) =>
     .transform((d) => ({
       name: d.name,
       email: d.email,
-      phoneNumber: d.phoneNumber || "",
+      phoneNumber: d.phoneNumber,
       password: d.password,
       confirmPassword: d.confirmPassword,
       userType: d.userType,
@@ -128,16 +131,21 @@ const RegisterPage = memo(() => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">{t("auth.phoneOptional")}</Label>
+          <Label htmlFor="phone">{t("auth.phone")}</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="phone"
-              placeholder="+1 234 567 890"
+              placeholder={t("auth.phonePlaceholder")}
               className="pl-10"
               {...register("phoneNumber")}
             />
           </div>
+          {errors.phoneNumber && (
+            <p className="text-sm text-destructive">
+              {errors.phoneNumber.message}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">

@@ -33,7 +33,6 @@ import { useProperty } from "@/features/properties/useProperties";
 import { useUpdatePropertyStatus } from "../useAdmin";
 import type { PropertyStatus } from "../admin.types";
 import { toast } from "sonner";
-import { showApiErrorToast } from "@/lib/apiError";
 
 interface PropertyDetailsModalProps {
   propertyId: number | null;
@@ -91,9 +90,6 @@ const PropertyDetailsModal = memo<PropertyDetailsModalProps>(
             setRejectionReason("");
             setShowReasonInput(false);
             onClose();
-          },
-          onError: (error) => {
-            showApiErrorToast(error);
           },
         },
       );

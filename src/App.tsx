@@ -1,7 +1,12 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  MutationCache,
+} from "@tanstack/react-query";
+import { showApiErrorToast } from "@/lib/apiError";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
@@ -95,6 +100,11 @@ const PageLoadingFallback = () => {
 };
 
 const queryClient = new QueryClient({
+  mutationCache: new MutationCache({
+    onError: (error) => {
+      showApiErrorToast(error);
+    },
+  }),
   defaultOptions: {
     queries: {
       staleTime: 3 * 60 * 1000, // 3 min — data is fresh, no background refetch
