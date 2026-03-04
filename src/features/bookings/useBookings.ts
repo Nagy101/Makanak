@@ -14,7 +14,6 @@ import type {
   UpdateBookingStatusRequest,
 } from "./booking.types";
 import { toast } from "sonner";
-import { showApiErrorToast } from "@/lib/apiError";
 
 // ── Tenant: My Bookings ──
 export const useMyBookings = (params: BookingListParams) =>
@@ -59,7 +58,6 @@ export const useCreateBooking = () => {
       toast.success(res.message || "Booking created successfully");
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
-    onError: (error) => showApiErrorToast(error),
   });
 };
 
@@ -72,7 +70,6 @@ export const useCancelBooking = () => {
       toast.success(res.message || "Booking cancelled");
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
-    onError: (error) => showApiErrorToast(error),
   });
 };
 
@@ -91,6 +88,5 @@ export const useUpdateBookingStatus = () => {
       toast.success(res.message || "Booking status updated");
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
-    onError: (error) => showApiErrorToast(error),
   });
 };
