@@ -37,11 +37,11 @@ import type {
 const MapPicker = lazy(() => import("../components/MapPicker"));
 
 const propertySchema = z.object({
-  Title: z.string().min(3, "Title must be at least 3 characters"),
-  Description: z.string().min(10, "Description must be at least 10 characters"),
+  Title: z.string().trim().min(3, "Title must be at least 3 characters"),
+  Description: z.string().trim().min(10, "Description must be at least 10 characters"),
   PropertyType: z.string().min(1, "Select a property type"),
   AreaName: z.string().min(1, "Area name is required"),
-  Address: z.string().min(3, "Address is required"),
+  Address: z.string().trim().min(3, "Address is required"),
   PricePerNight: z.coerce.number().min(1, "Price must be at least 1"),
   Area: z.coerce.number().min(1, "Area must be at least 1"),
   Bedrooms: z.coerce.number().min(0, "Invalid"),
@@ -576,7 +576,7 @@ export default function AddEditPropertyPage() {
                   >
                     <img
                       src={img.imageUrl}
-                      alt=""
+                      alt={t("owner.galleryImageAlt", { index: img.id })}
                       loading="lazy"
                       width={128}
                       height={96}
@@ -600,7 +600,7 @@ export default function AddEditPropertyPage() {
                   >
                     <img
                       src={url}
-                      alt=""
+                      alt={t("owner.galleryImageAlt", { index: i + 1 })}
                       className="h-full w-full object-cover"
                     />
                     <button

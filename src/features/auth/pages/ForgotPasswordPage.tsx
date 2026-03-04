@@ -28,7 +28,7 @@ const emailSchema = z.object({
 
 const resetSchema = z
   .object({
-    newPassword: z.string().min(6, "At least 6 characters"),
+    newPassword: z.string().min(8, "At least 8 characters"),
     confirmPassword: z.string().min(1),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {

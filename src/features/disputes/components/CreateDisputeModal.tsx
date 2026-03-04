@@ -35,7 +35,7 @@ import { getDisputeReasonLabel } from "../dispute.i18n";
 const schema = z.object({
   BookingId: z.number().min(1, "Booking ID is required"),
   Reason: z.number().min(1, "Please select a reason"),
-  Description: z.string().min(10, "Description must be at least 10 characters"),
+  Description: z.string().trim().min(10, "Description must be at least 10 characters"),
 });
 
 type FormValues = z.infer<typeof schema>;

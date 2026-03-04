@@ -129,6 +129,7 @@
     "phone": "الهاتف",
     "phoneRequired": "رقم الهاتف مطلوب",
     "phoneNumbersOnly": "رقم الهاتف يجب أن يحتوي على أرقام فقط",
+    "phoneInvalid": "رقم الهاتف يجب أن يكون ١٠-١٥ رقمًا، ويمكن أن يبدأ بعلامة +",
     "phonePlaceholder": "٠٢٠ xxx xxx xxxx+",
     "confirmPassword": "تأكيد كلمة المرور",
     "chooseAccountType": "اختر نوع حسابك",
@@ -157,12 +158,13 @@
     "newPassword": "كلمة المرور الجديدة",
     "resetPassword": "إعادة تعيين كلمة المرور",
     "passwordsMustMatch": "كلمتا المرور غير متطابقتين",
-    "atLeast6Chars": "٦ أحرف على الأقل",
+    "atLeast6Chars": "٨ أحرف على الأقل",
+    "atLeast8Chars": "٨ أحرف على الأقل",
     "enterValidEmail": "أدخل بريد إلكتروني صالح",
     "loginToPerformAction": "يرجى تسجيل الدخول للقيام بهذا الإجراء.",
     "emailRequired": "البريد الإلكتروني مطلوب",
     "nameRequired": "الاسم مطلوب",
-    "passwordMinChars": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+    "passwordMinChars": "كلمة المرور يجب أن تكون ٨ أحرف على الأقل",
     "confirmYourPassword": "يرجى تأكيد كلمة المرور",
     "selectUserType": "يرجى اختيار نوع المستخدم",
     "dobRequired": "تاريخ الميلاد مطلوب",
@@ -392,6 +394,7 @@
     "pricePlaceholder": "0",
     "loadingMap": "جاري تحميل الخريطة…",
     "galleryImages": "صور المعرض",
+    "galleryImageAlt": "صورة المعرض {{index}}",
     "addImage": "إضافة",
     "pricePerNightEgp": "السعر لكل ليلة (ج.م)",
     "selectPropertyType": "اختر النوع",
@@ -662,5 +665,12 @@
   "guards": {
     "pleaseLogIn": "يرجى تسجيل الدخول للوصول إلى هذه الصفحة.",
     "accessDenied": "تم رفض الوصول. فقط مالكو العقارات يمكنهم الوصول لهذه الصفحة."
+  },
+
+  "seo": {
+    "homeTitle": "مكانك — اعثر على منزلك المثالي في مصر",
+    "homeDescription": "تصفح آلاف العقارات المؤجرة الموثقة في جميع أنحاء مصر. احجز إقامتك القادمة مع مكانك.",
+    "propertiesTitle": "تصفح العقارات | مكانك",
+    "propertiesDescription": "ابحث وتصفح العقارات المؤجرة في جميع أنحاء مصر. اعثر على شقق وفلل واستوديوهات في كل محافظة."
   }
 }
