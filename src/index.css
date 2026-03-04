@@ -11,6 +11,7 @@
    */
 
   :root {
+    color-scheme: light;
     /* ── Light Mode ───────────────────────────────── */
     --background: 213 40% 96%;
     --foreground: 220 25% 10%;
@@ -63,6 +64,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     /* ── Core surfaces ────────────────────────────── */
     /* Background: rgb(19, 23, 32) = hsl(220, 25%, 10%) */
     --background: 220 25% 10%;
@@ -131,8 +133,8 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -170,7 +172,6 @@
 }
 
 @layer utilities {
-
   /* ── Shadow scale (dark-optimised with primary glow) ── */
   .shadow-card {
     box-shadow:
@@ -180,15 +181,15 @@
 
   .shadow-card-hover {
     box-shadow:
-      0 4px 12px rgb(0 0 0 / 0.40),
-      0 16px 40px rgb(0 0 0 / 0.30),
+      0 4px 12px rgb(0 0 0 / 0.4),
+      0 16px 40px rgb(0 0 0 / 0.3),
       0 0 0 1px hsl(var(--primary) / 0.15);
   }
 
   .shadow-panel {
     box-shadow:
       0 0 0 1px hsl(var(--border)),
-      0 2px 8px rgb(0 0 0 / 0.20);
+      0 2px 8px rgb(0 0 0 / 0.2);
   }
 
   /* Primary glow — for hero buttons / CTAs */
@@ -213,9 +214,11 @@
   /* ── Background utilities ───────────────────────── */
   /* Auth & form layout gradient */
   .auth-gradient {
-    background: linear-gradient(135deg,
-        hsl(var(--primary) / 0.06),
-        hsl(var(--accent) / 0.04));
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.06),
+      hsl(var(--accent) / 0.04)
+    );
   }
 
   /* Subtle noise/texture overlay for depth */
@@ -230,9 +233,11 @@
   /* ── Text utilities ─────────────────────────────── */
   /* Premium gradient headings */
   .text-gradient {
-    background: linear-gradient(135deg,
-        hsl(var(--primary)),
-        hsl(var(--accent)));
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)),
+      hsl(var(--accent))
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -271,9 +276,12 @@
 
   /* ── Animated gradient background ──────────────── */
   .hero-gradient {
-    background: radial-gradient(ellipse 80% 60% at 50% -10%,
+    background:
+      radial-gradient(
+        ellipse 80% 60% at 50% -10%,
         hsl(var(--primary) / 0.18) 0%,
-        transparent 70%),
+        transparent 70%
+      ),
       hsl(var(--background));
   }
 }
