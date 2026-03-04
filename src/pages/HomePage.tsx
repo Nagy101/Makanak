@@ -17,6 +17,7 @@
  */
 
 import { memo, useCallback, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -387,6 +388,10 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{t("seo.homeTitle")}</title>
+        <meta name="description" content={t("seo.homeDescription")} />
+      </Helmet>
       {/* ── Navbar ─────────────────────────────────────────── */}
       <UserNavbar />
 

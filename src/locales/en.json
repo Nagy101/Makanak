@@ -129,6 +129,7 @@
     "phone": "Phone",
     "phoneRequired": "Phone number is required",
     "phoneNumbersOnly": "Phone number must contain only digits",
+    "phoneInvalid": "Phone must be 10-15 digits, optionally starting with +",
     "phonePlaceholder": "+20 xxx xxx xxxx",
     "confirmPassword": "Confirm Password",
     "chooseAccountType": "Choose Your Account Type",
@@ -157,12 +158,13 @@
     "newPassword": "New Password",
     "resetPassword": "Reset Password",
     "passwordsMustMatch": "Passwords don't match",
-    "atLeast6Chars": "At least 6 characters",
+    "atLeast6Chars": "At least 8 characters",
+    "atLeast8Chars": "At least 8 characters",
     "enterValidEmail": "Enter a valid email",
     "loginToPerformAction": "Please login to perform this action.",
     "emailRequired": "Email is required",
     "nameRequired": "Name is required",
-    "passwordMinChars": "Password must be at least 6 characters",
+    "passwordMinChars": "Password must be at least 8 characters",
     "confirmYourPassword": "Please confirm your password",
     "selectUserType": "Please select a user type",
     "dobRequired": "Date of birth is required",
@@ -392,6 +394,7 @@
     "pricePlaceholder": "0",
     "loadingMap": "Loading map…",
     "galleryImages": "Gallery Images",
+    "galleryImageAlt": "Gallery image {{index}}",
     "addImage": "Add",
     "pricePerNightEgp": "Price per Night (EGP)",
     "selectPropertyType": "Select type",
@@ -662,5 +665,12 @@
   "guards": {
     "pleaseLogIn": "Please log in to access this page.",
     "accessDenied": "Access denied. Only property owners can access this page."
+  },
+
+  "seo": {
+    "homeTitle": "Makanak — Find Your Perfect Home in Egypt",
+    "homeDescription": "Browse thousands of verified rental properties across Egypt. Book your next stay with Makanak.",
+    "propertiesTitle": "Browse Properties | Makanak",
+    "propertiesDescription": "Search and filter rental properties across Egypt. Find apartments, villas, and studios in every governorate."
   }
 }

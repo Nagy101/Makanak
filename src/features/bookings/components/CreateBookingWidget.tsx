@@ -20,7 +20,10 @@ const bookingSchema = z
     checkInDate: z.string().min(1, "Check-in date is required"),
     checkOutDate: z.string().min(1, "Check-out date is required"),
     numberOfGuests: z.coerce.number().min(1, "At least 1 guest"),
-    specialRequests: z.string().optional(),
+    specialRequests: z
+      .string()
+      .optional()
+      .transform((v) => v?.trim() || undefined),
   })
   .refine((d) => new Date(d.checkOutDate) > new Date(d.checkInDate), {
     message: "Check-out must be after check-in",

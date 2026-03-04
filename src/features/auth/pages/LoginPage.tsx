@@ -18,7 +18,7 @@ const createSchema = (t: TFunction) =>
       .string()
       .min(1, t("auth.emailRequired"))
       .email(t("auth.enterValidEmail")),
-    password: z.string().min(6, t("auth.passwordMinChars")),
+    password: z.string().min(8, t("auth.passwordMinChars")),
   });
 type LoginFormData = z.infer<ReturnType<typeof createSchema>>;
 

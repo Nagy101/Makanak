@@ -33,8 +33,8 @@ const createSchema = (t: TFunction) =>
       phoneNumber: z
         .string()
         .min(1, t("auth.phoneRequired"))
-        .regex(/^[0-9]+$/, t("auth.phoneNumbersOnly")),
-      password: z.string().min(6, t("auth.atLeast6Chars")),
+        .regex(/^\+?[0-9]{10,15}$/, t("auth.phoneInvalid")),
+      password: z.string().min(8, t("auth.atLeast8Chars")),
       confirmPassword: z.string().min(1, t("auth.confirmYourPassword")),
       userType: z.enum(["Tenant", "Owner"], {
         message: t("auth.selectUserType"),

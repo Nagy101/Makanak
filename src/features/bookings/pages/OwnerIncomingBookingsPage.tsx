@@ -221,7 +221,7 @@ export default function OwnerIncomingBookingsPage() {
                     <div className="flex items-center gap-3">
                       <img
                         src={toUrl(booking.propertyMainImage)}
-                        alt=""
+                        alt={booking.propertyName}
                         className="h-10 w-14 rounded object-cover bg-muted shrink-0"
                         loading="lazy"
                         width={56}
@@ -240,7 +240,7 @@ export default function OwnerIncomingBookingsPage() {
                     <div className="flex items-center gap-2">
                       <img
                         src={toUrl(booking.tenantImage)}
-                        alt=""
+                        alt={booking.tenantName}
                         className="h-7 w-7 rounded-full object-cover shrink-0"
                         loading="lazy"
                         width={28}

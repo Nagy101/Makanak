@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { HelmetProvider } from "react-helmet-async";
 import {
   QueryClient,
   QueryClientProvider,
@@ -363,15 +364,17 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AppContent />
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ThemeProvider>
+  <HelmetProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AppContent />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
+  </HelmetProvider>
 );
 
 export default App;
