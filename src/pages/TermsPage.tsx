@@ -21,7 +21,12 @@ export default function TermsPage() {
             <ArrowLeft className="h-4 w-4" />
             {t("legal.backToHome")}
           </Link>
-          <Button variant="outline" size="sm" onClick={toggleLang} className="gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleLang}
+            className="gap-2"
+          >
             <Globe className="h-4 w-4" />
             {isAr ? t("legal.switchToEnglish") : t("legal.switchToArabic")}
           </Button>
@@ -32,7 +37,9 @@ export default function TermsPage() {
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {t("legal.termsTitle")}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{t("legal.lastUpdated")}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("legal.lastUpdated")}
+          </p>
         </header>
 
         {/* Content */}
@@ -72,22 +79,38 @@ export default function TermsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
-                    <th className="px-4 py-3 text-start font-semibold">{isAr ? "توقيت طلب الإلغاء" : "Cancellation Timing"}</th>
-                    <th className="px-4 py-3 text-start font-semibold">{isAr ? "قيمة المبلغ المسترد" : "Refund Amount"}</th>
+                    <th className="px-4 py-3 text-start font-semibold">
+                      {isAr ? "توقيت طلب الإلغاء" : "Cancellation Timing"}
+                    </th>
+                    <th className="px-4 py-3 text-start font-semibold">
+                      {isAr ? "قيمة المبلغ المسترد" : "Refund Amount"}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b border-border">
-                    <td className="px-4 py-3">{t("legal.section4Row1Title")}</td>
-                    <td className="px-4 py-3">{t("legal.section4Row1Value")}</td>
+                    <td className="px-4 py-3">
+                      {t("legal.section4Row1Title")}
+                    </td>
+                    <td className="px-4 py-3">
+                      {t("legal.section4Row1Value")}
+                    </td>
                   </tr>
                   <tr className="border-b border-border">
-                    <td className="px-4 py-3">{t("legal.section4Row2Title")}</td>
-                    <td className="px-4 py-3">{t("legal.section4Row2Value")}</td>
+                    <td className="px-4 py-3">
+                      {t("legal.section4Row2Title")}
+                    </td>
+                    <td className="px-4 py-3">
+                      {t("legal.section4Row2Value")}
+                    </td>
                   </tr>
                   <tr>
-                    <td className="px-4 py-3">{t("legal.section4Row3Title")}</td>
-                    <td className="px-4 py-3">{t("legal.section4Row3Value")}</td>
+                    <td className="px-4 py-3">
+                      {t("legal.section4Row3Title")}
+                    </td>
+                    <td className="px-4 py-3">
+                      {t("legal.section4Row3Value")}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -176,19 +199,25 @@ export default function TermsPage() {
           <Section title={t("legal.section12Title")}>
             <p>{t("legal.section12Intro")}</p>
 
-            <h3 className="text-lg font-semibold mt-4">{t("legal.section12Strike1Title")}</h3>
+            <h3 className="text-lg font-semibold mt-4">
+              {t("legal.section12Strike1Title")}
+            </h3>
             <ul>
               <li>{t("legal.section12Strike1P1")}</li>
               <li>{t("legal.section12Strike1P2")}</li>
             </ul>
 
-            <h3 className="text-lg font-semibold mt-4">{t("legal.section12Strike2Title")}</h3>
+            <h3 className="text-lg font-semibold mt-4">
+              {t("legal.section12Strike2Title")}
+            </h3>
             <ul>
               <li>{t("legal.section12Strike2P1")}</li>
               <li>{t("legal.section12Strike2P2")}</li>
             </ul>
 
-            <h3 className="text-lg font-semibold mt-4">{t("legal.section12Strike3Title")}</h3>
+            <h3 className="text-lg font-semibold mt-4">
+              {t("legal.section12Strike3Title")}
+            </h3>
             <ul>
               <li>{t("legal.section12Strike3P1")}</li>
               <li>{t("legal.section12Strike3P2")}</li>
@@ -210,7 +239,13 @@ export default function TermsPage() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <section>
       <h2 className="text-xl font-bold mb-3">{title}</h2>

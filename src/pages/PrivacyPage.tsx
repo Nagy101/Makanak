@@ -21,7 +21,12 @@ export default function PrivacyPage() {
             <ArrowLeft className="h-4 w-4" />
             {t("legal.backToHome")}
           </Link>
-          <Button variant="outline" size="sm" onClick={toggleLang} className="gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleLang}
+            className="gap-2"
+          >
             <Globe className="h-4 w-4" />
             {isAr ? t("legal.switchToEnglish") : t("legal.switchToArabic")}
           </Button>
@@ -32,7 +37,9 @@ export default function PrivacyPage() {
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {t("legal.privacyTitle")}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{t("legal.lastUpdated")}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("legal.lastUpdated")}
+          </p>
         </header>
 
         {/* Content — Section 14 from Terms is the Privacy Policy */}
