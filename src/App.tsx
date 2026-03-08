@@ -14,6 +14,10 @@ import { useAllLookups } from "@/features/lookup";
 import { useBannedUserCheck, useProfile } from "@/features/auth/hooks/useAuth";
 import NotFound from "./pages/NotFound";
 
+// Lazy load legal pages
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+
 // Lazy load auth pages for better code splitting
 const HomePage = lazy(() => import("./pages/HomePage.tsx"));
 const LoginPage = lazy(() => import("./features/auth/pages/LoginPage"));
@@ -187,6 +191,22 @@ const RouterContent = () => {
           </Suspense>
         }
       />
+      <Route
+        path="/terms"
+        element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <TermsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/privacy"
+        element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <PrivacyPage />
+          </Suspense>
+        }
+      />
       {/* ── Tenant protected routes ── */}
       <Route
         path="/profile"
@@ -353,7 +373,7 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />

@@ -14,11 +14,12 @@ import {
   Users,
 } from "lucide-react";
 import { useState, useCallback, memo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import type { TFunction } from "i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import AuthLayout from "../components/AuthLayout";
 import { useRegister } from "../hooks/useAuth";
 
@@ -37,6 +38,9 @@ const createSchema = (t: TFunction) =>
         message: t("auth.selectUserType"),
       }),
       dateOfBirth: z.string().min(1, t("auth.dobRequired")),
+      agreeToTerms: z.literal(true, {
+        errorMap: () => ({ message: t("auth.mustAgreeToTerms") }),
+      }),
     })
     .refine((d) => d.password === d.confirmPassword, {
       message: t("auth.passwordsMustMatch"),
@@ -51,7 +55,9 @@ const createSchema = (t: TFunction) =>
       userType: d.userType,
       dateOfBirth: d.dateOfBirth,
     }));
-type RegisterFormData = z.output<ReturnType<typeof createSchema>>;
+
+type RegisterFormInput = z.input<ReturnType<typeof createSchema>>;
+type RegisterFormOutput = z.output<ReturnType<typeof createSchema>>;
 
 const RegisterPage = memo(() => {
   const { t } = useTranslation();
@@ -63,7 +69,8 @@ const RegisterPage = memo(() => {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<RegisterFormData>({
+    setValue,
+  } = useForm<RegisterFormInput>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
@@ -73,16 +80,18 @@ const RegisterPage = memo(() => {
       confirmPassword: "",
       userType: "Tenant",
       dateOfBirth: "",
+      agreeToTerms: false as unknown as true,
     },
   });
   const selectedUserType = watch("userType");
+  const agreeToTerms = watch("agreeToTerms");
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPw((prev) => !prev);
   }, []);
 
   const onSubmit = useCallback(
-    (d: RegisterFormData) => {
+    (d: RegisterFormOutput) => {
       mutate(d);
     },
     [mutate],
@@ -253,10 +262,56 @@ const RegisterPage = memo(() => {
           </div>
         </div>
 
+        <div className="flex items-start space-x-3 rtl:space-x-reverse">
+          <Checkbox
+            id="agreeToTerms"
+            checked={agreeToTerms === true}
+            onCheckedChange={(checked) =>
+              setValue(
+                "agreeToTerms",
+                checked === true ? true : (false as unknown as true),
+                {
+                  shouldValidate: true,
+                },
+              )
+            }
+            className="mt-0.5"
+          />
+          <label
+            htmlFor="agreeToTerms"
+            className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
+          >
+            <Trans
+              i18nKey="auth.agreeToTerms"
+              components={{
+                termsLink: (
+                  <Link
+                    to="/terms"
+                    target="_blank"
+                    className="font-bold text-primary hover:underline"
+                  />
+                ),
+                privacyLink: (
+                  <Link
+                    to="/privacy"
+                    target="_blank"
+                    className="font-bold text-primary hover:underline"
+                  />
+                ),
+              }}
+            />
+          </label>
+        </div>
+        {errors.agreeToTerms && (
+          <p className="text-sm text-destructive">
+            {errors.agreeToTerms.message}
+          </p>
+        )}
+
         <Button
           type="submit"
           className="w-full h-12 text-base font-semibold"
-          disabled={isPending}
+          disabled={isPending || agreeToTerms !== true}
         >
           {isPending ? (
             <Loader2 className="h-5 w-5 animate-spin" />
