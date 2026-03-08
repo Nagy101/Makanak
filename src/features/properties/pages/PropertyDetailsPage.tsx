@@ -100,14 +100,14 @@ export default function PropertyDetailsPage() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{`${localized(property, "title")} | Makanak`}</title>
+        <title>{`${property.title} | Makanak`}</title>
         <meta name="description" content={property.description?.slice(0, 160)} />
-        <meta property="og:title" content={localized(property, "title")} />
+        <meta property="og:title" content={property.title} />
         <meta property="og:description" content={property.description?.slice(0, 160)} />
         <meta property="og:image" content={property.mainImageUrl} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={localized(property, "title")} />
+        <meta name="twitter:title" content={property.title} />
         <meta name="twitter:description" content={property.description?.slice(0, 160)} />
         <meta name="twitter:image" content={property.mainImageUrl} />
       </Helmet>
@@ -207,7 +207,7 @@ export default function PropertyDetailsPage() {
                   >
                     <img
                       src={img.imageUrl}
-                      alt={`${localized(property, "title")} — photo ${i + 1}`}
+                      alt={`${property.title} — photo ${i + 1}`}
                       className="h-16 w-24 object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.svg";
