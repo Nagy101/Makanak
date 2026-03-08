@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useProperties } from "../useProperties";
@@ -74,6 +75,10 @@ export default function PropertiesPage() {
 
   return (
     <div className="min-h-screen bg-secondary/30">
+      <Helmet>
+        <title>{t("seo.propertiesTitle")}</title>
+        <meta name="description" content={t("seo.propertiesDescription")} />
+      </Helmet>
       <UserNavbar />
       <PropertySearchFilter params={params} onParamsChange={setParams} />
 

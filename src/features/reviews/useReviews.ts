@@ -17,7 +17,6 @@ import {
 import * as reviewService from './review.service';
 import type { CreateReviewRequest, Review } from './review.types';
 import { toast } from 'sonner';
-import { showApiErrorToast } from '@/lib/apiError';
 
 // ── Constants ─────────────────────────────────────────────────
 const PAGE_SIZE = 5;
@@ -80,7 +79,6 @@ export const useCreateReview = (propertyId: number) => {
       // Invalidate only the reviews for this specific property
       qc.invalidateQueries({ queryKey: reviewKeys.property(propertyId) });
     },
-    onError: (error) => showApiErrorToast(error),
   });
 };
 
@@ -98,6 +96,5 @@ export const useDeleteReview = (propertyId: number) => {
       toast.success(res.message || 'Review deleted.');
       qc.invalidateQueries({ queryKey: reviewKeys.property(propertyId) });
     },
-    onError: (error) => showApiErrorToast(error),
   });
 };

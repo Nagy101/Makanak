@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 import * as authService from "../auth.service";
 import { useAuthStore } from "../store/authStore";
-import { showApiErrorToast } from "@/lib/apiError";
+
 import type {
   LoginRequest,
   RegisterRequest,
@@ -99,7 +99,6 @@ export function useLogin() {
         navigate("/", { replace: true });
       }
     },
-    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -114,7 +113,6 @@ export function useRegister() {
       toast.success("Account created successfully!");
       navigate("/profile");
     },
-    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -141,7 +139,6 @@ export function useForgotPassword() {
       authService.forgotPassword(data),
     onSuccess: () =>
       toast.success("OTP sent to your email. Please check your inbox."),
-    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -150,7 +147,6 @@ export function useVerifyOtp() {
   return useMutation({
     mutationFn: (data: VerifyOtpRequest) => authService.verifyOtp(data),
     onSuccess: () => toast.success("OTP verified!"),
-    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -163,7 +159,6 @@ export function useResetPassword() {
       toast.success("Password reset successfully!");
       navigate("/login");
     },
-    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -177,7 +172,6 @@ export function useUpdateProfile() {
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
       toast.success("Profile updated!");
     },
-    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -191,7 +185,6 @@ export function useVerifyIdentity() {
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
       toast.success("Identity verification submitted!");
     },
-    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -201,7 +194,6 @@ export function useInitiateEmailChange() {
     mutationFn: (data: InitiateEmailChangeRequest) =>
       authService.initiateEmailChange(data),
     onSuccess: () => toast.success("Verification code sent to your new email."),
-    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -215,7 +207,6 @@ export function useConfirmEmailChange() {
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
       toast.success("Email changed successfully!");
     },
-    onError: (error) => showApiErrorToast(error),
   });
 }
 

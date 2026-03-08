@@ -24,7 +24,7 @@
 import axios, { type AxiosInstance } from "axios";
 import { toast } from "sonner";
 import { storage } from "./storage";
-import { ApiError } from "./apiTypes";
+import { ApiError, parseApiError } from "./apiTypes";
 
 // ── Centralised base URL from environment ─────────────────────
 // Strips any trailing slash to prevent double-slash in URLs.
@@ -49,12 +49,9 @@ export function setupResponseInterceptor(instance: AxiosInstance): void {
         "isSuccess" in body &&
         body.isSuccess === false
       ) {
+        const parsed = parseApiError(body, response.status);
         return Promise.reject(
-          new ApiError(
-            body.statusCode ?? response.status,
-            body.message || "Something went wrong.",
-            body.errors ?? null,
-          ),
+          new ApiError(parsed.statusCode, parsed.message, parsed.errors),
         );
       }
 
@@ -110,12 +107,9 @@ export function setupResponseInterceptor(instance: AxiosInstance): void {
       }
 
       // ── Normalise into ApiError ─────────────────────────────
+      const parsed = parseApiError(data, status);
       return Promise.reject(
-        new ApiError(
-          data?.statusCode ?? status,
-          data?.message || "Something went wrong.",
-          data?.errors ?? null,
-        ),
+        new ApiError(parsed.statusCode, parsed.message, parsed.errors),
       );
     },
   );

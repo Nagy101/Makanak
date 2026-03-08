@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { decodeId } from "@/lib/idEncoder";
 import { useProperty } from "../useProperties";
 import { mapIcon } from "../utils/mapIcon";
@@ -98,6 +99,18 @@ export default function PropertyDetailsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{`${localized(property, "title")} | Makanak`}</title>
+        <meta name="description" content={property.description?.slice(0, 160)} />
+        <meta property="og:title" content={localized(property, "title")} />
+        <meta property="og:description" content={property.description?.slice(0, 160)} />
+        <meta property="og:image" content={property.mainImageUrl} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={localized(property, "title")} />
+        <meta name="twitter:description" content={property.description?.slice(0, 160)} />
+        <meta name="twitter:image" content={property.mainImageUrl} />
+      </Helmet>
       <UserNavbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -194,7 +207,7 @@ export default function PropertyDetailsPage() {
                   >
                     <img
                       src={img.imageUrl}
-                      alt=""
+                      alt={`${localized(property, "title")} — photo ${i + 1}`}
                       className="h-16 w-24 object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.svg";

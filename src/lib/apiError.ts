@@ -46,7 +46,7 @@ export function validateFileSize(
 }
 
 // ── Default fallback — only used when the API provides nothing ─
-const FALLBACK_MESSAGE = "Something went wrong.";
+const FALLBACK_MESSAGE = "An unexpected error occurred.";
 
 /**
  * Extracts the primary error message from any API error.

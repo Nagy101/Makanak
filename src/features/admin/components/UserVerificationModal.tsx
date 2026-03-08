@@ -43,7 +43,6 @@ import {
 } from "../useAdmin";
 import type { UserStatus } from "../admin.types";
 import { toast } from "sonner";
-import { showApiErrorToast } from "@/lib/apiError";
 
 interface UserVerificationModalProps {
   userId: string;
@@ -102,7 +101,6 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
               );
               onClose();
             },
-            onError: (error) => showApiErrorToast(error),
           },
         );
       },
@@ -112,14 +110,12 @@ const UserVerificationModal = memo<UserVerificationModalProps>(
     const handleAddStrike = useCallback(() => {
       addStrikeMutation.mutate(userId, {
         onSuccess: () => toast.success(t("admin.strikeAdded")),
-        onError: (error) => showApiErrorToast(error),
       });
     }, [userId, addStrikeMutation, t]);
 
     const handleRemoveStrike = useCallback(() => {
       removeStrikeMutation.mutate(userId, {
         onSuccess: () => toast.success(t("admin.strikeRemoved")),
-        onError: (error) => showApiErrorToast(error),
       });
     }, [userId, removeStrikeMutation, t]);
 

@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, memo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { storage } from "@/lib/storage";
-import { validateFileSize, showApiErrorToast } from "@/lib/apiError";
+import { validateFileSize } from "@/lib/apiError";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -46,7 +46,13 @@ import UserNavbar from "@/components/UserNavbar";
 // ── Schemas ──
 const profileSchema = z.object({
   Name: z.string().min(2, "Name required").max(100),
-  PhoneNumber: z.string().optional().default(""),
+  PhoneNumber: z
+    .string()
+    .optional()
+    .default("")
+    .refine((v) => !v || /^\+?[0-9]{10,15}$/.test(v), {
+      message: "Phone must be 10-15 digits, optionally starting with +",
+    }),
   Address: z.string().optional().default(""),
 });
 
@@ -56,7 +62,7 @@ const identitySchema = z.object({
 
 const emailChangeSchema = z.object({
   Email: z.string().email("Enter a valid email"),
-  currentPassword: z.string().min(6, "Password is required"),
+  currentPassword: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 const confirmEmailSchema = z.object({
@@ -193,7 +199,6 @@ const ProfilePage = memo(() => {
             window.location.href = "/login";
           }, 1500);
         },
-        onError: (error) => showApiErrorToast(error),
       },
     );
   });
