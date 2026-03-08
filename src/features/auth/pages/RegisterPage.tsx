@@ -19,7 +19,6 @@ import type { TFunction } from "i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import AuthLayout from "../components/AuthLayout";
 import { useRegister } from "../hooks/useAuth";
 
@@ -31,18 +30,15 @@ const createSchema = (t: TFunction) =>
         .string()
         .min(1, t("auth.emailRequired"))
         .email(t("auth.enterValidEmail")),
-      phoneNumber: z
-        .string()
-        .min(1, t("auth.phoneRequired"))
-        .regex(/^\+?[0-9]{10,15}$/, t("auth.phoneInvalid")),
-      password: z.string().min(8, t("auth.atLeast8Chars")),
+      phoneNumber: z.string().optional(),
+      password: z.string().min(6, t("auth.atLeast6Chars")),
       confirmPassword: z.string().min(1, t("auth.confirmYourPassword")),
       userType: z.enum(["Tenant", "Owner"], {
         message: t("auth.selectUserType"),
       }),
       dateOfBirth: z.string().min(1, t("auth.dobRequired")),
-      agreeToTerms: z.literal(true, {
-        errorMap: () => ({ message: t("auth.mustAgreeToTerms") }),
+      agreeToTerms: z.boolean().refine((v) => v === true, {
+        message: t("legal.mustAgree"),
       }),
     })
     .refine((d) => d.password === d.confirmPassword, {
@@ -52,15 +48,14 @@ const createSchema = (t: TFunction) =>
     .transform((d) => ({
       name: d.name,
       email: d.email,
-      phoneNumber: d.phoneNumber,
+      phoneNumber: d.phoneNumber || "",
       password: d.password,
       confirmPassword: d.confirmPassword,
       userType: d.userType,
       dateOfBirth: d.dateOfBirth,
     }));
-
 type RegisterFormInput = z.input<ReturnType<typeof createSchema>>;
-type RegisterFormOutput = z.output<ReturnType<typeof createSchema>>;
+type RegisterFormData = z.output<ReturnType<typeof createSchema>>;
 
 const RegisterPage = memo(() => {
   const { t } = useTranslation();
@@ -72,8 +67,7 @@ const RegisterPage = memo(() => {
     handleSubmit,
     formState: { errors },
     watch,
-    setValue,
-  } = useForm<RegisterFormInput>({
+  } = useForm<RegisterFormInput, unknown, RegisterFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
@@ -83,18 +77,17 @@ const RegisterPage = memo(() => {
       confirmPassword: "",
       userType: "Tenant",
       dateOfBirth: "",
-      agreeToTerms: false as unknown as true,
+      agreeToTerms: false,
     },
   });
   const selectedUserType = watch("userType");
-  const agreeToTerms = watch("agreeToTerms");
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPw((prev) => !prev);
   }, []);
 
   const onSubmit = useCallback(
-    (d: RegisterFormOutput) => {
+    (d: RegisterFormData) => {
       mutate(d);
     },
     [mutate],
@@ -140,21 +133,16 @@ const RegisterPage = memo(() => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">{t("auth.phone")}</Label>
+          <Label htmlFor="phone">{t("auth.phoneOptional")}</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="phone"
-              placeholder={t("auth.phonePlaceholder")}
+              placeholder="+1 234 567 890"
               className="pl-10"
               {...register("phoneNumber")}
             />
           </div>
-          {errors.phoneNumber && (
-            <p className="text-sm text-destructive">
-              {errors.phoneNumber.message}
-            </p>
-          )}
         </div>
 
         <div className="space-y-2">
@@ -270,56 +258,47 @@ const RegisterPage = memo(() => {
           </div>
         </div>
 
-        <div className="flex items-start space-x-3 rtl:space-x-reverse">
-          <Checkbox
-            id="agreeToTerms"
-            checked={agreeToTerms === true}
-            onCheckedChange={(checked) =>
-              setValue(
-                "agreeToTerms",
-                checked === true ? true : (false as unknown as true),
-                {
-                  shouldValidate: true,
-                },
-              )
-            }
-            className="mt-0.5"
-          />
-          <label
-            htmlFor="agreeToTerms"
-            className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
-          >
-            <Trans
-              i18nKey="auth.agreeToTerms"
-              components={{
-                termsLink: (
-                  <Link
-                    to="/terms"
-                    target="_blank"
-                    className="font-bold text-primary hover:underline"
-                  />
-                ),
-                privacyLink: (
-                  <Link
-                    to="/privacy"
-                    target="_blank"
-                    className="font-bold text-primary hover:underline"
-                  />
-                ),
-              }}
+        {/* Terms & Conditions Checkbox */}
+        <div className="space-y-2">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4 rounded border-border"
+              {...register("agreeToTerms")}
             />
+            <span className="text-sm text-muted-foreground leading-relaxed">
+              <Trans
+                i18nKey="legal.agreeToTerms"
+                components={{
+                  termsLink: (
+                    <Link
+                      to="/terms"
+                      target="_blank"
+                      className="font-bold text-primary hover:underline"
+                    />
+                  ),
+                  privacyLink: (
+                    <Link
+                      to="/privacy"
+                      target="_blank"
+                      className="font-bold text-primary hover:underline"
+                    />
+                  ),
+                }}
+              />
+            </span>
           </label>
+          {errors.agreeToTerms && (
+            <p className="text-sm text-destructive">
+              {errors.agreeToTerms.message}
+            </p>
+          )}
         </div>
-        {errors.agreeToTerms && (
-          <p className="text-sm text-destructive">
-            {errors.agreeToTerms.message}
-          </p>
-        )}
 
         <Button
           type="submit"
           className="w-full h-12 text-base font-semibold"
-          disabled={isPending || agreeToTerms !== true}
+          disabled={isPending}
         >
           {isPending ? (
             <Loader2 className="h-5 w-5 animate-spin" />

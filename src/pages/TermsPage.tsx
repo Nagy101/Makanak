@@ -3,177 +3,218 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const TermsPage = () => {
+export default function TermsPage() {
   const { t, i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
 
-  const toggleLanguage = () => {
-    i18n.changeLanguage(i18n.language === "ar" ? "en" : "ar");
-  };
-
-  const sections = [
-    { title: "s1Title", points: ["s1p1", "s1p2", "s1p3"] },
-    { title: "s2Title", points: ["s2p1", "s2p2", "s2p3", "s2p4"] },
-    { title: "s3Title", points: ["s3p1", "s3p2", "s3p3"] },
-    {
-      title: "s4Title",
-      intro: "s4intro",
-      points: ["s4row1", "s4row2", "s4row3"],
-    },
-    {
-      title: "s5Title",
-      intro: "s5intro",
-      points: ["s5p1", "s5p2", "s5p3", "s5p4"],
-    },
-    {
-      title: "s6Title",
-      intro: "s6intro",
-      points: ["s6p1", "s6p2", "s6p3"],
-    },
-    {
-      title: "s7Title",
-      intro: "s7intro",
-      points: ["s7p1", "s7p2", "s7p3"],
-    },
-    {
-      title: "s8Title",
-      intro: "s8intro",
-      points: ["s8p1", "s8p2", "s8p3"],
-    },
-    {
-      title: "s9Title",
-      intro: "s9intro",
-      points: ["s9p1", "s9p2", "s9p3", "s9p4"],
-    },
-    {
-      title: "s10Title",
-      intro: "s10intro",
-      points: ["s10p1", "s10p2"],
-      subPoints: ["s10p2a", "s10p2b", "s10p2c"],
-    },
-    {
-      title: "s11Title",
-      intro: "s11intro",
-      points: ["s11p1", "s11p2", "s11p3"],
-    },
-    {
-      title: "s12Title",
-      intro: "s12intro",
-      strikeGroups: [
-        {
-          heading: "s12strike1Title",
-          items: ["s12strike1a", "s12strike1b"],
-        },
-        {
-          heading: "s12strike2Title",
-          items: ["s12strike2a", "s12strike2b"],
-        },
-        {
-          heading: "s12strike3Title",
-          items: ["s12strike3a", "s12strike3b"],
-        },
-      ],
-    },
-    {
-      title: "s13Title",
-      intro: "s13intro",
-      points: ["s13p1", "s13p2", "s13p3"],
-    },
-  ];
+  const toggleLang = () => i18n.changeLanguage(isAr ? "en" : "ar");
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-8"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t("common.backToHome")}
-        </Link>
-
-        <header className="mb-10 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              {t("legal.termsTitle")}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("legal.lastUpdated")}
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleLanguage}
-            className="shrink-0 gap-2"
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-8">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
+            <ArrowLeft className="h-4 w-4" />
+            {t("legal.backToHome")}
+          </Link>
+          <Button variant="outline" size="sm" onClick={toggleLang} className="gap-2">
             <Globe className="h-4 w-4" />
-            {i18n.language === "ar" ? "English" : "العربية"}
+            {isAr ? t("legal.switchToEnglish") : t("legal.switchToArabic")}
           </Button>
+        </div>
+
+        {/* Header */}
+        <header className="mb-10">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {t("legal.termsTitle")}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">{t("legal.lastUpdated")}</p>
         </header>
 
-        <article className="prose prose-neutral dark:prose-invert max-w-none">
-          {sections.map((section) => (
-            <section key={section.title} className="mb-10">
-              <h2 className="text-xl font-semibold text-foreground mb-3">
-                {t(`legal.terms.${section.title}`)}
-              </h2>
+        {/* Content */}
+        <article className="prose prose-neutral dark:prose-invert max-w-none space-y-8">
+          {/* Section 1 */}
+          <Section title={t("legal.section1Title")}>
+            <ul>
+              <li>{t("legal.section1P1")}</li>
+              <li>{t("legal.section1P2")}</li>
+              <li>{t("legal.section1P3")}</li>
+            </ul>
+          </Section>
 
-              {section.intro && (
-                <p className="text-muted-foreground mb-4">
-                  {t(`legal.terms.${section.intro}`)}
-                </p>
-              )}
+          {/* Section 2 */}
+          <Section title={t("legal.section2Title")}>
+            <ul>
+              <li>{t("legal.section2P1")}</li>
+              <li>{t("legal.section2P2")}</li>
+              <li>{t("legal.section2P3")}</li>
+              <li>{t("legal.section2P4")}</li>
+            </ul>
+          </Section>
 
-              {section.points && (
-                <ul className="space-y-3 list-disc ps-5">
-                  {section.points.map((point) => (
-                    <li
-                      key={point}
-                      className="text-muted-foreground leading-relaxed"
-                    >
-                      {t(`legal.terms.${point}`)}
-                    </li>
-                  ))}
+          {/* Section 3 */}
+          <Section title={t("legal.section3Title")}>
+            <ul>
+              <li>{t("legal.section3P1")}</li>
+              <li>{t("legal.section3P2")}</li>
+              <li>{t("legal.section3P3")}</li>
+            </ul>
+          </Section>
+
+          {/* Section 4 — Cancellation Table */}
+          <Section title={t("legal.section4Title")}>
+            <p>{t("legal.section4Intro")}</p>
+            <div className="overflow-x-auto rounded-lg border border-border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/50">
+                    <th className="px-4 py-3 text-start font-semibold">{isAr ? "توقيت طلب الإلغاء" : "Cancellation Timing"}</th>
+                    <th className="px-4 py-3 text-start font-semibold">{isAr ? "قيمة المبلغ المسترد" : "Refund Amount"}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-border">
+                    <td className="px-4 py-3">{t("legal.section4Row1Title")}</td>
+                    <td className="px-4 py-3">{t("legal.section4Row1Value")}</td>
+                  </tr>
+                  <tr className="border-b border-border">
+                    <td className="px-4 py-3">{t("legal.section4Row2Title")}</td>
+                    <td className="px-4 py-3">{t("legal.section4Row2Value")}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3">{t("legal.section4Row3Title")}</td>
+                    <td className="px-4 py-3">{t("legal.section4Row3Value")}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </Section>
+
+          {/* Section 5 */}
+          <Section title={t("legal.section5Title")}>
+            <p>{t("legal.section5Intro")}</p>
+            <ul>
+              <li>{t("legal.section5P1")}</li>
+              <li>{t("legal.section5P2")}</li>
+              <li>{t("legal.section5P3")}</li>
+              <li>{t("legal.section5P4")}</li>
+            </ul>
+          </Section>
+
+          {/* Section 6 */}
+          <Section title={t("legal.section6Title")}>
+            <p>{t("legal.section6Intro")}</p>
+            <ul>
+              <li>{t("legal.section6P1")}</li>
+              <li>{t("legal.section6P2")}</li>
+              <li>{t("legal.section6P3")}</li>
+            </ul>
+          </Section>
+
+          {/* Section 7 */}
+          <Section title={t("legal.section7Title")}>
+            <p>{t("legal.section7Intro")}</p>
+            <ul>
+              <li>{t("legal.section7P1")}</li>
+              <li>{t("legal.section7P2")}</li>
+              <li>{t("legal.section7P3")}</li>
+            </ul>
+          </Section>
+
+          {/* Section 8 */}
+          <Section title={t("legal.section8Title")}>
+            <p>{t("legal.section8Intro")}</p>
+            <ul>
+              <li>{t("legal.section8P1")}</li>
+              <li>{t("legal.section8P2")}</li>
+              <li>{t("legal.section8P3")}</li>
+            </ul>
+          </Section>
+
+          {/* Section 9 */}
+          <Section title={t("legal.section9Title")}>
+            <p>{t("legal.section9Intro")}</p>
+            <ul>
+              <li>{t("legal.section9P1")}</li>
+              <li>{t("legal.section9P2")}</li>
+              <li>{t("legal.section9P3")}</li>
+              <li>{t("legal.section9P4")}</li>
+            </ul>
+          </Section>
+
+          {/* Section 10 */}
+          <Section title={t("legal.section10Title")}>
+            <p>{t("legal.section10Intro")}</p>
+            <ul>
+              <li>{t("legal.section10P1")}</li>
+              <li>
+                {t("legal.section10P2")}
+                <ul className="mt-2">
+                  <li>{t("legal.section10P2a")}</li>
+                  <li>{t("legal.section10P2b")}</li>
+                  <li>{t("legal.section10P2c")}</li>
                 </ul>
-              )}
+              </li>
+            </ul>
+          </Section>
 
-              {section.subPoints && (
-                <ul className="mt-2 space-y-2 list-[circle] ps-10">
-                  {section.subPoints.map((sp) => (
-                    <li
-                      key={sp}
-                      className="text-muted-foreground leading-relaxed"
-                    >
-                      {t(`legal.terms.${sp}`)}
-                    </li>
-                  ))}
-                </ul>
-              )}
+          {/* Section 11 */}
+          <Section title={t("legal.section11Title")}>
+            <p>{t("legal.section11Intro")}</p>
+            <ul>
+              <li>{t("legal.section11P1")}</li>
+              <li>{t("legal.section11P2")}</li>
+              <li>{t("legal.section11P3")}</li>
+            </ul>
+          </Section>
 
-              {section.strikeGroups &&
-                section.strikeGroups.map((group) => (
-                  <div key={group.heading} className="mb-4">
-                    <h3 className="text-base font-medium text-foreground mt-4 mb-2">
-                      {t(`legal.terms.${group.heading}`)}
-                    </h3>
-                    <ul className="space-y-2 list-disc ps-5">
-                      {group.items.map((item) => (
-                        <li
-                          key={item}
-                          className="text-muted-foreground leading-relaxed"
-                        >
-                          {t(`legal.terms.${item}`)}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-            </section>
-          ))}
+          {/* Section 12 — Strike System */}
+          <Section title={t("legal.section12Title")}>
+            <p>{t("legal.section12Intro")}</p>
+
+            <h3 className="text-lg font-semibold mt-4">{t("legal.section12Strike1Title")}</h3>
+            <ul>
+              <li>{t("legal.section12Strike1P1")}</li>
+              <li>{t("legal.section12Strike1P2")}</li>
+            </ul>
+
+            <h3 className="text-lg font-semibold mt-4">{t("legal.section12Strike2Title")}</h3>
+            <ul>
+              <li>{t("legal.section12Strike2P1")}</li>
+              <li>{t("legal.section12Strike2P2")}</li>
+            </ul>
+
+            <h3 className="text-lg font-semibold mt-4">{t("legal.section12Strike3Title")}</h3>
+            <ul>
+              <li>{t("legal.section12Strike3P1")}</li>
+              <li>{t("legal.section12Strike3P2")}</li>
+            </ul>
+          </Section>
+
+          {/* Section 13 */}
+          <Section title={t("legal.section13Title")}>
+            <p>{t("legal.section13Intro")}</p>
+            <ul>
+              <li>{t("legal.section13P1")}</li>
+              <li>{t("legal.section13P2")}</li>
+              <li>{t("legal.section13P3")}</li>
+            </ul>
+          </Section>
         </article>
       </div>
     </div>
   );
-};
+}
 
-export default TermsPage;
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h2 className="text-xl font-bold mb-3">{title}</h2>
+      {children}
+    </section>
+  );
+}
