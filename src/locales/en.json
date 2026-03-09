@@ -1,4 +1,11 @@
 {
+  "seo": {
+    "homeTitle": "Makanak — Egypt's Premier Real Estate Platform",
+    "homeDescription": "Discover thousands of verified properties across Egypt. Apartments, chalets, villas and more — book your perfect stay with Makanak.",
+    "propertiesTitle": "Browse Properties — Makanak",
+    "propertiesDescription": "Search and filter verified rental properties across Egypt on Makanak."
+  },
+
   "common": {
     "search": "Search",
     "loading": "Loading...",
@@ -91,6 +98,73 @@
     "footerOwnerDashboard": "Owner Dashboard",
     "footerCopyright": "© {{year}} Makanak. All rights reserved.",
     "footerBuiltWith": "Built with ♥ in Egypt"
+  },
+
+  "footer": {
+    "brand": "Egypt's trusted platform for finding and listing properties. Transparent, fast, and reliable.",
+    "address": "Medical Mall, Abbas El Akkad Street, 9th District, Obour City",
+    "categories": "Categories",
+    "shopAll": "Shop All",
+    "bestSeller": "Best Seller",
+    "bestOffers": "Best Offers",
+    "newArrivals": "New Arrivals",
+    "ourPolicy": "Our Policy",
+    "privacyPolicy": "Privacy Policy",
+    "returnPolicy": "Return Policy",
+    "shippingPolicy": "Shipping Policy",
+    "termsOfService": "Terms of Service",
+    "helpCenter": "Help Center",
+    "aboutUs": "About Us",
+    "contactUs": "Contact Us",
+    "storeLocator": "Store & Locator",
+    "faq": "FAQ",
+    "copyright": "© {{year}} Makanak. All rights reserved.",
+    "builtWith": "Built with ♥ in Egypt"
+  },
+
+  "about": {
+    "pageTitle": "About Us",
+    "heroTitle": "About Makanak",
+    "heroSubtitle": "Revolutionizing real estate and rentals in Egypt — connecting tenants with trusted property owners through a seamless digital experience.",
+    "missionBadge": "Our Mission",
+    "missionTitle": "Bridging Tenants and Owners",
+    "missionDesc": "At Makanak, we believe finding a home should be simple, transparent, and stress-free. Our mission is to bridge the gap between tenants and property owners with a platform built on trust, verified listings, secure payments, and dedicated support — empowering everyone in the Egyptian real estate market.",
+    "whyBadge": "Platform Highlights",
+    "whyTitle": "Why Choose Makanak?",
+    "featurePaymentsTitle": "Secure Payments",
+    "featurePaymentsDesc": "All transactions are processed securely through Stripe, ensuring your money is safe at every step of the booking process.",
+    "featureVerifiedTitle": "Verified Properties",
+    "featureVerifiedDesc": "Every listing is reviewed and verified by our team, so you can book with confidence knowing the property is real and accurate.",
+    "featureDisputeTitle": "Dispute Resolution",
+    "featureDisputeDesc": "Our dedicated dispute resolution team is here to mediate and resolve any issues between tenants and owners quickly and fairly.",
+    "featureBookingTitle": "Seamless Booking",
+    "featureBookingDesc": "From search to check-in, our streamlined booking flow makes it easy to find, reserve, and enjoy your perfect property."
+  },
+
+  "contact": {
+    "pageTitle": "Contact Us",
+    "heroTitle": "Get in Touch",
+    "heroSubtitle": "Have questions, feedback, or need support? We'd love to hear from you.",
+    "infoTitle": "Contact Information",
+    "infoSubtitle": "Reach out to us through any of the channels below and we'll get back to you as soon as possible.",
+    "addressLabel": "Our Address",
+    "emailLabel": "Email Us",
+    "phoneLabel": "Call Us",
+    "formTitle": "Send Us a Message",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "fullNameRequired": "Full name is required",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email address",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "subject": "Subject",
+    "subjectPlaceholder": "What is this about?",
+    "subjectRequired": "Subject is required",
+    "message": "Message",
+    "messagePlaceholder": "Write your message here...",
+    "messageRequired": "Message is required",
+    "sendMessage": "Send Message"
   },
 
   "index": {
@@ -668,6 +742,8 @@
     "switchToEnglish": "English",
     "termsTitle": "Terms & Conditions",
     "privacyTitle": "Privacy Policy",
+    "shippingTitle": "Booking & Payment Process",
+    "returnTitle": "Cancellation & Refund Policy",
     "lastUpdated": "Last updated: March 2026",
     "backToHome": "Back to Home",
     "section1Title": "1. Nature of the Platform",
