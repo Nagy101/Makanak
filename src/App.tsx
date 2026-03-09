@@ -1,17 +1,12 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { HelmetProvider } from "react-helmet-async";
-import {
-  QueryClient,
-  QueryClientProvider,
-  MutationCache,
-} from "@tanstack/react-query";
-import { showApiErrorToast } from "@/lib/apiError";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
 import { ThemeProvider } from "next-themes";
+import { HelmetProvider } from "react-helmet-async";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import AuthGuard from "@/components/AuthGuard";
 import OwnerGuard from "@/components/OwnerGuard";
@@ -19,6 +14,10 @@ import RequireAuth from "@/components/RequireAuth";
 import { useAllLookups } from "@/features/lookup";
 import { useBannedUserCheck, useProfile } from "@/features/auth/hooks/useAuth";
 import NotFound from "./pages/NotFound";
+
+// Lazy load legal pages
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 
 // Lazy load auth pages for better code splitting
 const HomePage = lazy(() => import("./pages/HomePage.tsx"));
@@ -101,11 +100,6 @@ const PageLoadingFallback = () => {
 };
 
 const queryClient = new QueryClient({
-  mutationCache: new MutationCache({
-    onError: (error) => {
-      showApiErrorToast(error);
-    },
-  }),
   defaultOptions: {
     queries: {
       staleTime: 3 * 60 * 1000, // 3 min — data is fresh, no background refetch
@@ -195,6 +189,22 @@ const RouterContent = () => {
         element={
           <Suspense fallback={<PageLoadingFallback />}>
             <ForgotPasswordPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/terms"
+        element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <TermsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/privacy"
+        element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <PrivacyPage />
           </Suspense>
         }
       />
@@ -365,7 +375,7 @@ const AppContent = () => {
 
 const App = () => (
   <HelmetProvider>
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />

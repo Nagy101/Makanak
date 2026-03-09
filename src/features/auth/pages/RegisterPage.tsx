@@ -14,7 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { useState, useCallback, memo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import type { TFunction } from "i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,9 @@ const createSchema = (t: TFunction) =>
         message: t("auth.selectUserType"),
       }),
       dateOfBirth: z.string().min(1, t("auth.dobRequired")),
+      agreeToTerms: z.boolean().refine((v) => v === true, {
+        message: t("legal.mustAgree"),
+      }),
     })
     .refine((d) => d.password === d.confirmPassword, {
       message: t("auth.passwordsMustMatch"),
@@ -49,12 +52,13 @@ const createSchema = (t: TFunction) =>
     .transform((d) => ({
       name: d.name,
       email: d.email,
-      phoneNumber: d.phoneNumber,
+      phoneNumber: d.phoneNumber || "",
       password: d.password,
       confirmPassword: d.confirmPassword,
       userType: d.userType,
       dateOfBirth: d.dateOfBirth,
     }));
+type RegisterFormInput = z.input<ReturnType<typeof createSchema>>;
 type RegisterFormData = z.output<ReturnType<typeof createSchema>>;
 
 const RegisterPage = memo(() => {
@@ -67,7 +71,7 @@ const RegisterPage = memo(() => {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<RegisterFormData>({
+  } = useForm<RegisterFormInput, unknown, RegisterFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
@@ -77,6 +81,7 @@ const RegisterPage = memo(() => {
       confirmPassword: "",
       userType: "Tenant",
       dateOfBirth: "",
+      agreeToTerms: false,
     },
   });
   const selectedUserType = watch("userType");
@@ -132,21 +137,16 @@ const RegisterPage = memo(() => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">{t("auth.phone")}</Label>
+          <Label htmlFor="phone">{t("auth.phoneOptional")}</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="phone"
-              placeholder={t("auth.phonePlaceholder")}
+              placeholder="+1 234 567 890"
               className="pl-10"
               {...register("phoneNumber")}
             />
           </div>
-          {errors.phoneNumber && (
-            <p className="text-sm text-destructive">
-              {errors.phoneNumber.message}
-            </p>
-          )}
         </div>
 
         <div className="space-y-2">
@@ -260,6 +260,43 @@ const RegisterPage = memo(() => {
               </p>
             )}
           </div>
+        </div>
+
+        {/* Terms & Conditions Checkbox */}
+        <div className="space-y-2">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4 rounded border-border"
+              {...register("agreeToTerms")}
+            />
+            <span className="text-sm text-muted-foreground leading-relaxed">
+              <Trans
+                i18nKey="legal.agreeToTerms"
+                components={{
+                  termsLink: (
+                    <Link
+                      to="/terms"
+                      target="_blank"
+                      className="font-bold text-primary hover:underline"
+                    />
+                  ),
+                  privacyLink: (
+                    <Link
+                      to="/privacy"
+                      target="_blank"
+                      className="font-bold text-primary hover:underline"
+                    />
+                  ),
+                }}
+              />
+            </span>
+          </label>
+          {errors.agreeToTerms && (
+            <p className="text-sm text-destructive">
+              {errors.agreeToTerms.message}
+            </p>
+          )}
         </div>
 
         <Button
