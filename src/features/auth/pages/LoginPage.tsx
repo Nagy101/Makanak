@@ -11,13 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AuthLayout from "../components/AuthLayout";
 import { useLogin } from "../hooks/useAuth";
+import { emailRegex } from "@/lib/utils";
 
 const createSchema = (t: TFunction) =>
   z.object({
     email: z
       .string()
       .min(1, t("auth.emailRequired"))
-      .email(t("auth.enterValidEmail")),
+      .regex(emailRegex, "Invalid email format. Please use a valid domain (e.g., user@example.com)"),
     password: z.string().min(8, t("auth.passwordMinChars")),
   });
 type LoginFormData = z.infer<ReturnType<typeof createSchema>>;

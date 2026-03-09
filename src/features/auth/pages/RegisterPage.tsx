@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AuthLayout from "../components/AuthLayout";
 import { useRegister } from "../hooks/useAuth";
+import { emailRegex } from "@/lib/utils";
 
 const createSchema = (t: TFunction) =>
   z
@@ -29,9 +30,12 @@ const createSchema = (t: TFunction) =>
       email: z
         .string()
         .min(1, t("auth.emailRequired"))
-        .email(t("auth.enterValidEmail")),
-      phoneNumber: z.string().optional(),
-      password: z.string().min(6, t("auth.atLeast6Chars")),
+        .regex(emailRegex, "Invalid email format. Please use a valid domain (e.g., user@example.com)"),
+      phoneNumber: z
+        .string()
+        .min(1, t("auth.phoneRequired"))
+        .regex(/^\+?[0-9]{10,15}$/, t("auth.phoneInvalid")),
+      password: z.string().min(8, t("auth.atLeast8Chars")),
       confirmPassword: z.string().min(1, t("auth.confirmYourPassword")),
       userType: z.enum(["Tenant", "Owner"], {
         message: t("auth.selectUserType"),

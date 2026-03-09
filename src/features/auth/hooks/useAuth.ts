@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 import * as authService from "../auth.service";
 import { useAuthStore } from "../store/authStore";
+import { showApiErrorToast } from "@/lib/apiError";
 
 import type {
   LoginRequest,
@@ -99,6 +100,7 @@ export function useLogin() {
         navigate("/", { replace: true });
       }
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -113,6 +115,7 @@ export function useRegister() {
       toast.success("Account created successfully!");
       navigate("/profile");
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
