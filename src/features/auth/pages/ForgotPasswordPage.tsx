@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Loader2, Mail, KeyRound, Lock } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, KeyRound, Lock, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { getApiErrorMessage } from "@/lib/apiError";
 import AuthLayout from "../components/AuthLayout";
 import PasswordStrengthIndicator, {
   PASSWORD_REGEX,
@@ -47,6 +48,7 @@ const ForgotPasswordPage = memo(() => {
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [otpBlocked, setOtpBlocked] = useState(false);
 
   const forgot = useForgotPassword();
   const verify = useVerifyOtp();
@@ -75,7 +77,19 @@ const ForgotPasswordPage = memo(() => {
   );
 
   const handleOtpSubmit = useCallback(() => {
-    verify.mutate({ otp, email }, { onSuccess: () => setStep("reset") });
+    verify.mutate(
+      { otp, email },
+      {
+        onSuccess: () => setStep("reset"),
+        onError: (error) => {
+          const msg = getApiErrorMessage(error);
+          if (/expired|maximum attempts/i.test(msg)) {
+            setOtp("");
+            setOtpBlocked(true);
+          }
+        },
+      },
+    );
   }, [verify, otp, email]);
 
   const handleResetSubmit = useCallback(
@@ -92,6 +106,12 @@ const ForgotPasswordPage = memo(() => {
     },
     [resetForm, reset, email, otp],
   );
+
+  const handleResendOtp = useCallback(() => {
+    setOtp("");
+    setOtpBlocked(false);
+    forgot.mutate({ email });
+  }, [forgot, email]);
 
   const handleChangeEmail = useCallback(() => {
     setStep("email");
@@ -173,13 +193,31 @@ const ForgotPasswordPage = memo(() => {
           <Button
             onClick={handleOtpSubmit}
             className="w-full h-12 font-semibold"
-            disabled={otp.length < 6 || verify.isPending}
+            disabled={otp.length < 6 || verify.isPending || otpBlocked}
           >
             {verify.isPending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               t("auth.verifyCode")
             )}
+          </Button>
+          <Button
+            type="button"
+            variant={otpBlocked ? "default" : "ghost"}
+            onClick={handleResendOtp}
+            className={`w-full h-10 font-semibold gap-2 ${
+              otpBlocked
+                ? "animate-pulse"
+                : ""
+            }`}
+            disabled={forgot.isPending}
+          >
+            {forgot.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            {t("auth.resendCode")}
           </Button>
           <button
             onClick={handleChangeEmail}

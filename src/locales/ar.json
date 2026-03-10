@@ -223,6 +223,7 @@
     "codeSentTo": "أرسلنا رمز تحقق إلى {{email}}",
     "verifyCode": "تحقق من الرمز",
     "changeEmail": "تغيير البريد الإلكتروني",
+    "resendCode": "إعادة إرسال الرمز",
     "setNewPassword": "تعيين كلمة مرور جديدة",
     "setNewPasswordSubtitle": "أنشئ كلمة مرور قوية لحسابك",
     "newPassword": "كلمة المرور الجديدة",

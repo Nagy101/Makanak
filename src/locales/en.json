@@ -223,6 +223,7 @@
     "codeSentTo": "We sent a verification code to {{email}}",
     "verifyCode": "Verify Code",
     "changeEmail": "Change email",
+    "resendCode": "Resend Code",
     "setNewPassword": "Set new password",
     "setNewPasswordSubtitle": "Create a strong password for your account",
     "newPassword": "New Password",

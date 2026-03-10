@@ -151,6 +151,7 @@ export function useVerifyOtp() {
   return useMutation({
     mutationFn: (data: VerifyOtpRequest) => authService.verifyOtp(data),
     onSuccess: () => toast.success("OTP verified!"),
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
