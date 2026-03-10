@@ -238,7 +238,18 @@
     "selectUserType": "Please select a user type",
     "dobRequired": "Date of birth is required",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "atLeast8Chars": "At least 8 characters",
+    "phoneRequired": "Phone number is required",
+    "phoneInvalid": "Invalid phone number format",
+    "passwordRequirements": "Password does not meet all requirements",
+    "pwRuleLength": "At least 8 characters",
+    "pwRuleCase": "One uppercase & one lowercase letter",
+    "pwRuleNumber": "At least one number",
+    "pwRuleSpecial": "At least one special character (@$!%*?&)",
+    "pwStrengthWeak": "Weak",
+    "pwStrengthMedium": "Medium",
+    "pwStrengthStrong": "Strong"
   },
 
   "properties": {

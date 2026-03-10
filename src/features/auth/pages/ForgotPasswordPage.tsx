@@ -14,6 +14,9 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import AuthLayout from "../components/AuthLayout";
+import PasswordStrengthIndicator, {
+  PASSWORD_REGEX,
+} from "../components/PasswordStrengthIndicator";
 import {
   useForgotPassword,
   useVerifyOtp,
@@ -28,7 +31,10 @@ const emailSchema = z.object({
 
 const resetSchema = z
   .object({
-    newPassword: z.string().min(8, "At least 8 characters"),
+    newPassword: z
+      .string()
+      .min(8, "At least 8 characters")
+      .regex(PASSWORD_REGEX, "Password does not meet requirements"),
     confirmPassword: z.string().min(1),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {
@@ -54,6 +60,8 @@ const ForgotPasswordPage = memo(() => {
     resolver: zodResolver(resetSchema),
     defaultValues: { newPassword: "", confirmPassword: "" },
   });
+
+  const newPasswordValue = resetForm.watch("newPassword");
 
   const handleEmailSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
@@ -197,6 +205,7 @@ const ForgotPasswordPage = memo(() => {
                 {...resetForm.register("newPassword")}
               />
             </div>
+            <PasswordStrengthIndicator password={newPasswordValue} />
             {resetForm.formState.errors.newPassword && (
               <p className="text-sm text-destructive">
                 {resetForm.formState.errors.newPassword.message}

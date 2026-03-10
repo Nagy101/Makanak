@@ -238,7 +238,18 @@
     "selectUserType": "يرجى اختيار نوع المستخدم",
     "dobRequired": "تاريخ الميلاد مطلوب",
     "showPassword": "إظهار كلمة المرور",
-    "hidePassword": "إخفاء كلمة المرور"
+    "hidePassword": "إخفاء كلمة المرور",
+    "atLeast8Chars": "٨ أحرف على الأقل",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "phoneInvalid": "صيغة رقم الهاتف غير صحيحة",
+    "passwordRequirements": "كلمة المرور لا تستوفي جميع المتطلبات",
+    "pwRuleLength": "٨ أحرف على الأقل",
+    "pwRuleCase": "حرف كبير وحرف صغير على الأقل",
+    "pwRuleNumber": "رقم واحد على الأقل",
+    "pwRuleSpecial": "رمز خاص واحد على الأقل (@$!%*?&)",
+    "pwStrengthWeak": "ضعيفة",
+    "pwStrengthMedium": "متوسطة",
+    "pwStrengthStrong": "قوية"
   },
 
   "properties": {
