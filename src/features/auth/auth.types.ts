@@ -98,6 +98,13 @@ export interface VerifyIdentityRequest {
   NationalIdImageBackUrl: File;
 }
 
+// ── Change Password ──
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
 // ── Email Change ──
 export interface InitiateEmailChangeRequest {
   newEmail: string;

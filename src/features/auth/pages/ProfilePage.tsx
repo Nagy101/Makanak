@@ -38,9 +38,13 @@ import {
   useProfile,
   useUpdateProfile,
   useVerifyIdentity,
+  useChangePassword,
   useInitiateEmailChange,
   useConfirmEmailChange,
 } from "../hooks/useAuth";
+import PasswordStrengthIndicator, {
+  PASSWORD_REGEX,
+} from "../components/PasswordStrengthIndicator";
 import UserNavbar from "@/components/UserNavbar";
 
 // ── Schemas ──
@@ -70,11 +74,26 @@ const confirmEmailSchema = z.object({
   Email: z.string().min(1).email(),
 });
 
+const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z
+      .string()
+      .min(8, "At least 8 characters")
+      .regex(PASSWORD_REGEX, "Password does not meet all requirements"),
+    confirmNewPassword: z.string().min(1, "Please confirm your new password"),
+  })
+  .refine((d) => d.newPassword === d.confirmNewPassword, {
+    message: "Passwords don't match",
+    path: ["confirmNewPassword"],
+  });
+
 const ProfilePage = memo(() => {
   const { t } = useTranslation();
   const { data: user, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const verifyIdentity = useVerifyIdentity();
+  const changePassword = useChangePassword();
   const initiateEmail = useInitiateEmailChange();
   const confirmEmail = useConfirmEmailChange();
 
@@ -129,6 +148,17 @@ const ProfilePage = memo(() => {
 
   const watchedNationalId = identityForm.watch("NationalId");
 
+  const changePasswordForm = useForm<z.infer<typeof changePasswordSchema>>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    },
+  });
+
+  const newPasswordValue = changePasswordForm.watch("newPassword");
+
   const emailForm = useForm<z.infer<typeof emailChangeSchema>>({
     resolver: zodResolver(emailChangeSchema),
   });
@@ -173,6 +203,12 @@ const ProfilePage = memo(() => {
       NationalId: d.NationalId,
       NationalIdImageFrontUrl: frontIdFile,
       NationalIdImageBackUrl: backIdFile,
+    });
+  });
+
+  const handleChangePassword = changePasswordForm.handleSubmit((d) => {
+    changePassword.mutate(d, {
+      onSuccess: () => changePasswordForm.reset(),
     });
   });
 
@@ -750,7 +786,98 @@ const ProfilePage = memo(() => {
           </TabsContent>
 
           {/* Security Tab */}
-          <TabsContent value="security">
+          <TabsContent value="security" className="space-y-6">
+            {/* Change Password Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("profile.changePassword")}</CardTitle>
+                <CardDescription>
+                  {t("profile.changePasswordDesc")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleChangePassword} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="currentPassword-cp">
+                      {t("profile.currentPassword")}
+                    </Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="currentPassword-cp"
+                        type="password"
+                        placeholder={t("profile.enterYourPassword")}
+                        autoComplete="current-password"
+                        className="pl-10"
+                        {...changePasswordForm.register("currentPassword")}
+                      />
+                    </div>
+                    {changePasswordForm.formState.errors.currentPassword && (
+                      <p className="text-sm text-destructive">
+                        {changePasswordForm.formState.errors.currentPassword.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword-cp">
+                      {t("profile.newPassword")}
+                    </Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="newPassword-cp"
+                        type="password"
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        className="pl-10"
+                        {...changePasswordForm.register("newPassword")}
+                      />
+                    </div>
+                    <PasswordStrengthIndicator password={newPasswordValue} />
+                    {changePasswordForm.formState.errors.newPassword && (
+                      <p className="text-sm text-destructive">
+                        {changePasswordForm.formState.errors.newPassword.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmNewPassword-cp">
+                      {t("auth.confirmPassword")}
+                    </Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="confirmNewPassword-cp"
+                        type="password"
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        className="pl-10"
+                        {...changePasswordForm.register("confirmNewPassword")}
+                      />
+                    </div>
+                    {changePasswordForm.formState.errors.confirmNewPassword && (
+                      <p className="text-sm text-destructive">
+                        {changePasswordForm.formState.errors.confirmNewPassword.message}
+                      </p>
+                    )}
+                  </div>
+                  <Separator />
+                  <div className="flex justify-end">
+                    <Button
+                      type="submit"
+                      disabled={changePassword.isPending}
+                    >
+                      {changePassword.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : null}
+                      {t("profile.updatePassword")}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Change Email Card */}
             <Card>
               <CardHeader>
                 <CardTitle>{t("profile.changeEmail")}</CardTitle>
