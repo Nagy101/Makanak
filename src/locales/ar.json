@@ -670,7 +670,11 @@
     "codeSentTo": "أرسلنا رمزاً إلى",
     "confirmChange": "تأكيد التغيير",
     "emailChangedSuccess": "تم تغيير البريد الإلكتروني بنجاح! جاري تسجيل الخروج...",
-    "failedToConfirmEmail": "فشل تأكيد تغيير البريد الإلكتروني. يرجى المحاولة مرة أخرى."
+    "failedToConfirmEmail": "فشل تأكيد تغيير البريد الإلكتروني. يرجى المحاولة مرة أخرى.",
+    "changePassword": "تغيير كلمة المرور",
+    "changePasswordDesc": "قم بتحديث كلمة المرور للحفاظ على أمان حسابك",
+    "newPassword": "كلمة المرور الجديدة",
+    "updatePassword": "تحديث كلمة المرور"
   },
 
   "language": {

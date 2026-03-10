@@ -670,7 +670,11 @@
     "codeSentTo": "We sent a code to",
     "confirmChange": "Confirm Change",
     "emailChangedSuccess": "Email changed successfully! Logging out...",
-    "failedToConfirmEmail": "Failed to confirm email change. Please try again."
+    "failedToConfirmEmail": "Failed to confirm email change. Please try again.",
+    "changePassword": "Change Password",
+    "changePasswordDesc": "Update your password to keep your account secure",
+    "newPassword": "New Password",
+    "updatePassword": "Update Password"
   },
 
   "language": {
