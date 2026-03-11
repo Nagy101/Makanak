@@ -15,6 +15,7 @@ import type {
   ResetPasswordRequest,
   UpdateProfileRequest,
   VerifyIdentityRequest,
+  ChangePasswordRequest,
   InitiateEmailChangeRequest,
   ConfirmEmailChangeRequest,
 } from "../auth.types";
@@ -150,6 +151,7 @@ export function useVerifyOtp() {
   return useMutation({
     mutationFn: (data: VerifyOtpRequest) => authService.verifyOtp(data),
     onSuccess: () => toast.success("OTP verified!"),
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -188,6 +190,31 @@ export function useVerifyIdentity() {
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
       toast.success("Identity verification submitted!");
     },
+  });
+}
+
+// ── Change Password ──
+export function useChangePassword() {
+  const setAuth = useAuthStore((s) => s.setAuth);
+  return useMutation({
+    mutationFn: (data: ChangePasswordRequest) =>
+      authService.changePassword(data),
+    onSuccess: (res) => {
+      const d = res.data;
+      if (d?.token) {
+        setAuth(
+          {
+            id: d.roles?.[0] || "User",
+            name: d.name,
+            email: d.email,
+            role: d.roles?.[0],
+          },
+          d.token,
+        );
+      }
+      toast.success(res.message);
+    },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 

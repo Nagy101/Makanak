@@ -13,9 +13,11 @@ import type {
   User,
   UpdateProfileRequest,
   VerifyIdentityRequest,
+  ChangePasswordRequest,
   InitiateEmailChangeRequest,
   ConfirmEmailChangeRequest,
   ApiResponse,
+  AuthData,
 } from "./auth.types";
 
 const authApi = createApi(`${API_BASE}/Auth`);
@@ -102,6 +104,11 @@ export const verifyIdentity = (data: VerifyIdentityRequest) =>
       },
     )
     .then((r) => r.data.data);
+
+export const changePassword = (data: ChangePasswordRequest) =>
+  authApi
+    .post<ApiResponse<AuthData>>("/change-password", data)
+    .then((r) => r.data);
 
 export const initiateEmailChange = (data: InitiateEmailChangeRequest) =>
   authApi

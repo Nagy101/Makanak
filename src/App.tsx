@@ -15,9 +15,13 @@ import { useAllLookups } from "@/features/lookup";
 import { useBannedUserCheck, useProfile } from "@/features/auth/hooks/useAuth";
 import NotFound from "./pages/NotFound";
 
-// Lazy load legal pages
+// Lazy load legal & static pages
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const ShippingPolicyPage = lazy(() => import("./pages/ShippingPolicyPage"));
+const ReturnPolicyPage = lazy(() => import("./pages/ReturnPolicyPage"));
+const AboutUsPage = lazy(() => import("./pages/AboutUsPage"));
+const ContactUsPage = lazy(() => import("./pages/ContactUsPage"));
 
 // Lazy load auth pages for better code splitting
 const HomePage = lazy(() => import("./pages/HomePage.tsx"));
@@ -205,6 +209,38 @@ const RouterContent = () => {
         element={
           <Suspense fallback={<PageLoadingFallback />}>
             <PrivacyPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/shipping"
+        element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <ShippingPolicyPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/return"
+        element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <ReturnPolicyPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/about"
+        element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <AboutUsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/contact"
+        element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <ContactUsPage />
           </Suspense>
         }
       />

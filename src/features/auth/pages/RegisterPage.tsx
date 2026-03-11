@@ -20,6 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AuthLayout from "../components/AuthLayout";
+import PasswordStrengthIndicator, {
+  PASSWORD_REGEX,
+} from "../components/PasswordStrengthIndicator";
 import { useRegister } from "../hooks/useAuth";
 import { emailRegex } from "@/lib/utils";
 
@@ -35,7 +38,10 @@ const createSchema = (t: TFunction) =>
         .string()
         .min(1, t("auth.phoneRequired"))
         .regex(/^\+?[0-9]{10,15}$/, t("auth.phoneInvalid")),
-      password: z.string().min(8, t("auth.atLeast8Chars")),
+      password: z
+        .string()
+        .min(8, t("auth.atLeast8Chars"))
+        .regex(PASSWORD_REGEX, t("auth.passwordRequirements")),
       confirmPassword: z.string().min(1, t("auth.confirmYourPassword")),
       userType: z.enum(["Tenant", "Owner"], {
         message: t("auth.selectUserType"),
@@ -85,6 +91,7 @@ const RegisterPage = memo(() => {
     },
   });
   const selectedUserType = watch("userType");
+  const passwordValue = watch("password");
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPw((prev) => !prev);
@@ -234,6 +241,7 @@ const RegisterPage = memo(() => {
                 )}
               </button>
             </div>
+            <PasswordStrengthIndicator password={passwordValue} />
             {errors.password && (
               <p className="text-sm text-destructive">
                 {errors.password.message}
