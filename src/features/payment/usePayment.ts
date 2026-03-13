@@ -1,12 +1,19 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createPaymentIntent, scanQrCode } from "./payment.service";
-import type { ScanQrRequest } from "./payment.types";
+import { createPaymentIntent, payBooking, scanQrCode } from "./payment.service";
+import type { MockPaymentData, ScanQrRequest } from "./payment.types";
 import { toast } from "sonner";
 
 /** Tenant: create a Stripe payment intent for a booking */
 export const useCreatePaymentIntent = () => {
   return useMutation({
     mutationFn: (bookingId: number) => createPaymentIntent(bookingId),
+  });
+};
+
+/** Tenant: temporary mocked payment completion (test mode) */
+export const useMockPayBooking = () => {
+  return useMutation<MockPaymentData, Error, number>({
+    mutationFn: (bookingId: number) => payBooking(bookingId),
   });
 };
 

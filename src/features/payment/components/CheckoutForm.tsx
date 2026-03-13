@@ -1,75 +1,94 @@
 import { memo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  useStripe,
-  useElements,
-  PaymentElement,
-} from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+import { useMockPayBooking } from "../usePayment";
 
 interface CheckoutFormProps {
-  totalAmount: number;
-  onSuccess: () => void;
+  bookingId: number;
+  onSuccess: (bookingId: number) => void;
 }
 
-const CheckoutForm = memo(({ totalAmount, onSuccess }: CheckoutFormProps) => {
+const CheckoutForm = memo(({ bookingId, onSuccess }: CheckoutFormProps) => {
   const { t } = useTranslation();
-  const stripe = useStripe();
-  const elements = useElements();
+  const payMutation = useMockPayBooking();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+
+  // TODO: Uncomment this block when the real payment gateway is integrated.
+  // const stripe = useStripe();
+  // const elements = useElements();
+  // const [success, setSuccess] = useState(false);
+  //
+  // if (success) {
+  //   return (
+  //     <div className="flex flex-col items-center gap-3 py-8 text-center">
+  //       <CheckCircle2 className="h-12 w-12 text-success" />
+  //       <h3 className="text-lg font-semibold text-foreground">
+  //         {t("payment.paymentSuccessful")}
+  //       </h3>
+  //       <p className="text-sm text-muted-foreground">
+  //         {t("payment.bookingConfirmed")}
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!stripe || !elements) return;
 
       setLoading(true);
       setError(null);
 
-      const { error: stripeError } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/my-bookings`,
-        },
-        redirect: "if_required",
-      });
+      // TODO: Uncomment this block when the real payment gateway is integrated.
+      // if (!stripe || !elements) return;
+      //
+      // const { error: stripeError } = await stripe.confirmPayment({
+      //   elements,
+      //   confirmParams: {
+      //     return_url: `${window.location.origin}/my-bookings`,
+      //   },
+      //   redirect: "if_required",
+      // });
+      //
+      // if (stripeError) {
+      //   setError(stripeError.message ?? "Payment failed");
+      //   setLoading(false);
+      // } else {
+      //   setSuccess(true);
+      //   setLoading(false);
+      //   onSuccess();
+      // }
 
-      if (stripeError) {
-        setError(stripeError.message ?? "Payment failed");
+      try {
+        const result = await payMutation.mutateAsync(bookingId);
+        if (result.status === "PaymentReceived") {
+          toast.success("Payment successful (Test Mode)");
+          onSuccess(result.bookingId);
+          return;
+        }
+        setError(t("payment.failedToInitialize"));
+      } catch {
+        setError(t("payment.failedToInitialize"));
+      } finally {
         setLoading(false);
-      } else {
-        setSuccess(true);
-        setLoading(false);
-        onSuccess();
       }
     },
-    [stripe, elements, onSuccess],
+    [bookingId, onSuccess, payMutation, t],
   );
-
-  if (success) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-8 text-center">
-        <CheckCircle2 className="h-12 w-12 text-success" />
-        <h3 className="text-lg font-semibold text-foreground">
-          {t("payment.paymentSuccessful")}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          {t("payment.bookingConfirmed")}
-        </p>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* TODO: Uncomment this block when the real payment gateway is integrated. */}
+      {/*
       <PaymentElement
         options={{
           layout: "tabs",
         }}
       />
+      */}
 
       {error && (
         <div className="flex items-center gap-2 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -80,7 +99,7 @@ const CheckoutForm = memo(({ totalAmount, onSuccess }: CheckoutFormProps) => {
 
       <Button
         type="submit"
-        disabled={!stripe || loading}
+        disabled={loading}
         className="w-full h-12 text-base font-semibold"
       >
         {loading ? (
@@ -89,7 +108,7 @@ const CheckoutForm = memo(({ totalAmount, onSuccess }: CheckoutFormProps) => {
             {t("payment.processing")}
           </>
         ) : (
-          t("payment.payAmount", { amount: totalAmount.toLocaleString() })
+          t("bookings.payNow")
         )}
       </Button>
     </form>
