@@ -30,12 +30,12 @@ export const createPaymentIntent = (bookingId: number) =>
     .then((r) => r.data);
 
 /**
- * POST /api/Booking/{bookingId}/pay — mocked server-side payment completion
+ * POST /api/Booking/{bookingId}/payment — mocked server-side payment completion
  * Temporary testing path: backend returns PaymentReceived immediately.
  */
 export const payBooking = (bookingId: number) =>
   api.post<PaymentApiResponse<MockPaymentData> | MockPaymentData>(
-    `/Booking/${bookingId}/pay`,
+    `/Booking/${bookingId}/payment`,
   )
   .then((r) => r.data)
   .then((payload) => {
