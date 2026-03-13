@@ -101,14 +101,23 @@ export default function PropertyDetailsPage() {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>{`${property.title} | Makanak`}</title>
-        <meta name="description" content={property.description?.slice(0, 160)} />
+        <meta
+          name="description"
+          content={property.description?.slice(0, 160)}
+        />
         <meta property="og:title" content={property.title} />
-        <meta property="og:description" content={property.description?.slice(0, 160)} />
+        <meta
+          property="og:description"
+          content={property.description?.slice(0, 160)}
+        />
         <meta property="og:image" content={property.mainImageUrl} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={property.title} />
-        <meta name="twitter:description" content={property.description?.slice(0, 160)} />
+        <meta
+          name="twitter:description"
+          content={property.description?.slice(0, 160)}
+        />
         <meta name="twitter:image" content={property.mainImageUrl} />
       </Helmet>
       <UserNavbar />
