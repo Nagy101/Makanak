@@ -26,7 +26,27 @@ import PasswordStrengthIndicator, {
 import { useRegister } from "../hooks/useAuth";
 import { emailRegex } from "@/lib/utils";
 
-const createSchema = (t: TFunction) =>
+const formatDateForInput = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getBirthDateLimits = (today = new Date()) => {
+  const maxBirthDate = new Date(today);
+  maxBirthDate.setFullYear(maxBirthDate.getFullYear() - 16);
+
+  const minBirthDate = new Date(today);
+  minBirthDate.setFullYear(minBirthDate.getFullYear() - 100);
+
+  return {
+    minDate: formatDateForInput(minBirthDate),
+    maxDate: formatDateForInput(maxBirthDate),
+  };
+};
+
+const createSchema = (t: TFunction, minDate: string, maxDate: string) =>
   z
     .object({
       name: z.string().min(2, t("auth.nameRequired")).max(100),
@@ -46,7 +66,21 @@ const createSchema = (t: TFunction) =>
       userType: z.enum(["Tenant", "Owner"], {
         message: t("auth.selectUserType"),
       }),
-      dateOfBirth: z.string().min(1, t("auth.dobRequired")),
+      dateOfBirth: z
+        .string()
+        .min(1, t("auth.dobRequired"))
+        .refine(
+          (value) => /^\d{4}-\d{2}-\d{2}$/.test(value),
+          "Please enter a valid date of birth.",
+        )
+        .refine(
+          (value) => value >= minDate,
+          "Age must be 100 years or less.",
+        )
+        .refine(
+          (value) => value <= maxDate,
+          "You must be at least 16 years old.",
+        ),
       agreeToTerms: z.boolean().refine((v) => v === true, {
         message: t("legal.mustAgree"),
       }),
@@ -69,7 +103,8 @@ type RegisterFormData = z.output<ReturnType<typeof createSchema>>;
 
 const RegisterPage = memo(() => {
   const { t } = useTranslation();
-  const schema = createSchema(t);
+  const { minDate, maxDate } = getBirthDateLimits();
+  const schema = createSchema(t, minDate, maxDate);
   const [showPw, setShowPw] = useState(false);
   const { mutate, isPending } = useRegister();
   const {
@@ -205,7 +240,13 @@ const RegisterPage = memo(() => {
 
         <div className="space-y-2">
           <Label htmlFor="dateOfBirth">{t("auth.dateOfBirth")}</Label>
-          <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} />
+          <Input
+            id="dateOfBirth"
+            type="date"
+            min={minDate}
+            max={maxDate}
+            {...register("dateOfBirth")}
+          />
           {errors.dateOfBirth && (
             <p className="text-sm text-destructive">
               {errors.dateOfBirth.message}
