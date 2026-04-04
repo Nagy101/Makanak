@@ -31,9 +31,12 @@ import {
   useGovernorates,
   useAmenities,
   usePropertyTypes,
-  useSortingOptions,
 } from "@/features/lookup";
 import type { PropertySearchParams } from "../property.types";
+import {
+  PROPERTY_SORT_OPTIONS,
+  type PropertySortValue,
+} from "@/constants/sortOptions";
 
 interface Props {
   params: PropertySearchParams;
@@ -481,8 +484,8 @@ export default function PropertySearchFilter({
 
 /**
  * SortSelect Component
- * Renders a Select dropdown for sorting options fetched from the backend.
- * Sends numeric Sort ID (matching SortingOptionsEnum on backend).
+ * Renders a Select dropdown for sorting options.
+ * Sends SortingOptionsEnum value to backend.
  */
 interface SortSelectProps {
   params: PropertySearchParams;
@@ -490,34 +493,26 @@ interface SortSelectProps {
 }
 
 function SortSelect({ params, onParamsChange }: SortSelectProps) {
-  const { sortingOptions, loading: loadingSortingOptions } =
-    useSortingOptions();
-
   const { t } = useTranslation();
 
   return (
     <Select
-      value={params.Sort?.toString() || ""}
+      value={params.Sort || ""}
       onValueChange={(v) =>
         onParamsChange({
           ...params,
-          Sort: v ? Number(v) : undefined,
+          Sort: (v as PropertySortValue) || undefined,
           PageIndex: 1,
         })
       }
-      disabled={loadingSortingOptions}
     >
       <SelectTrigger className="h-11 w-full sm:w-[170px]">
-        <SelectValue
-          placeholder={
-            loadingSortingOptions ? t("common.loading") : t("properties.sortBy")
-          }
-        />
+        <SelectValue placeholder={t("properties.sortBy")} />
       </SelectTrigger>
       <SelectContent>
-        {sortingOptions.map((s) => (
-          <SelectItem key={s.id} value={s.id.toString()}>
-            {s.name}
+        {PROPERTY_SORT_OPTIONS.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {t(option.labelKey)}
           </SelectItem>
         ))}
       </SelectContent>

@@ -1,3 +1,5 @@
+import type { PropertySortValue } from "@/constants/sortOptions";
+
 // ── API Response Envelope ──
 export interface OwnerApiResponse<T> {
   statusCode: number;
@@ -13,7 +15,7 @@ export interface MyPropertiesParams {
   PageIndex?: number;
   PageSize?: number;
   Search?: string;
-  Sort?: string;
+  Sort?: PropertySortValue;
 }
 
 // ── Owner Property Listing (My Properties response item) ──

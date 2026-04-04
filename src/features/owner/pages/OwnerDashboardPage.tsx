@@ -39,8 +39,11 @@ import {
 import { useMyProperties, useDeleteProperty } from "../useOwnerProperties";
 import OwnerPropertyCard from "../components/OwnerPropertyCard";
 import type { MyPropertiesParams } from "../owner.types";
-import { usePropertyStatuses, useSortingOptions } from "@/features/lookup";
-import { toLabel } from "@/lib/utils";
+import { usePropertyStatuses } from "@/features/lookup";
+import {
+  PROPERTY_SORT_OPTIONS,
+  type PropertySortValue,
+} from "@/constants/sortOptions";
 
 const PropertyReviewsSection = lazy(
   () => import("@/features/reviews/components/PropertyReviewsSection"),
@@ -61,7 +64,6 @@ export default function OwnerDashboardPage() {
   const { data, isLoading, isFetching } = useMyProperties(params);
   const deleteMutation = useDeleteProperty();
   const { propertyStatuses } = usePropertyStatuses();
-  const { sortingOptions } = useSortingOptions();
 
   const totalPages = useMemo(
     () => (data ? Math.ceil(data.totalCount / (params.PageSize || 6)) : 0),
@@ -82,7 +84,7 @@ export default function OwnerDashboardPage() {
     }));
   }, []);
 
-  const handleSort = useCallback((value: string) => {
+  const handleSort = useCallback((value: PropertySortValue) => {
     setParams((p) => ({ ...p, Sort: value, PageIndex: 1 }));
   }, []);
 
@@ -181,9 +183,9 @@ export default function OwnerDashboardPage() {
               <SelectValue placeholder={t("properties.sortBy")} />
             </SelectTrigger>
             <SelectContent>
-              {sortingOptions.map((o) => (
-                <SelectItem key={o.id} value={o.name}>
-                  {toLabel(o.name)}
+              {PROPERTY_SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {t(option.labelKey)}
                 </SelectItem>
               ))}
             </SelectContent>
