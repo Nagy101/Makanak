@@ -273,6 +273,8 @@
     "dates": "Dates",
     "checkIn": "Check-in",
     "checkOut": "Check-out",
+    "checkInPastError": "Check-in cannot be in the past.",
+    "checkOutAfterCheckInError": "Check-out must be after check-in.",
     "amenities": "Amenities",
     "loadingAmenities": "Loading amenities...",
     "location": "Location",

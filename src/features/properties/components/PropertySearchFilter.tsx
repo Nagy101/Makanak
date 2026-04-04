@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Search,
   SlidersHorizontal,
   X,
   MapPin,
@@ -41,13 +40,20 @@ interface Props {
   onParamsChange: (params: PropertySearchParams) => void;
 }
 
+const toDateInputValue = (date: Date) => date.toISOString().split("T")[0];
+
+const addDays = (dateValue: string, days: number) => {
+  const date = new Date(`${dateValue}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  return toDateInputValue(date);
+};
+
 export default function PropertySearchFilter({
   params,
   onParamsChange,
 }: Props) {
   const { t } = useTranslation();
   const localized = useLocalizedField();
-  const [localSearch, setLocalSearch] = useState(params.Search || "");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [draft, setDraft] = useState<PropertySearchParams>({ ...params });
 
@@ -55,6 +61,21 @@ export default function PropertySearchFilter({
   const { governorates, loading: loadingGov } = useGovernorates();
   const { amenities, loading: loadingAmenities } = useAmenities();
   const { propertyTypes, loading: loadingTypes } = usePropertyTypes();
+  const today = toDateInputValue(new Date());
+  const checkOutMinDate = draft.CheckInDate
+    ? addDays(draft.CheckInDate, 1)
+    : addDays(today, 1);
+
+  const checkInInPast = !!draft.CheckInDate && draft.CheckInDate < today;
+  const checkOutInvalid =
+    !!draft.CheckInDate &&
+    !!draft.CheckOutDate &&
+    draft.CheckOutDate <= draft.CheckInDate;
+  const hasValidDateRange =
+    !!draft.CheckInDate &&
+    !!draft.CheckOutDate &&
+    !checkInInPast &&
+    !checkOutInvalid;
 
   const activeFilterCount = [
     draft.Type,
@@ -64,14 +85,55 @@ export default function PropertySearchFilter({
     draft.MinMaxGuests,
     (draft.AmenityIds?.length ?? 0) > 0,
     draft.CheckInDate,
+    draft.CheckOutDate,
   ].filter(Boolean).length;
 
-  const handleSearch = () => {
-    onParamsChange({ ...params, Search: localSearch, PageIndex: 1 });
+  useEffect(() => {
+    if (!hasValidDateRange) return;
+    if (
+      params.CheckInDate === draft.CheckInDate &&
+      params.CheckOutDate === draft.CheckOutDate
+    ) {
+      return;
+    }
+
+    onParamsChange({
+      ...params,
+      CheckInDate: draft.CheckInDate,
+      CheckOutDate: draft.CheckOutDate,
+      PageIndex: 1,
+    });
+  }, [
+    draft.CheckInDate,
+    draft.CheckOutDate,
+    hasValidDateRange,
+    onParamsChange,
+    params,
+  ]);
+
+  const handleCheckInChange = (value: string) => {
+    const nextCheckIn = value || undefined;
+    const shouldClearCheckOut =
+      !!nextCheckIn &&
+      !!draft.CheckOutDate &&
+      draft.CheckOutDate <= nextCheckIn;
+
+    setDraft({
+      ...draft,
+      CheckInDate: nextCheckIn,
+      CheckOutDate: shouldClearCheckOut ? undefined : draft.CheckOutDate,
+    });
+  };
+
+  const handleCheckOutChange = (value: string) => {
+    setDraft({
+      ...draft,
+      CheckOutDate: value || undefined,
+    });
   };
 
   const handleApplyFilters = () => {
-    onParamsChange({ ...draft, Search: localSearch, PageIndex: 1 });
+    onParamsChange({ ...draft, PageIndex: 1 });
     setSheetOpen(false);
   };
 
@@ -81,7 +143,6 @@ export default function PropertySearchFilter({
       PageSize: params.PageSize || 12,
     };
     setDraft(cleared);
-    setLocalSearch("");
     onParamsChange(cleared);
     setSheetOpen(false);
   };
@@ -96,75 +157,117 @@ export default function PropertySearchFilter({
 
   return (
     <div className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur-sm">
-      <div className="container mx-auto flex items-center gap-3 px-4 py-3">
-        {/* Search bar */}
-        <div className="relative flex-1 max-w-xl">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder={t("properties.searchPlaceholder")}
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="pl-10 h-11"
-          />
+      <div className="container mx-auto flex flex-col gap-3 px-4 py-3 md:flex-row md:flex-nowrap md:items-end md:gap-2">
+        {/* Dates */}
+        <div className="grid w-full min-w-0 grid-cols-2 gap-2 md:w-auto md:gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="checkInDate" className="text-[11px] font-medium md:text-xs">
+              {t("properties.checkIn")}
+            </Label>
+            <div className="relative">
+              <CalendarIcon className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground md:left-3 md:h-4 md:w-4" />
+              <Input
+                id="checkInDate"
+                type="date"
+                min={today}
+                value={draft.CheckInDate || ""}
+                onChange={(e) => handleCheckInChange(e.target.value)}
+                className="h-10 w-full min-w-0 px-2 pl-8 text-xs md:h-11 md:w-[185px] md:pl-10 md:text-sm"
+                placeholder={t("properties.checkIn")}
+                aria-label={t("properties.checkIn")}
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="checkOutDate" className="text-[11px] font-medium md:text-xs">
+              {t("properties.checkOut")}
+            </Label>
+            <div className="relative">
+              <CalendarIcon className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground md:left-3 md:h-4 md:w-4" />
+              <Input
+                id="checkOutDate"
+                type="date"
+                min={checkOutMinDate}
+                value={draft.CheckOutDate || ""}
+                onChange={(e) => handleCheckOutChange(e.target.value)}
+                className="h-10 w-full min-w-0 px-2 pl-8 text-xs md:h-11 md:w-[185px] md:pl-10 md:text-sm"
+                placeholder={t("properties.checkOut")}
+                aria-label={t("properties.checkOut")}
+              />
+            </div>
+          </div>
         </div>
 
+        {(checkInInPast || checkOutInvalid) && (
+          <p className="w-full text-sm text-destructive md:order-last">
+            {checkInInPast
+              ? t("properties.checkInPastError")
+              : t("properties.checkOutAfterCheckInError")}
+          </p>
+        )}
+
         {/* Governorate quick select */}
-        <Select
-          value={params.GovernorateId?.toString() || ""}
-          onValueChange={(v) =>
-            onParamsChange({
-              ...params,
-              GovernorateId: v ? Number(v) : undefined,
-              PageIndex: 1,
-            })
-          }
-          disabled={loadingGov}
-        >
-          <SelectTrigger className="w-[180px] h-11 hidden md:flex">
-            <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-            <SelectValue
-              placeholder={
-                loadingGov ? t("common.loading") : t("properties.allLocations")
-              }
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {governorates.map((g) => (
-              <SelectItem key={g.id} value={g.id.toString()}>
-                {localized(g.nameEn, g.nameAr)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="hidden md:block md:w-[180px]">
+          <Select
+            value={params.GovernorateId?.toString() || ""}
+            onValueChange={(v) =>
+              onParamsChange({
+                ...params,
+                GovernorateId: v ? Number(v) : undefined,
+                PageIndex: 1,
+              })
+            }
+            disabled={loadingGov}
+          >
+            <SelectTrigger className="h-11 w-full">
+              <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
+              <SelectValue
+                placeholder={
+                  loadingGov
+                    ? t("common.loading")
+                    : t("properties.allLocations")
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {governorates.map((g) => (
+                <SelectItem key={g.id} value={g.id.toString()}>
+                  {localized(g.nameEn, g.nameAr)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Sort */}
         {/* Sorting options come from backend */}
-        <SortSelect params={params} onParamsChange={onParamsChange} />
+        <div className="hidden md:block md:w-[170px]">
+          <SortSelect params={params} onParamsChange={onParamsChange} />
+        </div>
 
-        {/* Search button */}
-        <Button
-          onClick={handleSearch}
-          size="lg"
-          className="h-11 px-6 font-semibold"
-        >
-          <Search className="h-4 w-4 mr-2" /> {t("common.search")}
-        </Button>
+        <div className="flex w-full gap-2 md:ml-auto md:w-auto">
+          <Button
+            variant="outline"
+            className="h-11 flex-1 md:flex-none"
+            onClick={handleClearFilters}
+          >
+            <X className="h-4 w-4 mr-2" /> {t("common.clearAll")}
+          </Button>
 
-        {/* Filters sheet */}
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" className="h-11 relative">
-              <SlidersHorizontal className="h-4 w-4 mr-2" />{" "}
-              {t("properties.filters")}
-              {activeFilterCount > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                  {activeFilterCount}
-                </Badge>
-              )}
-            </Button>
-          </SheetTrigger>
-          <SheetContent className="w-[380px] sm:w-[420px] overflow-y-auto">
+          {/* Filters sheet */}
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="h-11 flex-1 md:flex-none relative">
+                <SlidersHorizontal className="h-4 w-4 mr-2" />{" "}
+                {t("properties.filters")}
+                {activeFilterCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-full max-w-full overflow-y-auto sm:w-[420px] sm:max-w-[420px]">
             <SheetHeader>
               <SheetTitle className="text-xl font-bold">
                 {t("properties.filters")}
@@ -288,45 +391,6 @@ export default function PropertySearchFilter({
                 </div>
               </div>
 
-              {/* Dates */}
-              <div className="space-y-3">
-                <Label className="text-sm font-semibold text-foreground">
-                  {t("properties.dates")}
-                </Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="relative">
-                    <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      type="date"
-                      value={draft.CheckInDate || ""}
-                      onChange={(e) =>
-                        setDraft({
-                          ...draft,
-                          CheckInDate: e.target.value || undefined,
-                        })
-                      }
-                      className="pl-10"
-                      placeholder="Check-in"
-                    />
-                  </div>
-                  <div className="relative">
-                    <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      type="date"
-                      value={draft.CheckOutDate || ""}
-                      onChange={(e) =>
-                        setDraft({
-                          ...draft,
-                          CheckOutDate: e.target.value || undefined,
-                        })
-                      }
-                      className="pl-10"
-                      placeholder="Check-out"
-                    />
-                  </div>
-                </div>
-              </div>
-
               {/* Amenities */}
               <div className="space-y-3">
                 <Label className="text-sm font-semibold text-foreground">
@@ -407,8 +471,9 @@ export default function PropertySearchFilter({
                 </Button>
               </div>
             </div>
-          </SheetContent>
-        </Sheet>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </div>
   );
@@ -442,7 +507,7 @@ function SortSelect({ params, onParamsChange }: SortSelectProps) {
       }
       disabled={loadingSortingOptions}
     >
-      <SelectTrigger className="w-[170px] h-11 hidden lg:flex">
+      <SelectTrigger className="h-11 w-full sm:w-[170px]">
         <SelectValue
           placeholder={
             loadingSortingOptions ? t("common.loading") : t("properties.sortBy")

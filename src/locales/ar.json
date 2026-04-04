@@ -273,6 +273,8 @@
     "dates": "التواريخ",
     "checkIn": "تسجيل الدخول",
     "checkOut": "تسجيل الخروج",
+    "checkInPastError": "لا يمكن أن يكون تاريخ تسجيل الدخول في الماضي.",
+    "checkOutAfterCheckInError": "يجب أن يكون تاريخ تسجيل الخروج بعد تاريخ تسجيل الدخول.",
     "amenities": "المرافق",
     "loadingAmenities": "جاري تحميل المرافق...",
     "location": "الموقع",
