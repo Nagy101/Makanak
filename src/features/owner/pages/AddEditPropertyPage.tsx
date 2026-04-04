@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import type { TFunction } from "i18next";
 import { ArrowLeft, Upload, X, Trash2, Loader2, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { validateFileSize } from "@/lib/apiError";
@@ -36,26 +37,110 @@ import type {
 // Lazy-load the map component to avoid blocking initial render
 const MapPicker = lazy(() => import("../components/MapPicker"));
 
-const propertySchema = z.object({
-  Title: z.string().trim().min(3, "Title must be at least 3 characters"),
-  Description: z.string().trim().min(10, "Description must be at least 10 characters"),
-  PropertyType: z.string().min(1, "Select a property type"),
-  AreaName: z.string().min(1, "Area name is required"),
-  Address: z.string().trim().min(3, "Address is required"),
-  PricePerNight: z.coerce.number().min(1, "Price must be at least 1"),
-  Area: z.coerce.number().min(1, "Area must be at least 1"),
-  Bedrooms: z.coerce.number().min(0, "Invalid"),
-  Bathrooms: z.coerce.number().min(0, "Invalid"),
-  MaxGuests: z.coerce.number().min(1, "At least 1 guest"),
-  GovernorateId: z.coerce.number().min(1, "Select a governorate"),
-  Latitude: z.coerce.number(),
-  Longitude: z.coerce.number(),
-});
+const requiredNumber = (
+  requiredMessage: string,
+  minValue: number,
+  minMessage: string,
+) =>
+  z.preprocess(
+    (value) => {
+      if (value === "" || value === null || value === undefined) {
+        return undefined;
+      }
 
-type FormValues = z.infer<typeof propertySchema>;
+      if (typeof value === "number") {
+        return Number.isNaN(value) ? undefined : value;
+      }
+
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (!trimmed) return undefined;
+        const parsed = Number(trimmed);
+        return Number.isNaN(parsed) ? value : parsed;
+      }
+
+      return value;
+    },
+    z
+      .number({
+        required_error: requiredMessage,
+        invalid_type_error: requiredMessage,
+      })
+      .min(minValue, minMessage),
+  );
+
+const createPropertySchema = (t: TFunction) =>
+  z.object({
+    Title: z
+      .string()
+      .trim()
+      .min(1, t("owner.validationTitleRequired"))
+      .min(3, t("owner.validationTitleMin")),
+    Description: z
+      .string()
+      .trim()
+      .min(1, t("owner.validationDescriptionRequired"))
+      .min(10, t("owner.validationDescriptionMin")),
+    PropertyType: z
+      .string()
+      .trim()
+      .min(1, t("owner.validationPropertyTypeRequired")),
+    AreaName: z
+      .string()
+      .trim()
+      .min(1, t("owner.validationAreaNameRequired")),
+    Address: z
+      .string()
+      .trim()
+      .min(1, t("owner.validationAddressRequired"))
+      .min(3, t("owner.validationAddressMin")),
+    PricePerNight: requiredNumber(
+      t("owner.validationPriceRequired"),
+      1,
+      t("owner.validationPriceMin"),
+    ),
+    Area: requiredNumber(
+      t("owner.validationAreaRequired"),
+      1,
+      t("owner.validationAreaMin"),
+    ),
+    Bedrooms: requiredNumber(
+      t("owner.validationBedroomsRequired"),
+      0,
+      t("owner.validationBedroomsMin"),
+    ),
+    Bathrooms: requiredNumber(
+      t("owner.validationBathroomsRequired"),
+      0,
+      t("owner.validationBathroomsMin"),
+    ),
+    MaxGuests: requiredNumber(
+      t("owner.validationMaxGuestsRequired"),
+      1,
+      t("owner.validationMaxGuestsMin"),
+    ),
+    GovernorateId: requiredNumber(
+      t("owner.validationGovernorateRequired"),
+      1,
+      t("owner.validationGovernorateRequired"),
+    ),
+    Latitude: requiredNumber(
+      t("owner.validationLatitudeRequired"),
+      -90,
+      t("owner.validationLatitudeRequired"),
+    ),
+    Longitude: requiredNumber(
+      t("owner.validationLongitudeRequired"),
+      -180,
+      t("owner.validationLongitudeRequired"),
+    ),
+  });
+
+type FormValues = z.infer<ReturnType<typeof createPropertySchema>>;
 
 export default function AddEditPropertyPage() {
   const { t } = useTranslation();
+  const propertySchema = createPropertySchema(t);
   const localized = useLocalizedField();
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
@@ -467,6 +552,11 @@ export default function AddEditPropertyPage() {
               <div className="space-y-2">
                 <Label htmlFor="Bedrooms">{t("owner.bedrooms")}</Label>
                 <Input id="Bedrooms" type="number" {...register("Bedrooms")} />
+                {errors.Bedrooms && (
+                  <p className="text-sm text-destructive">
+                    {errors.Bedrooms.message}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="Bathrooms">{t("owner.bathrooms")}</Label>
@@ -475,6 +565,11 @@ export default function AddEditPropertyPage() {
                   type="number"
                   {...register("Bathrooms")}
                 />
+                {errors.Bathrooms && (
+                  <p className="text-sm text-destructive">
+                    {errors.Bathrooms.message}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="MaxGuests">{t("owner.maxGuests")}</Label>
