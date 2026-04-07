@@ -54,6 +54,8 @@ const CreateBookingWidget = memo(
       formState: { errors },
     } = useForm<BookingForm>({
       resolver: zodResolver(bookingSchema),
+      mode: "onChange",
+      reValidateMode: "onChange",
       defaultValues: { numberOfGuests: 1, specialRequests: "" },
     });
 

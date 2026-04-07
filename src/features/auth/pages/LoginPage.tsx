@@ -34,6 +34,8 @@ const LoginPage = memo(() => {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(schema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: { email: "", password: "" },
   });
 

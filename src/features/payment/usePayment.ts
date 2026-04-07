@@ -2,11 +2,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPaymentIntent, payBooking, scanQrCode } from "./payment.service";
 import type { MockPaymentData, ScanQrRequest } from "./payment.types";
 import { toast } from "sonner";
+import { showApiErrorToast } from "@/lib/apiError";
 
 /** Tenant: create a Stripe payment intent for a booking */
 export const useCreatePaymentIntent = () => {
   return useMutation({
     mutationFn: (bookingId: number) => createPaymentIntent(bookingId),
+    onError: (error) => showApiErrorToast(error),
   });
 };
 
@@ -14,6 +16,7 @@ export const useCreatePaymentIntent = () => {
 export const useMockPayBooking = () => {
   return useMutation<MockPaymentData, Error, number>({
     mutationFn: (bookingId: number) => payBooking(bookingId),
+    onError: (error) => showApiErrorToast(error),
   });
 };
 
@@ -26,5 +29,6 @@ export const useScanQrCode = () => {
       toast.success(res.message || "Check-in confirmed!");
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
+    onError: (error) => showApiErrorToast(error),
   });
 };

@@ -12,6 +12,8 @@ import {
   Phone,
   Home,
   Users,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { useState, useCallback, memo } from "react";
 import { useTranslation, Trans } from "react-i18next";
@@ -25,6 +27,8 @@ import PasswordStrengthIndicator, {
 } from "../components/PasswordStrengthIndicator";
 import { useRegister } from "../hooks/useAuth";
 import { emailRegex } from "@/lib/utils";
+
+const phoneRegex = /^\+?[0-9]{10,15}$/;
 
 const formatDateForInput = (date: Date) => {
   const year = date.getFullYear();
@@ -54,10 +58,14 @@ const createSchema = (t: TFunction, minDate: string, maxDate: string) =>
         .string()
         .min(1, t("auth.emailRequired"))
         .regex(emailRegex, "Invalid email format. Please use a valid domain (e.g., user@example.com)"),
-      phoneNumber: z
-        .string()
-        .min(1, t("auth.phoneRequired"))
-        .regex(/^\+?[0-9]{10,15}$/, t("auth.phoneInvalid")),
+      phoneNumber: z.preprocess(
+        (value) =>
+          typeof value === "string" ? value.replace(/[\s-]/g, "") : value,
+        z
+          .string()
+          .min(1, t("auth.phoneRequired"))
+          .regex(phoneRegex, t("auth.phoneInvalid")),
+      ),
       password: z
         .string()
         .min(8, t("auth.atLeast8Chars"))
@@ -114,6 +122,8 @@ const RegisterPage = memo(() => {
     watch,
   } = useForm<RegisterFormInput, unknown, RegisterFormData>({
     resolver: zodResolver(schema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       name: "",
       email: "",
@@ -127,6 +137,16 @@ const RegisterPage = memo(() => {
   });
   const selectedUserType = watch("userType");
   const passwordValue = watch("password");
+  const emailValue = watch("email") || "";
+  const phoneValueRaw = watch("phoneNumber");
+  const phoneValue = typeof phoneValueRaw === "string" ? phoneValueRaw : "";
+  const confirmPasswordValue = watch("confirmPassword") || "";
+
+  const normalizedPhone = phoneValue.replace(/[\s-]/g, "");
+  const isEmailValid = !!emailValue && emailRegex.test(emailValue);
+  const isPhoneValid = !!normalizedPhone && phoneRegex.test(normalizedPhone);
+  const isPasswordMatched =
+    !!confirmPasswordValue && !!passwordValue && confirmPasswordValue === passwordValue;
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPw((prev) => !prev);
@@ -176,19 +196,43 @@ const RegisterPage = memo(() => {
           {errors.email && (
             <p className="text-sm text-destructive">{errors.email.message}</p>
           )}
+          {!errors.email && emailValue && (
+            <p className="text-xs text-emerald-600 flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {isEmailValid ? "Email format looks good." : ""}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">{t("auth.phoneOptional")}</Label>
+          <Label htmlFor="phone">{t("auth.phone")}</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="phone"
-              placeholder="+1 234 567 890"
+              type="tel"
+              placeholder="+201001234567"
               className="pl-10"
               {...register("phoneNumber")}
             />
           </div>
+          {errors.phoneNumber && (
+            <p className="text-sm text-destructive">{errors.phoneNumber.message}</p>
+          )}
+          {!errors.phoneNumber && phoneValue && (
+            <p className="text-xs text-emerald-600 flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {isPhoneValid
+                ? "Phone number is valid."
+                : ""}
+            </p>
+          )}
+          {!isPhoneValid && !errors.phoneNumber && phoneValue && (
+            <p className="text-xs text-amber-600 flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5" />
+              Use 10-15 digits, optionally starting with +.
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -306,6 +350,12 @@ const RegisterPage = memo(() => {
             {errors.confirmPassword && (
               <p className="text-sm text-destructive">
                 {errors.confirmPassword.message}
+              </p>
+            )}
+            {!errors.confirmPassword && confirmPasswordValue && isPasswordMatched && (
+              <p className="text-xs text-emerald-600 flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Passwords match.
               </p>
             )}
           </div>

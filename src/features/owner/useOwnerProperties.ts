@@ -11,6 +11,7 @@ import type {
   EditPropertyPayload,
 } from "./owner.types";
 import { toast } from "sonner";
+import { showApiErrorToast } from "@/lib/apiError";
 
 const OWNER_KEY = ["owner", "properties"] as const;
 
@@ -32,6 +33,7 @@ export function useCreateProperty() {
       qc.invalidateQueries({ queryKey: OWNER_KEY });
       toast.success("Property created successfully!");
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -51,6 +53,7 @@ export function useUpdateProperty() {
       qc.invalidateQueries({ queryKey: ["property", id] });
       toast.success("Property updated successfully!");
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -62,5 +65,6 @@ export function useDeleteProperty() {
       qc.invalidateQueries({ queryKey: OWNER_KEY });
       toast.success("Property deleted.");
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }

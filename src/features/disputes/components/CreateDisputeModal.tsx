@@ -73,6 +73,8 @@ export default function CreateDisputeModal({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: { BookingId: bookingId, Reason: 0, Description: "" },
   });
 
