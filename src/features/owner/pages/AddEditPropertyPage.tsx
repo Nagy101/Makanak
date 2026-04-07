@@ -178,6 +178,8 @@ export default function AddEditPropertyPage() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(propertySchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       Latitude: 30.0444,
       Longitude: 31.2357,

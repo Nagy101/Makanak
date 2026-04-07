@@ -48,6 +48,10 @@ export function validateFileSize(
 // ── Default fallback — only used when the API provides nothing ─
 const FALLBACK_MESSAGE = "An unexpected error occurred.";
 
+// Keep track of errors already surfaced to users to avoid duplicate toasts
+// when both global and local handlers process the same rejection.
+const shownErrors = new WeakSet<object>();
+
 /**
  * Extracts the primary error message from any API error.
  *
@@ -89,6 +93,19 @@ export function getApiValidationErrors(error: unknown): string[] | null {
  *   onError: (error) => showApiErrorToast(error)
  */
 export function showApiErrorToast(error: unknown): void {
+  if (error && typeof error === "object") {
+    if (shownErrors.has(error)) return;
+    shownErrors.add(error);
+  }
+
+  // 401 is handled in the Axios interceptor for authenticated pages.
+  // Keep 401 visible on login/admin-login forms (e.g. invalid credentials).
+  if (error instanceof ApiError && error.statusCode === 401) {
+    const path = window.location.pathname.toLowerCase();
+    const isAuthPage = path.includes("/login") || path.includes("/admin/login");
+    if (!isAuthPage) return;
+  }
+
   const message = getApiErrorMessage(error);
   const errors = getApiValidationErrors(error);
 

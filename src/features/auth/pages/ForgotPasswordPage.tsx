@@ -56,10 +56,14 @@ const ForgotPasswordPage = memo(() => {
 
   const emailForm = useForm<z.output<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: { email: "" },
   });
   const resetForm = useForm<z.output<typeof resetSchema>>({
     resolver: zodResolver(resetSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: { newPassword: "", confirmPassword: "" },
   });
 

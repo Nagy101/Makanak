@@ -14,6 +14,7 @@ import RequireAuth from "@/components/RequireAuth";
 import { useAllLookups } from "@/features/lookup";
 import { useBannedUserCheck, useProfile } from "@/features/auth/hooks/useAuth";
 import NotFound from "./pages/NotFound";
+import { showApiErrorToast } from "@/lib/apiError";
 
 // Lazy load legal & static pages
 const TermsPage = lazy(() => import("./pages/TermsPage"));
@@ -111,6 +112,10 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false, // don't refetch on every browser tab focus
       refetchOnReconnect: false, // don't refetch on network reconnect
       retry: 1, // only one retry on failure
+      onError: (error) => showApiErrorToast(error),
+    },
+    mutations: {
+      onError: (error) => showApiErrorToast(error),
     },
   },
 });

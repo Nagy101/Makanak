@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as notificationService from './notifications.service';
 import type { Notification, NotificationListFilter } from './notifications.types';
+import { showApiErrorToast } from '@/lib/apiError';
 
 const KEYS = {
   list: (filter?: NotificationListFilter) => ['notifications', 'list', filter ?? {}] as const,
@@ -52,8 +53,9 @@ export const useMarkAsRead = () => {
 
       return { prevCount };
     },
-    onError: (_err, _id, ctx) => {
+    onError: (error, _id, ctx) => {
       if (ctx?.prevCount) qc.setQueryData(KEYS.count, ctx.prevCount);
+      showApiErrorToast(error);
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });

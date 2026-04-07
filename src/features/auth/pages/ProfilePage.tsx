@@ -114,6 +114,8 @@ const ProfilePage = memo(() => {
 
   const profileForm = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     values: {
       Name: user?.name ?? "",
       PhoneNumber: user?.phoneNumber ?? "",
@@ -143,6 +145,8 @@ const ProfilePage = memo(() => {
 
   const identityForm = useForm<z.infer<typeof identitySchema>>({
     resolver: zodResolver(identitySchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     values: { NationalId: user?.nationalId ?? "" },
   });
 
@@ -150,6 +154,8 @@ const ProfilePage = memo(() => {
 
   const changePasswordForm = useForm<z.infer<typeof changePasswordSchema>>({
     resolver: zodResolver(changePasswordSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       currentPassword: "",
       newPassword: "",
@@ -161,10 +167,14 @@ const ProfilePage = memo(() => {
 
   const emailForm = useForm<z.infer<typeof emailChangeSchema>>({
     resolver: zodResolver(emailChangeSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   const confirmEmailForm = useForm<z.infer<typeof confirmEmailSchema>>({
     resolver: zodResolver(confirmEmailSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: { Email: "", otp: "" },
   });
 
@@ -206,11 +216,20 @@ const ProfilePage = memo(() => {
     });
   });
 
-  const handleChangePassword = changePasswordForm.handleSubmit((d) => {
-    changePassword.mutate(d, {
+  const handleChangePassword = changePasswordForm.handleSubmit(
+    (d: z.output<typeof changePasswordSchema>) => {
+    changePassword.mutate(
+      {
+        currentPassword: d.currentPassword!,
+        newPassword: d.newPassword!,
+        confirmNewPassword: d.confirmNewPassword!,
+      },
+      {
       onSuccess: () => changePasswordForm.reset(),
-    });
-  });
+      },
+    );
+    },
+  );
 
   const handleEmailInitiate = emailForm.handleSubmit((d) => {
     setPendingEmail(d.Email);

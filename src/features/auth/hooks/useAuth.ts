@@ -133,6 +133,7 @@ export function useLogout() {
       toast.success("Logged out successfully.");
       navigate("/login");
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -143,6 +144,7 @@ export function useForgotPassword() {
       authService.forgotPassword(data),
     onSuccess: () =>
       toast.success("OTP sent to your email. Please check your inbox."),
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -164,6 +166,7 @@ export function useResetPassword() {
       toast.success("Password reset successfully!");
       navigate("/login");
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -177,6 +180,7 @@ export function useUpdateProfile() {
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
       toast.success("Profile updated!");
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -190,6 +194,7 @@ export function useVerifyIdentity() {
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
       toast.success("Identity verification submitted!");
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -224,6 +229,7 @@ export function useInitiateEmailChange() {
     mutationFn: (data: InitiateEmailChangeRequest) =>
       authService.initiateEmailChange(data),
     onSuccess: () => toast.success("Verification code sent to your new email."),
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -237,6 +243,7 @@ export function useConfirmEmailChange() {
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
       toast.success("Email changed successfully!");
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 

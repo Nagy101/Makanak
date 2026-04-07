@@ -6,6 +6,7 @@ import type {
   UpdatePropertyStatusRequest,
   AdminPropertySearchParams,
 } from "./admin.types";
+import { showApiErrorToast } from "@/lib/apiError";
 
 // ── Users ──
 export function useAdminUsers(params: AdminUserSearchParams) {
@@ -26,6 +27,7 @@ export function useUpdateUserStatus() {
       qc.invalidateQueries({ queryKey: ["admin", "users"] });
       qc.invalidateQueries({ queryKey: ["admin", "stats"] });
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -50,6 +52,7 @@ export function useAddStrike() {
         queryKey: ["admin", "users", userId, "verification-details"],
       });
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -63,6 +66,7 @@ export function useRemoveStrike() {
         queryKey: ["admin", "users", userId, "verification-details"],
       });
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 
@@ -76,6 +80,7 @@ export function useUpdatePropertyStatus() {
       qc.invalidateQueries({ queryKey: ["property"] });
       qc.invalidateQueries({ queryKey: ["admin", "properties"] });
     },
+    onError: (error) => showApiErrorToast(error),
   });
 }
 

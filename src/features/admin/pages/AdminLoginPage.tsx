@@ -47,6 +47,8 @@ const AdminLoginPage = memo(() => {
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: { email: "", password: "" },
   });
 
