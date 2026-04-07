@@ -40,6 +40,12 @@ const Footer = memo(function Footer() {
             <span dir="ltr">0106 805 7499</span>
           </div>
 
+          {/* Address for Paymob Compliance */}
+          <div className="flex items-start gap-2 text-sm">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+            <span className="leading-relaxed">{t("footer.address")}</span>
+          </div>
+
           {/* Social links */}
           <div className="flex gap-3 mt-1">
             <a
