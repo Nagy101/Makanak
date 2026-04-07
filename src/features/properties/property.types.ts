@@ -1,3 +1,5 @@
+import type { PropertySortValue } from "@/constants/sortOptions";
+
 // ── Search / Filter Params ──
 export interface PropertySearchParams {
   Type?: string;
@@ -12,7 +14,7 @@ export interface PropertySearchParams {
   PageIndex?: number;
   PageSize?: number;
   Search?: string;
-  Sort?: number;  // Numeric Sort ID matching backend SortingOptionsEnum
+  Sort?: PropertySortValue;
   Latitude?: number;
   Longitude?: number;
   MaxDistance?: number;

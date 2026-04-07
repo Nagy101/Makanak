@@ -16,6 +16,14 @@ export interface PaymentIntentData {
   status: string;
 }
 
+// ── Mock Payment Completion Data (temporary testing flow) ──
+export interface MockPaymentData {
+  bookingId: number;
+  paymentIntentId: string;
+  clientSecret: string;
+  status: string;
+}
+
 // ── QR Scan Request ──
 export interface ScanQrRequest {
   qrCode: string;

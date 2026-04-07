@@ -1,7 +1,6 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -9,15 +8,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useCreatePaymentIntent } from "../usePayment";
 import CheckoutForm from "./CheckoutForm";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
-
-// Stripe publishable key — safe to store in client code
-const STRIPE_PK = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
-const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
 
 interface PaymentModalProps {
   bookingId: number | null;
@@ -28,44 +20,59 @@ interface PaymentModalProps {
 const PaymentModal = memo(
   ({ bookingId, open, onOpenChange }: PaymentModalProps) => {
     const { t } = useTranslation();
-    const mutation = useCreatePaymentIntent();
+    const navigate = useNavigate();
     const qc = useQueryClient();
 
-    // Trigger payment intent creation when modal opens
-    useEffect(() => {
-      if (open && bookingId && !mutation.data && !mutation.isPending) {
-        mutation.mutate(bookingId);
-      }
-      // Reset when modal closes
-      if (!open) {
-        mutation.reset();
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, bookingId]);
-
-    const handleSuccess = useCallback(() => {
+    const handleSuccess = useCallback((paidBookingId: number) => {
       qc.invalidateQueries({ queryKey: ["bookings"] });
-      setTimeout(() => onOpenChange(false), 2000);
-    }, [qc, onOpenChange]);
+      onOpenChange(false);
+      navigate("/my-bookings", {
+        replace: true,
+        state: { openBookingId: paidBookingId },
+      });
+    }, [qc, onOpenChange, navigate]);
 
-    const intentData = mutation.data?.isSuccess ? mutation.data.data : null;
-
-    const stripeOptions = useMemo(
-      () =>
-        intentData?.clientSecret
-          ? {
-              clientSecret: intentData.clientSecret,
-              appearance: {
-                theme: "stripe" as const,
-                variables: {
-                  colorPrimary: "hsl(210 75% 42%)",
-                  borderRadius: "0.75rem",
-                },
-              },
-            }
-          : null,
-      [intentData?.clientSecret],
-    );
+    // TODO: Uncomment this block when the real payment gateway is integrated.
+    // Stripe publishable key — safe to store in client code
+    // const STRIPE_PK = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
+    // const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
+    // const mutation = useCreatePaymentIntent();
+    //
+    // // Trigger payment intent creation when modal opens
+    // useEffect(() => {
+    //   if (open && bookingId && !mutation.data && !mutation.isPending) {
+    //     mutation.mutate(bookingId);
+    //   }
+    //   // Reset when modal closes
+    //   if (!open) {
+    //     mutation.reset();
+    //   }
+    //   // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [open, bookingId]);
+    //
+    // const handleSuccess = useCallback(() => {
+    //   qc.invalidateQueries({ queryKey: ["bookings"] });
+    //   setTimeout(() => onOpenChange(false), 2000);
+    // }, [qc, onOpenChange]);
+    //
+    // const intentData = mutation.data?.isSuccess ? mutation.data.data : null;
+    //
+    // const stripeOptions = useMemo(
+    //   () =>
+    //     intentData?.clientSecret
+    //       ? {
+    //           clientSecret: intentData.clientSecret,
+    //           appearance: {
+    //             theme: "stripe" as const,
+    //             variables: {
+    //               colorPrimary: "hsl(210 75% 42%)",
+    //               borderRadius: "0.75rem",
+    //             },
+    //           },
+    //         }
+    //       : null,
+    //   [intentData?.clientSecret],
+    // );
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -73,37 +80,17 @@ const PaymentModal = memo(
           <DialogHeader>
             <DialogTitle>{t("payment.completePayment")}</DialogTitle>
             <DialogDescription>
-              {intentData
-                ? t("payment.totalAmount", {
-                    amount: intentData.totalAmount.toLocaleString(),
-                  })
-                : t("payment.initializingPayment")}
+              {t("payment.initializingPayment")}
             </DialogDescription>
           </DialogHeader>
 
-          {!stripePromise ? (
+          {bookingId ? (
+            <CheckoutForm bookingId={bookingId} onSuccess={handleSuccess} />
+          ) : (
             <div className="py-8 text-center text-sm text-destructive">
-              {t("payment.stripeNotConfigured")}
+              {t("payment.failedToInitialize")}
             </div>
-          ) : mutation.isPending ? (
-            <div className="space-y-4 py-6">
-              <Skeleton className="h-12 w-full rounded-lg" />
-              <Skeleton className="h-12 w-full rounded-lg" />
-              <Skeleton className="h-12 w-full rounded-lg" />
-            </div>
-          ) : mutation.isError ||
-            (mutation.data && !mutation.data.isSuccess) ? (
-            <div className="py-8 text-center text-sm text-destructive">
-              {mutation.data?.message || t("payment.failedToInitialize")}
-            </div>
-          ) : stripeOptions ? (
-            <Elements stripe={stripePromise} options={stripeOptions}>
-              <CheckoutForm
-                totalAmount={intentData!.totalAmount}
-                onSuccess={handleSuccess}
-              />
-            </Elements>
-          ) : null}
+          )}
         </DialogContent>
       </Dialog>
     );
