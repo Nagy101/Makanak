@@ -9,10 +9,24 @@ import type {
   UpdateUserStatusRequest,
   UpdatePropertyStatusRequest,
   UserVerificationDetails,
-  AdminPropertyListing,
+  AdminPropertyDto,
+  AdminPropertyDetailDto,
   AdminPropertySearchParams,
   StrikeApiResponse,
 } from "./admin.types";
+
+interface ApiResponseWithResult<T> {
+  statusCode: number;
+  isSuccess: boolean;
+  message?: string;
+  data?: T;
+  result: T;
+  errors?: string[] | null;
+}
+
+function unwrapPayload<T>(envelope: ApiResponseWithResult<T>): T {
+  return (envelope.result ?? envelope.data) as T;
+}
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -66,6 +80,21 @@ export const removeStrike = (userId: string) =>
 export const getAdminProperties = (params: AdminPropertySearchParams) =>
   api
     .get<
-      AdminApiResponse<PaginatedData<AdminPropertyListing>>
+      ApiResponseWithResult<PaginatedData<AdminPropertyDto>>
     >("/Property/admin-all", { params })
-    .then((r) => r.data.data);
+    .then((r) => {
+      const paginated = unwrapPayload(r.data);
+
+      return {
+        ...paginated,
+        data: Array.isArray(paginated?.data) ? paginated.data : [],
+        totalCount: Number(paginated?.totalCount ?? 0),
+      };
+    });
+
+export const getAdminPropertyById = (id: number) =>
+  api
+    .get<ApiResponseWithResult<AdminPropertyDetailDto>>(
+      `/Property/admin/${id}`,
+    )
+    .then((r) => unwrapPayload(r.data));

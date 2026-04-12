@@ -94,6 +94,40 @@ export interface AdminPropertyListing {
   isAvailable: boolean;
 }
 
+export interface AdminPropertyOwnerInfo {
+  ownerName: string;
+  ownerEmail: string;
+  ownerPhoneNumber: string;
+}
+
+// DTO returned from api/AdminProperty/admin-all
+export interface AdminPropertyDto
+  extends AdminPropertyListing,
+    AdminPropertyOwnerInfo {}
+
+// DTO returned from api/AdminProperty/admin/{id}
+export interface AdminPropertyDetailDto
+  extends AdminPropertyDto {
+  description: string;
+  area: number;
+  bedrooms: number;
+  bathrooms: number;
+  maxGuests: number;
+  address: string;
+  areaName: string;
+  propertyImages: Array<{
+    id: number;
+    imageUrl: string;
+  }>;
+  amenities: Array<{
+    id: number;
+    name?: string;
+    nameEn?: string;
+    nameAr?: string;
+    icon?: string;
+  }>;
+}
+
 export interface AdminPropertySearchParams {
   Status?: PropertyStatus;
   Type?: string;

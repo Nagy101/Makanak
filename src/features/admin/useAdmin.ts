@@ -93,3 +93,12 @@ export function useAdminProperties(params: AdminPropertySearchParams) {
     staleTime: 30 * 1000,
   });
 }
+
+export function useAdminPropertyDetails(propertyId: number | null) {
+  return useQuery({
+    queryKey: ["admin", "properties", propertyId, "details"],
+    queryFn: () => adminService.getAdminPropertyById(propertyId!),
+    enabled: !!propertyId,
+    staleTime: 60 * 1000,
+  });
+}

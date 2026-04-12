@@ -37,7 +37,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useProperties } from "@/features/properties/useProperties";
 import { useUpdatePropertyStatus, useAdminProperties } from "../useAdmin";
 import {
   usePropertyTypes,
@@ -47,12 +46,8 @@ import {
 } from "@/features/lookup";
 import PropertyDetailsModal from "../components/PropertyDetailsModal";
 import type {
-  PropertySearchParams,
-  PropertyListing,
-} from "@/features/properties/property.types";
-import type {
   AdminPropertySearchParams,
-  AdminPropertyListing,
+  AdminPropertyDto,
   PropertyStatus,
 } from "../admin.types";
 import { toast } from "sonner";
@@ -155,7 +150,7 @@ const AdminPropertiesPage = memo(() => {
         { onSuccess: () => toast.success(t("admin.propertyApproved")) },
       );
     },
-    [mutation],
+    [mutation, t],
   );
 
   const handleRejectSubmit = useCallback(() => {
@@ -174,7 +169,7 @@ const AdminPropertiesPage = memo(() => {
         },
       },
     );
-  }, [rejectTarget, rejectReason, mutation]);
+  }, [rejectTarget, rejectReason, mutation, t]);
 
   const handlePageChange = useCallback((dir: 1 | -1) => {
     setParams((p) => ({ ...p, PageIndex: (p.PageIndex ?? 1) + dir }));
@@ -280,6 +275,12 @@ const AdminPropertiesPage = memo(() => {
                 <TableHead className="hidden sm:table-cell">
                   {t("admin.typeColumn")}
                 </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  {t("admin.ownerNameColumn")}
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">
+                  {t("admin.ownerEmailColumn")}
+                </TableHead>
                 <TableHead>{t("admin.priceNightColumn")}</TableHead>
                 <TableHead>{t("admin.statusColumn")}</TableHead>
                 <TableHead className="hidden md:table-cell">
@@ -294,13 +295,19 @@ const AdminPropertiesPage = memo(() => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.data.map((p: AdminPropertyListing) => (
+              {data.data.map((p: AdminPropertyDto) => (
                 <TableRow key={p.id}>
                   <TableCell className="font-medium max-w-[200px] truncate">
                     {p.title}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground text-xs">
                     {p.propertyType}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell text-muted-foreground text-xs">
+                    {p.ownerName || t("admin.notProvided")}
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell text-muted-foreground text-xs max-w-[220px] truncate">
+                    {p.ownerEmail || t("admin.notProvided")}
                   </TableCell>
                   <TableCell className="font-semibold">
                     {p.pricePerNight} EGP
