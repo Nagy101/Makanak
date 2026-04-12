@@ -10,6 +10,9 @@ import {
   Bed,
   Bath,
   Loader2,
+  User,
+  Mail,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,8 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useProperty } from "@/features/properties/useProperties";
-import { useUpdatePropertyStatus } from "../useAdmin";
+import { useAdminPropertyDetails, useUpdatePropertyStatus } from "../useAdmin";
 import type { PropertyStatus } from "../admin.types";
 import { toast } from "sonner";
 
@@ -50,7 +52,7 @@ const PropertyDetailsModal = memo<PropertyDetailsModalProps>(
   ({ propertyId, onClose }) => {
     const { t } = useTranslation();
     const localized = useLocalizedField();
-    const { data: property, isLoading } = useProperty(propertyId);
+    const { data: property, isLoading } = useAdminPropertyDetails(propertyId);
     const mutation = useUpdatePropertyStatus();
     const [newStatus, setNewStatus] = useState<PropertyStatus | "">("");
     const [rejectionReason, setRejectionReason] = useState("");
@@ -240,6 +242,44 @@ const PropertyDetailsModal = memo<PropertyDetailsModalProps>(
                   </div>
                 </div>
               )}
+
+              {/* Owner Profile */}
+              <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
+                <p className="text-sm font-medium text-foreground">
+                  {t("admin.ownerProfile")}
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">
+                      {t("admin.ownerNameColumn")}
+                    </p>
+                    <p className="text-sm font-medium flex items-center gap-1">
+                      <User className="h-4 w-4 text-primary" />
+                      {property.ownerName || t("admin.notProvided")}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">
+                      {t("admin.ownerEmailColumn")}
+                    </p>
+                    <p className="text-sm font-medium flex items-center gap-1 break-all">
+                      <Mail className="h-4 w-4 text-primary" />
+                      {property.ownerEmail || t("admin.notProvided")}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1 sm:col-span-2">
+                    <p className="text-xs text-muted-foreground">
+                      {t("admin.ownerPhoneColumn")}
+                    </p>
+                    <p className="text-sm font-medium flex items-center gap-1">
+                      <Phone className="h-4 w-4 text-primary" />
+                      {property.ownerPhoneNumber || t("admin.notProvided")}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               <Separator />
 
