@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import { useEffect } from "react";
 import * as authService from "../auth.service";
 import { useAuthStore } from "../store/authStore";
 import { showApiErrorToast } from "@/lib/apiError";
+import { showErrorMessage, showSuccessMessage } from "@/lib/appMessage";
 
 import type {
   LoginRequest,
@@ -73,7 +73,7 @@ export function useLogin() {
         ) {
           clearAuth();
           qc.clear();
-          toast.error("Your account has been banned. Please contact support.");
+          showErrorMessage("messages.accountBannedContactSupport");
           return;
         }
 
@@ -87,17 +87,17 @@ export function useLogin() {
           clearAuth();
           qc.clear();
           // Security: intentionally generic message for admin accounts
-          toast.error("Invalid email or password.");
+          showErrorMessage("messages.invalidEmailOrPassword");
           return;
         }
 
-        toast.success("Welcome back!");
+        showSuccessMessage("messages.welcomeBack");
         if (role === "owner") navigate("/owner", { replace: true });
         else navigate("/", { replace: true });
       } catch (error) {
         // If profile fetch fails, still navigate home
         console.error("Failed to fetch profile:", error);
-        toast.success("Welcome back!");
+        showSuccessMessage("messages.welcomeBack");
         navigate("/", { replace: true });
       }
     },
@@ -113,7 +113,7 @@ export function useRegister() {
     mutationFn: (data: RegisterRequest) => authService.register(data),
     onSuccess: (res: AuthResponse) => {
       setAuth(res.user, res.token);
-      toast.success("Account created successfully!");
+      showSuccessMessage("messages.accountCreatedSuccessfully");
       navigate("/profile");
     },
     onError: (error) => showApiErrorToast(error),
@@ -130,7 +130,7 @@ export function useLogout() {
     onSuccess: () => {
       clearAuth();
       qc.clear();
-      toast.success("Logged out successfully.");
+      showSuccessMessage("messages.loggedOutSuccessfully");
       navigate("/login");
     },
     onError: (error) => showApiErrorToast(error),
@@ -143,7 +143,7 @@ export function useForgotPassword() {
     mutationFn: (data: ForgotPasswordRequest) =>
       authService.forgotPassword(data),
     onSuccess: () =>
-      toast.success("OTP sent to your email. Please check your inbox."),
+      showSuccessMessage("messages.otpSentToEmail"),
     onError: (error) => showApiErrorToast(error),
   });
 }
@@ -152,7 +152,7 @@ export function useForgotPassword() {
 export function useVerifyOtp() {
   return useMutation({
     mutationFn: (data: VerifyOtpRequest) => authService.verifyOtp(data),
-    onSuccess: () => toast.success("OTP verified!"),
+    onSuccess: () => showSuccessMessage("messages.otpVerified"),
     onError: (error) => showApiErrorToast(error),
   });
 }
@@ -163,7 +163,7 @@ export function useResetPassword() {
   return useMutation({
     mutationFn: (data: ResetPasswordRequest) => authService.resetPassword(data),
     onSuccess: () => {
-      toast.success("Password reset successfully!");
+      showSuccessMessage("messages.passwordResetSuccessfully");
       navigate("/login");
     },
     onError: (error) => showApiErrorToast(error),
@@ -178,7 +178,7 @@ export function useUpdateProfile() {
     onSuccess: (user: User) => {
       useAuthStore.getState().setUser(user);
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
-      toast.success("Profile updated!");
+      showSuccessMessage("messages.profileUpdated");
     },
     onError: (error) => showApiErrorToast(error),
   });
@@ -192,7 +192,7 @@ export function useVerifyIdentity() {
       authService.verifyIdentity(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
-      toast.success("Identity verification submitted!");
+      showSuccessMessage("messages.identityVerificationSubmitted");
     },
     onError: (error) => showApiErrorToast(error),
   });
@@ -217,7 +217,7 @@ export function useChangePassword() {
           d.token,
         );
       }
-      toast.success(res.message);
+      showSuccessMessage(res.message);
     },
     onError: (error) => showApiErrorToast(error),
   });
@@ -228,7 +228,7 @@ export function useInitiateEmailChange() {
   return useMutation({
     mutationFn: (data: InitiateEmailChangeRequest) =>
       authService.initiateEmailChange(data),
-    onSuccess: () => toast.success("Verification code sent to your new email."),
+    onSuccess: () => showSuccessMessage("messages.verificationCodeSentToNewEmail"),
     onError: (error) => showApiErrorToast(error),
   });
 }
@@ -241,7 +241,7 @@ export function useConfirmEmailChange() {
       authService.confirmEmailChange(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
-      toast.success("Email changed successfully!");
+      showSuccessMessage("messages.emailChangedSuccessfully");
     },
     onError: (error) => showApiErrorToast(error),
   });
@@ -264,7 +264,7 @@ export function useBannedUserCheck() {
       userStatus === "suspended" ||
       userStatus === "deactivated"
     ) {
-      toast.error("Your account has been banned. Please contact support.", {
+      showErrorMessage("messages.accountBannedContactSupport", {
         duration: 5000,
       });
       clearAuth();

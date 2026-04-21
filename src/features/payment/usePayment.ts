@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPaymentIntent, payBooking, scanQrCode } from "./payment.service";
 import type { MockPaymentData, ScanQrRequest } from "./payment.types";
-import { toast } from "sonner";
 import { showApiErrorToast } from "@/lib/apiError";
+import { showSuccessMessage } from "@/lib/appMessage";
 
 /** Tenant: create a Stripe payment intent for a booking */
 export const useCreatePaymentIntent = () => {
@@ -26,7 +26,7 @@ export const useScanQrCode = () => {
   return useMutation({
     mutationFn: (data: ScanQrRequest) => scanQrCode(data),
     onSuccess: (res) => {
-      toast.success(res.message || "Check-in confirmed!");
+      showSuccessMessage(res.message || "messages.checkInConfirmed");
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
     onError: (error) => showApiErrorToast(error),

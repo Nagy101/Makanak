@@ -4,11 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate, useLocation } from "react-router-dom";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { showErrorMessage, showSuccessMessage } from "@/lib/appMessage";
 import { Calendar, Users, LogIn, ShieldCheck } from "lucide-react";
 import { useCreateBooking } from "../useBookings";
 import { useAuthStore } from "@/features/auth/store/authStore";
@@ -72,19 +72,39 @@ const CreateBookingWidget = memo(
     const onSubmit = useCallback(
       (data: BookingForm) => {
         if (!isAuthenticated) {
-          toast.error(t("auth.loginToPerformAction"));
+          showErrorMessage("auth.loginToPerformAction");
           navigate("/login", { state: { from: location.pathname } });
           return;
         }
-        createBooking.mutate({
-          propertyId,
-          checkInDate: new Date(data.checkInDate).toISOString(),
-          checkOutDate: new Date(data.checkOutDate).toISOString(),
-          numberOfGuests: data.numberOfGuests,
-          specialRequests: data.specialRequests || undefined,
-        });
+        createBooking.mutate(
+          {
+            propertyId,
+            checkInDate: new Date(data.checkInDate).toISOString(),
+            checkOutDate: new Date(data.checkOutDate).toISOString(),
+            numberOfGuests: data.numberOfGuests,
+            specialRequests: data.specialRequests || undefined,
+          },
+          {
+            onSuccess: () => {
+              showSuccessMessage("bookings.requestPendingOwnerReview", {
+                duration: 2000,
+              });
+
+              window.setTimeout(() => {
+                navigate("/my-bookings");
+              }, 2000);
+            },
+          },
+        );
       },
-      [propertyId, createBooking, isAuthenticated, navigate, location.pathname],
+      [
+        propertyId,
+        createBooking,
+        isAuthenticated,
+        navigate,
+        location.pathname,
+        t,
+      ],
     );
 
     const today = new Date().toISOString().split("T")[0];

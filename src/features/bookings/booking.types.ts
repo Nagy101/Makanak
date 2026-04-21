@@ -57,6 +57,7 @@ export interface TenantBookingDetails {
   propertyId: number;
   propertyName: string;
   propertyMainImage: string;
+  propertyImages?: { id: number; imageUrl: string }[];
   ownerPhoneNumber: string | null;
   exactLocationUrl: string | null;
   checkInInstructions: string | null;
@@ -80,8 +81,8 @@ export interface OwnerBookingDetails {
   id: number;
   propertyId: number;
   propertyName: string;
-  tenantName: string;
-  tenantImage: string;
+  tenantName: string | null;
+  tenantImage: string | null;
   tenantPhoneNumber: string | null;
   tenantIdentityImage: string | null;
   checkInDate: string;

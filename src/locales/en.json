@@ -36,6 +36,37 @@
     "reviews": "Reviews"
   },
 
+  "messages": {
+    "accountBannedContactSupport": "Your account has been banned. Please contact support.",
+    "invalidEmailOrPassword": "Invalid email or password.",
+    "welcomeBack": "Welcome back!",
+    "accountCreatedSuccessfully": "Account created successfully!",
+    "loggedOutSuccessfully": "Logged out successfully.",
+    "otpSentToEmail": "OTP sent to your email. Please check your inbox.",
+    "otpVerified": "OTP verified!",
+    "passwordResetSuccessfully": "Password reset successfully!",
+    "profileUpdated": "Profile updated!",
+    "identityVerificationSubmitted": "Identity verification submitted!",
+    "verificationCodeSentToNewEmail": "Verification code sent to your new email.",
+    "emailChangedSuccessfully": "Email changed successfully!",
+    "propertyCreatedSuccessfully": "Property created successfully!",
+    "propertyUpdatedSuccessfully": "Property updated successfully!",
+    "propertyDeleted": "Property deleted.",
+    "paymentSuccessfulTestMode": "Payment successful (Test Mode)",
+    "bookingCancelled": "Booking cancelled.",
+    "bookingStatusUpdated": "Booking status updated.",
+    "reviewSubmittedSuccessfully": "Review submitted successfully!",
+    "reviewDeleted": "Review deleted.",
+    "checkInConfirmed": "Check-in confirmed!",
+    "disputeCreatedSuccessfully": "Dispute created successfully.",
+    "disputeResolved": "Dispute resolved.",
+    "disputeCancelled": "Dispute cancelled.",
+    "sessionExpiredLoginAgain": "Session expired. Please log in again.",
+    "networkErrorCheckConnection": "Network error. Please check your connection and try again.",
+    "unexpectedError": "An unexpected error occurred.",
+    "fileTooLarge": "\"{{fileName}}\" is too large. Maximum allowed size is {{limitMB}} MB."
+  },
+
   "nav": {
     "browseProperties": "Browse Properties",
     "myBookings": "My Bookings",
@@ -372,6 +403,7 @@
     "rejectBooking": "Reject",
     "openDispute": "Open Dispute",
     "identityDocument": "Identity Document",
+    "hiddenUntilPaymentConfirmed": "Hidden until payment is confirmed",
     "somethingWentWrong": "Something went wrong loading this booking.",
     "pleaseCloseAndTry": "Please close and try again.",
     "checkinQrScanned": "Check-in QR Scanned",
@@ -383,6 +415,7 @@
     "processing": "Processing...",
     "bookNow": "Book Now",
     "loginToBook": "Login to Book",
+    "requestPendingOwnerReview": "Booking request sent successfully! It is now pending the owner's review.",
     "wontBeChargedYet": "You won't be charged yet",
     "filterByStatus": "Filter by status"
   },

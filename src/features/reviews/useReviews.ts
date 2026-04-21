@@ -16,8 +16,8 @@ import {
 } from '@tanstack/react-query';
 import * as reviewService from './review.service';
 import type { CreateReviewRequest, Review } from './review.types';
-import { toast } from 'sonner';
 import { showApiErrorToast } from '@/lib/apiError';
+import { showSuccessMessage } from '@/lib/appMessage';
 
 // ── Constants ─────────────────────────────────────────────────
 const PAGE_SIZE = 5;
@@ -76,7 +76,7 @@ export const useCreateReview = (propertyId: number) => {
   return useMutation({
     mutationFn: (data: CreateReviewRequest) => reviewService.createReview(data),
     onSuccess: (res) => {
-      toast.success(res.message || 'Review submitted successfully!');
+      showSuccessMessage(res.message || 'messages.reviewSubmittedSuccessfully');
       // Invalidate only the reviews for this specific property
       qc.invalidateQueries({ queryKey: reviewKeys.property(propertyId) });
     },
@@ -95,7 +95,7 @@ export const useDeleteReview = (propertyId: number) => {
   return useMutation({
     mutationFn: (reviewId: number) => reviewService.deleteReview(reviewId),
     onSuccess: (res) => {
-      toast.success(res.message || 'Review deleted.');
+      showSuccessMessage(res.message || 'messages.reviewDeleted');
       qc.invalidateQueries({ queryKey: reviewKeys.property(propertyId) });
     },
     onError: (error) => showApiErrorToast(error),

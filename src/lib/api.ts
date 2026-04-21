@@ -22,9 +22,10 @@
  */
 
 import axios, { type AxiosInstance } from "axios";
-import { toast } from "sonner";
 import { storage } from "./storage";
 import { ApiError, parseApiError } from "./apiTypes";
+import i18n from "@/lib/i18n";
+import { showErrorMessage } from "@/lib/appMessage";
 
 // ── Centralised base URL from environment ─────────────────────
 // Strips any trailing slash to prevent double-slash in URLs.
@@ -65,7 +66,7 @@ export function setupResponseInterceptor(instance: AxiosInstance): void {
         return Promise.reject(
           new ApiError(
             0,
-            "Network error. Please check your connection and try again.",
+            i18n.t("messages.networkErrorCheckConnection"),
             null,
           ),
         );
@@ -94,8 +95,8 @@ export function setupResponseInterceptor(instance: AxiosInstance): void {
 
         // 3. Show the API's message (fall back only if absent)
         const authMessage =
-          data?.message || "Session expired. Please log in again.";
-        toast.error(authMessage);
+          data?.message || i18n.t("messages.sessionExpiredLoginAgain");
+        showErrorMessage(authMessage);
 
         // 4. Hard redirect — safe even outside React Router context
         window.location.href = "/login";

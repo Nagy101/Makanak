@@ -1,9 +1,8 @@
 import { ReactNode, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useProfile } from "@/features/auth/hooks/useAuth";
+import { showErrorMessage } from "@/lib/appMessage";
 
 interface Props {
   children: ReactNode;
@@ -15,7 +14,6 @@ interface Props {
  * Completely independent from AuthGuard (which is admin-only).
  */
 export default function OwnerGuard({ children }: Props) {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const token = useAuthStore((s) => s.token);
@@ -29,7 +27,7 @@ export default function OwnerGuard({ children }: Props) {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      toast.error(t("guards.pleaseLogIn"));
+      showErrorMessage("guards.pleaseLogIn");
       navigate("/login", { replace: true, state: { from: location.pathname } });
       return;
     }
@@ -37,7 +35,7 @@ export default function OwnerGuard({ children }: Props) {
     if (profileLoading) return;
 
     if (user && !isOwner) {
-      toast.error(t("guards.accessDenied"));
+      showErrorMessage("guards.accessDenied");
       navigate("/", { replace: true });
     }
   }, [isAuthenticated, isOwner, user, navigate, location, profileLoading]);

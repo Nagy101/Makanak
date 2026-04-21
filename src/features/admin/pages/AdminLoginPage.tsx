@@ -16,13 +16,13 @@ import { useState, useCallback, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import * as authService from "@/features/auth/auth.service";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import type { LoginRequest } from "@/features/auth/auth.types";
+import { showErrorMessage } from "@/lib/appMessage";
 
 const schema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email"),
@@ -30,10 +30,9 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-const GENERIC_ERROR = "Invalid email or password.";
-
 const AdminLoginPage = memo(() => {
   const { t } = useTranslation();
+  const genericError = t("messages.invalidEmailOrPassword");
   const [showPw, setShowPw] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -60,7 +59,7 @@ const AdminLoginPage = memo(() => {
       } catch {
         // Discard the real error — prevents TanStack Query / interceptors
         // from leaking backend messages (e.g. "User not found")
-        throw new Error(GENERIC_ERROR);
+        throw new Error(genericError);
       }
     },
     onSuccess: async (res) => {
@@ -74,8 +73,8 @@ const AdminLoginPage = memo(() => {
           // Non-admin credentials — block and show generic error
           clearAuth();
           qc.clear();
-          setFormError(GENERIC_ERROR);
-          toast.error(GENERIC_ERROR);
+          setFormError(genericError);
+          showErrorMessage("messages.invalidEmailOrPassword");
           return;
         }
 
@@ -84,12 +83,12 @@ const AdminLoginPage = memo(() => {
       } catch {
         clearAuth();
         qc.clear();
-        setFormError(GENERIC_ERROR);
-        toast.error(GENERIC_ERROR);
+        setFormError(genericError);
+        showErrorMessage("messages.invalidEmailOrPassword");
       }
     },
     onError: () => {
-      setFormError(GENERIC_ERROR);
+      setFormError(genericError);
     },
   });
 

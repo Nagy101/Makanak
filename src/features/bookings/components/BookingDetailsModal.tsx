@@ -1,4 +1,13 @@
-import { memo, useCallback, lazy, Suspense, Component } from "react";
+import {
+  memo,
+  useCallback,
+  lazy,
+  Suspense,
+  Component,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "i18next";
@@ -129,6 +138,23 @@ const TenantBookingContent = memo(
     isCancelling,
   }: TenantContentProps) => {
     const { t } = useTranslation();
+    const [activeImage, setActiveImage] = useState(
+      toUrl(booking.propertyMainImage),
+    );
+
+    useEffect(() => {
+      setActiveImage(toUrl(booking.propertyMainImage));
+    }, [booking.propertyMainImage]);
+
+    const galleryImages = useMemo(() => {
+      const images = [
+        toUrl(booking.propertyMainImage),
+        ...(booking.propertyImages ?? []).map((image) => toUrl(image.imageUrl)),
+      ];
+
+      return images.filter((image, index) => images.indexOf(image) === index);
+    }, [booking.propertyMainImage, booking.propertyImages]);
+
     const canCancel = ["PendingOwnerApproval", "PendingPayment"].includes(
       booking.status,
     );
@@ -161,17 +187,49 @@ const TenantBookingContent = memo(
 
     return (
       <div className="space-y-5 py-2">
-        {/* Property image */}
-        <div className="rounded-lg overflow-hidden bg-muted aspect-video">
-          <img
-            src={toUrl(booking.propertyMainImage)}
-            alt={booking.propertyName}
-            className="h-full w-full object-cover"
-            loading="lazy"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "/placeholder.svg";
-            }}
-          />
+        {/* Property gallery */}
+        <div className="space-y-3">
+          <div className="rounded-lg overflow-hidden bg-muted aspect-video">
+            <img
+              src={activeImage}
+              alt={booking.propertyName}
+              className="h-full w-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/placeholder.svg";
+              }}
+            />
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
+            {galleryImages.map((image, index) => {
+              const isActive = image === activeImage;
+
+              return (
+                <button
+                  key={`${image}-${index}`}
+                  type="button"
+                  onClick={() => setActiveImage(image)}
+                  aria-label={`${booking.propertyName} image ${index + 1}`}
+                  className={`h-16 w-20 shrink-0 overflow-hidden rounded-md transition ${
+                    isActive
+                      ? "ring-2 ring-blue-500"
+                      : "opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <img
+                    src={image}
+                    alt={`${booking.propertyName} thumbnail ${index + 1}`}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/placeholder.svg";
+                    }}
+                  />
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Title + status */}
