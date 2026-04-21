@@ -36,6 +36,37 @@
     "reviews": "التقييمات"
   },
 
+  "messages": {
+    "accountBannedContactSupport": "تم حظر حسابك. يرجى التواصل مع الدعم.",
+    "invalidEmailOrPassword": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "welcomeBack": "مرحباً بعودتك!",
+    "accountCreatedSuccessfully": "تم إنشاء الحساب بنجاح!",
+    "loggedOutSuccessfully": "تم تسجيل الخروج بنجاح.",
+    "otpSentToEmail": "تم إرسال رمز التحقق إلى بريدك الإلكتروني. يرجى التحقق من صندوق الوارد.",
+    "otpVerified": "تم التحقق من الرمز بنجاح!",
+    "passwordResetSuccessfully": "تمت إعادة تعيين كلمة المرور بنجاح!",
+    "profileUpdated": "تم تحديث الملف الشخصي!",
+    "identityVerificationSubmitted": "تم إرسال طلب توثيق الهوية!",
+    "verificationCodeSentToNewEmail": "تم إرسال رمز التحقق إلى بريدك الإلكتروني الجديد.",
+    "emailChangedSuccessfully": "تم تغيير البريد الإلكتروني بنجاح!",
+    "propertyCreatedSuccessfully": "تم إنشاء العقار بنجاح!",
+    "propertyUpdatedSuccessfully": "تم تحديث العقار بنجاح!",
+    "propertyDeleted": "تم حذف العقار.",
+    "paymentSuccessfulTestMode": "تم الدفع بنجاح (وضع الاختبار)",
+    "bookingCancelled": "تم إلغاء الحجز.",
+    "bookingStatusUpdated": "تم تحديث حالة الحجز.",
+    "reviewSubmittedSuccessfully": "تم إرسال التقييم بنجاح!",
+    "reviewDeleted": "تم حذف التقييم.",
+    "checkInConfirmed": "تم تأكيد تسجيل الدخول!",
+    "disputeCreatedSuccessfully": "تم إنشاء النزاع بنجاح.",
+    "disputeResolved": "تم حل النزاع.",
+    "disputeCancelled": "تم إلغاء النزاع.",
+    "sessionExpiredLoginAgain": "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.",
+    "networkErrorCheckConnection": "خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
+    "unexpectedError": "حدث خطأ غير متوقع.",
+    "fileTooLarge": "\"{{fileName}}\" كبير جداً. الحد الأقصى المسموح هو {{limitMB}} ميجابايت."
+  },
+
   "nav": {
     "browseProperties": "تصفح العقارات",
     "myBookings": "حجوزاتي",
@@ -372,6 +403,7 @@
     "rejectBooking": "رفض",
     "openDispute": "فتح نزاع",
     "identityDocument": "مستند الهوية",
+    "hiddenUntilPaymentConfirmed": "يظهر بعد تأكيد الدفع",
     "somethingWentWrong": "حدث خطأ أثناء تحميل هذا الحجز.",
     "pleaseCloseAndTry": "يرجى الإغلاق والمحاولة مرة أخرى.",
     "checkinQrScanned": "تم مسح رمز QR لتسجيل الدخول",
@@ -383,6 +415,7 @@
     "processing": "جاري المعالجة...",
     "bookNow": "احجز الآن",
     "loginToBook": "سجّل الدخول للحجز",
+    "requestPendingOwnerReview": "تم إرسال طلب الحجز بنجاح! الطلب الآن في انتظار مراجعة المالك.",
     "wontBeChargedYet": "لن يتم خصم أي مبلغ الآن",
     "filterByStatus": "تصفية حسب الحالة"
   },

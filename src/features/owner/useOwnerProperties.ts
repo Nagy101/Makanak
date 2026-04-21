@@ -10,8 +10,8 @@ import type {
   CreatePropertyPayload,
   EditPropertyPayload,
 } from "./owner.types";
-import { toast } from "sonner";
 import { showApiErrorToast } from "@/lib/apiError";
+import { showSuccessMessage } from "@/lib/appMessage";
 
 const OWNER_KEY = ["owner", "properties"] as const;
 
@@ -31,7 +31,7 @@ export function useCreateProperty() {
       ownerService.createProperty(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: OWNER_KEY });
-      toast.success("Property created successfully!");
+      showSuccessMessage("messages.propertyCreatedSuccessfully");
     },
     onError: (error) => showApiErrorToast(error),
   });
@@ -51,7 +51,7 @@ export function useUpdateProperty() {
       qc.invalidateQueries({ queryKey: OWNER_KEY });
       // Invalidate the individual property detail cache so navigating back shows fresh data
       qc.invalidateQueries({ queryKey: ["property", id] });
-      toast.success("Property updated successfully!");
+      showSuccessMessage("messages.propertyUpdatedSuccessfully");
     },
     onError: (error) => showApiErrorToast(error),
   });
@@ -63,7 +63,7 @@ export function useDeleteProperty() {
     mutationFn: (id: number) => ownerService.deleteProperty(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: OWNER_KEY });
-      toast.success("Property deleted.");
+      showSuccessMessage("messages.propertyDeleted");
     },
     onError: (error) => showApiErrorToast(error),
   });

@@ -22,8 +22,9 @@
  *   onError: (error) => toast.error(getApiErrorMessage(error))
  */
 
-import { toast } from "sonner";
 import { ApiError } from "./apiTypes";
+import i18n from "@/lib/i18n";
+import { showErrorMessage } from "@/lib/appMessage";
 
 // ── File size constants ───────────────────────────────────────
 export const MAX_FILE_SIZE_MB = 5;
@@ -40,13 +41,16 @@ export function validateFileSize(
 ): string | null {
   if (file.size > maxBytes) {
     const limitMB = maxBytes / 1024 / 1024;
-    return `"${file.name}" is too large. Maximum allowed size is ${limitMB} MB.`;
+    return i18n.t("messages.fileTooLarge", {
+      fileName: file.name,
+      limitMB,
+    });
   }
   return null;
 }
 
 // ── Default fallback — only used when the API provides nothing ─
-const FALLBACK_MESSAGE = "An unexpected error occurred.";
+const FALLBACK_MESSAGE = i18n.t("messages.unexpectedError");
 
 // Keep track of errors already surfaced to users to avoid duplicate toasts
 // when both global and local handlers process the same rejection.
@@ -110,11 +114,11 @@ export function showApiErrorToast(error: unknown): void {
   const errors = getApiValidationErrors(error);
 
   if (errors?.length) {
-    toast.error(message, {
+    showErrorMessage(message, {
       description: errors.join("\n"),
     });
   } else {
-    toast.error(message);
+    showErrorMessage(message);
   }
 }
 

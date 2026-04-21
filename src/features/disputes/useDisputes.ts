@@ -10,8 +10,8 @@ import type {
   ResolveDisputeRequest,
   DisputeListParams,
 } from "./dispute.types";
-import { toast } from "sonner";
 import { showApiErrorToast } from "@/lib/apiError";
+import { showSuccessMessage } from "@/lib/appMessage";
 
 const DISPUTES_KEY = "disputes";
 
@@ -38,7 +38,7 @@ export const useCreateDispute = () => {
     mutationFn: (data: CreateDisputeRequest) =>
       disputeService.createDispute(data),
     onSuccess: (res) => {
-      toast.success(res.message || "Dispute created successfully");
+      showSuccessMessage(res.message || "messages.disputeCreatedSuccessfully");
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
     onError: (error) => showApiErrorToast(error),
@@ -52,7 +52,7 @@ export const useResolveDispute = () => {
     mutationFn: (data: ResolveDisputeRequest) =>
       disputeService.resolveDispute(data),
     onSuccess: (res) => {
-      toast.success(res.message || "Dispute resolved");
+      showSuccessMessage(res.message || "messages.disputeResolved");
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
     onError: (error) => showApiErrorToast(error),
@@ -65,7 +65,7 @@ export const useCancelDispute = () => {
   return useMutation({
     mutationFn: (id: number) => disputeService.cancelDispute(id),
     onSuccess: (res) => {
-      toast.success(res.message || "Dispute cancelled");
+      showSuccessMessage(res.message || "messages.disputeCancelled");
       qc.invalidateQueries({ queryKey: [DISPUTES_KEY] });
     },
     onError: (error) => showApiErrorToast(error),

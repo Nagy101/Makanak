@@ -44,7 +44,7 @@ import {
   useGovernorates,
   useSortingOptions,
 } from "@/features/lookup";
-import PropertyDetailsModal from "../components/PropertyDetailsModal";
+import AdminReviewModal from "../components/AdminReviewModal";
 import type {
   AdminPropertySearchParams,
   AdminPropertyDto,
@@ -398,7 +398,7 @@ const AdminPropertiesPage = memo(() => {
       )}
 
       {/* Property Details Modal */}
-      <PropertyDetailsModal
+      <AdminReviewModal
         propertyId={selectedPropertyId}
         onClose={() => setSelectedPropertyId(null)}
       />

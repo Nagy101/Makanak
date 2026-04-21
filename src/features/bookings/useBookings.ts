@@ -13,8 +13,8 @@ import type {
   CreateBookingRequest,
   UpdateBookingStatusRequest,
 } from "./booking.types";
-import { toast } from "sonner";
 import { showApiErrorToast } from "@/lib/apiError";
+import { showSuccessMessage } from "@/lib/appMessage";
 
 // ── Tenant: My Bookings ──
 export const useMyBookings = (params: BookingListParams) =>
@@ -55,8 +55,7 @@ export const useCreateBooking = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateBookingRequest) => createBooking(data),
-    onSuccess: (res) => {
-      toast.success(res.message || "Booking created successfully");
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
     onError: (error) => showApiErrorToast(error),
@@ -69,7 +68,7 @@ export const useCancelBooking = () => {
   return useMutation({
     mutationFn: (id: number) => cancelBooking(id),
     onSuccess: (res) => {
-      toast.success(res.message || "Booking cancelled");
+      showSuccessMessage(res.message || "messages.bookingCancelled");
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
     onError: (error) => showApiErrorToast(error),
@@ -88,7 +87,7 @@ export const useUpdateBookingStatus = () => {
       data: UpdateBookingStatusRequest;
     }) => updateBookingStatus(id, data),
     onSuccess: (res) => {
-      toast.success(res.message || "Booking status updated");
+      showSuccessMessage(res.message || "messages.bookingStatusUpdated");
       qc.invalidateQueries({ queryKey: ["bookings"] });
     },
     onError: (error) => showApiErrorToast(error),

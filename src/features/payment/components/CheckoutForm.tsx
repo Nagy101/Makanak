@@ -2,8 +2,8 @@ import { memo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
 import { useMockPayBooking } from "../usePayment";
+import { showSuccessMessage } from "@/lib/appMessage";
 
 interface CheckoutFormProps {
   bookingId: number;
@@ -65,7 +65,7 @@ const CheckoutForm = memo(({ bookingId, onSuccess }: CheckoutFormProps) => {
       try {
         const result = await payMutation.mutateAsync(bookingId);
         if (result.status === "PaymentReceived") {
-          toast.success("Payment successful (Test Mode)");
+          showSuccessMessage("messages.paymentSuccessfulTestMode");
           onSuccess(result.bookingId);
           return;
         }

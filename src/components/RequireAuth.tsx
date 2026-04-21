@@ -12,16 +12,14 @@
  */
 import { type ReactNode, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/features/auth/store/authStore";
+import { showErrorMessage } from "@/lib/appMessage";
 
 interface Props {
   children: ReactNode;
 }
 
 export default function RequireAuth({ children }: Props) {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   // Atomic selector — only re-renders when token changes
@@ -29,7 +27,7 @@ export default function RequireAuth({ children }: Props) {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      toast.error(t("guards.pleaseLogIn"));
+      showErrorMessage("guards.pleaseLogIn");
       navigate("/login", { replace: true, state: { from: location.pathname } });
     }
   }, [isAuthenticated, navigate, location.pathname]);
