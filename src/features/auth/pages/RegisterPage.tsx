@@ -28,7 +28,7 @@ import PasswordStrengthIndicator, {
 import { useRegister } from "../hooks/useAuth";
 import { emailRegex } from "@/lib/utils";
 
-const phoneRegex = /^\+?[0-9]{10,15}$/;
+const phoneRegex = /^\+?[0-9]{11}$/;
 
 const formatDateForInput = (date: Date) => {
   const year = date.getFullYear();
@@ -230,7 +230,7 @@ const RegisterPage = memo(() => {
           {!isPhoneValid && !errors.phoneNumber && phoneValue && (
             <p className="text-xs text-amber-600 flex items-center gap-1.5">
               <AlertCircle className="h-3.5 w-3.5" />
-              Use 10-15 digits, optionally starting with +.
+              Use exactly 11 digits, optionally starting with +.
             </p>
           )}
         </div>
