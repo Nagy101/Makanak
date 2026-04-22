@@ -54,8 +54,8 @@ const profileSchema = z.object({
     .string()
     .optional()
     .default("")
-    .refine((v) => !v || /^\+?[0-9]{10,15}$/.test(v), {
-      message: "Phone must be 10-15 digits, optionally starting with +",
+    .refine((v) => !v || /^\+?[0-9]{11}$/.test(v), {
+      message: "Phone must be exactly 11 digits, optionally starting with +",
     }),
   Address: z.string().optional().default(""),
 });
