@@ -1,4 +1,4 @@
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +14,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { getApiErrorMessage } from "@/lib/apiError";
+import { ApiError } from "@/lib/apiTypes";
 import AuthLayout from "../components/AuthLayout";
 import PasswordStrengthIndicator, {
   PASSWORD_REGEX,
@@ -48,7 +49,10 @@ const ForgotPasswordPage = memo(() => {
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
   const [otpBlocked, setOtpBlocked] = useState(false);
+  const [otpLockUntil, setOtpLockUntil] = useState<number | null>(null);
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   const forgot = useForgotPassword();
   const verify = useVerifyOtp();
@@ -68,12 +72,36 @@ const ForgotPasswordPage = memo(() => {
   });
 
   const newPasswordValue = resetForm.watch("newPassword");
+  const otpRemainingSeconds = otpLockUntil
+    ? Math.max(0, Math.ceil((otpLockUntil - nowMs) / 1000))
+    : 0;
+
+  useEffect(() => {
+    if (!otpBlocked || otpRemainingSeconds <= 0) return;
+
+    const timer = window.setInterval(() => {
+      setNowMs(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [otpBlocked, otpRemainingSeconds]);
+
+  useEffect(() => {
+    if (otpBlocked && otpRemainingSeconds <= 0) {
+      setOtpBlocked(false);
+      setOtpLockUntil(null);
+    }
+  }, [otpBlocked, otpRemainingSeconds]);
 
   const handleEmailSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       emailForm.handleSubmit((d) => {
         setEmail(d.email);
+        setOtp("");
+        setOtpError("");
+        setOtpBlocked(false);
+        setOtpLockUntil(null);
         forgot.mutate({ email: d.email }, { onSuccess: () => setStep("otp") });
       })(e);
     },
@@ -84,13 +112,32 @@ const ForgotPasswordPage = memo(() => {
     verify.mutate(
       { otp, email },
       {
-        onSuccess: () => setStep("reset"),
+        onSuccess: () => {
+          setOtpError("");
+          setOtpBlocked(false);
+          setOtpLockUntil(null);
+          setStep("reset");
+        },
         onError: (error) => {
           const msg = getApiErrorMessage(error);
-          if (/expired|maximum attempts/i.test(msg)) {
+
+          if (error instanceof ApiError && error.statusCode === 429) {
             setOtp("");
+            setOtpError(msg);
             setOtpBlocked(true);
+            setOtpLockUntil(Date.now() + 2 * 60 * 1000);
+            return;
           }
+
+          if (error instanceof ApiError && error.statusCode === 400) {
+            setOtp("");
+            setOtpError("Invalid OTP. Please check and try again.");
+            setOtpBlocked(false);
+            setOtpLockUntil(null);
+            return;
+          }
+
+          setOtpError(msg);
         },
       },
     );
@@ -113,7 +160,9 @@ const ForgotPasswordPage = memo(() => {
 
   const handleResendOtp = useCallback(() => {
     setOtp("");
+    setOtpError("");
     setOtpBlocked(false);
+    setOtpLockUntil(null);
     forgot.mutate({ email });
   }, [forgot, email]);
 
@@ -186,7 +235,12 @@ const ForgotPasswordPage = memo(() => {
             </div>
           </div>
           <div className="flex justify-center">
-            <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+            <InputOTP
+              maxLength={6}
+              value={otp}
+              onChange={setOtp}
+              disabled={otpBlocked}
+            >
               <InputOTPGroup>
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                   <InputOTPSlot key={i} index={i} />
@@ -194,6 +248,17 @@ const ForgotPasswordPage = memo(() => {
               </InputOTPGroup>
             </InputOTP>
           </div>
+          {otpError && (
+            <p className="text-sm text-destructive text-center">{otpError}</p>
+          )}
+          {otpBlocked && otpRemainingSeconds > 0 && (
+            <p className="text-xs text-muted-foreground text-center">
+              Try again in {Math.floor(otpRemainingSeconds / 60)
+                .toString()
+                .padStart(2, "0")}
+              :{(otpRemainingSeconds % 60).toString().padStart(2, "0")}
+            </p>
+          )}
           <Button
             onClick={handleOtpSubmit}
             className="w-full h-12 font-semibold"
@@ -214,7 +279,7 @@ const ForgotPasswordPage = memo(() => {
                 ? "animate-pulse"
                 : ""
             }`}
-            disabled={forgot.isPending}
+            disabled={forgot.isPending || otpBlocked}
           >
             {forgot.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

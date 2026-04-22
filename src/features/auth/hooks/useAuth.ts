@@ -5,6 +5,7 @@ import * as authService from "../auth.service";
 import { useAuthStore } from "../store/authStore";
 import { showApiErrorToast } from "@/lib/apiError";
 import { showErrorMessage, showSuccessMessage } from "@/lib/appMessage";
+import { ApiError } from "@/lib/apiTypes";
 
 import type {
   LoginRequest,
@@ -153,7 +154,15 @@ export function useVerifyOtp() {
   return useMutation({
     mutationFn: (data: VerifyOtpRequest) => authService.verifyOtp(data),
     onSuccess: () => showSuccessMessage("messages.otpVerified"),
-    onError: (error) => showApiErrorToast(error),
+    onError: (error) => {
+      if (
+        error instanceof ApiError &&
+        (error.statusCode === 400 || error.statusCode === 429)
+      ) {
+        return;
+      }
+      showApiErrorToast(error);
+    },
   });
 }
 
@@ -243,7 +252,15 @@ export function useConfirmEmailChange() {
       qc.invalidateQueries({ queryKey: ["auth", "profile"] });
       showSuccessMessage("messages.emailChangedSuccessfully");
     },
-    onError: (error) => showApiErrorToast(error),
+    onError: (error) => {
+      if (
+        error instanceof ApiError &&
+        (error.statusCode === 400 || error.statusCode === 429)
+      ) {
+        return;
+      }
+      showApiErrorToast(error);
+    },
   });
 }
 

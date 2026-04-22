@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, memo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { storage } from "@/lib/storage";
-import { validateFileSize } from "@/lib/apiError";
+import { getApiErrorMessage, validateFileSize } from "@/lib/apiError";
+import { ApiError } from "@/lib/apiTypes";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,6 +24,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import {
   Card,
   CardContent,
@@ -70,7 +76,7 @@ const emailChangeSchema = z.object({
 });
 
 const confirmEmailSchema = z.object({
-  otp: z.string().min(4, "OTP required"),
+  otp: z.string().length(6, "OTP must be 6 digits"),
   Email: z.string().min(1).email(),
 });
 
@@ -107,6 +113,9 @@ const ProfilePage = memo(() => {
     "initiate",
   );
   const [pendingEmail, setPendingEmail] = useState("");
+  const [emailOtpError, setEmailOtpError] = useState("");
+  const [emailOtpLockUntil, setEmailOtpLockUntil] = useState<number | null>(null);
+  const [emailOtpNowMs, setEmailOtpNowMs] = useState(() => Date.now());
 
   const avatarRef = useRef<HTMLInputElement>(null);
   const frontIdRef = useRef<HTMLInputElement>(null);
@@ -177,6 +186,27 @@ const ProfilePage = memo(() => {
     reValidateMode: "onChange",
     defaultValues: { Email: "", otp: "" },
   });
+  const emailOtpValue = confirmEmailForm.watch("otp") || "";
+  const emailOtpRemainingSeconds = emailOtpLockUntil
+    ? Math.max(0, Math.ceil((emailOtpLockUntil - emailOtpNowMs) / 1000))
+    : 0;
+  const emailOtpBlocked = emailOtpRemainingSeconds > 0;
+
+  useEffect(() => {
+    if (!emailOtpBlocked) return;
+
+    const timer = window.setInterval(() => {
+      setEmailOtpNowMs(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [emailOtpBlocked]);
+
+  useEffect(() => {
+    if (emailOtpLockUntil && emailOtpRemainingSeconds <= 0) {
+      setEmailOtpLockUntil(null);
+    }
+  }, [emailOtpLockUntil, emailOtpRemainingSeconds]);
 
   const handleFilePreview = useCallback(
     (
@@ -233,7 +263,10 @@ const ProfilePage = memo(() => {
 
   const handleEmailInitiate = emailForm.handleSubmit((d) => {
     setPendingEmail(d.Email);
+    setEmailOtpError("");
+    setEmailOtpLockUntil(null);
     confirmEmailForm.setValue("Email", d.Email);
+    confirmEmailForm.setValue("otp", "");
     initiateEmail.mutate(
       { newEmail: d.Email, currentPassword: d.currentPassword },
       {
@@ -247,12 +280,33 @@ const ProfilePage = memo(() => {
       { otp: d.otp!, Email: d.Email! },
       {
         onSuccess: () => {
+          setEmailOtpError("");
+          setEmailOtpLockUntil(null);
           toast.success(t("profile.emailChangedSuccess"));
           setTimeout(() => {
             storage.clear();
             sessionStorage.clear();
             window.location.href = "/login";
           }, 1500);
+        },
+        onError: (error) => {
+          const message = getApiErrorMessage(error);
+
+          if (error instanceof ApiError && error.statusCode === 429) {
+            setEmailOtpError(message);
+            confirmEmailForm.setValue("otp", "");
+            setEmailOtpLockUntil(Date.now() + 2 * 60 * 1000);
+            return;
+          }
+
+          if (error instanceof ApiError && error.statusCode === 400) {
+            setEmailOtpError(error.errors?.[0] || message);
+            confirmEmailForm.setValue("otp", "");
+            setEmailOtpLockUntil(null);
+            return;
+          }
+
+          setEmailOtpError(message);
         },
       },
     );
@@ -291,6 +345,9 @@ const ProfilePage = memo(() => {
 
   const handleEmailStepChange = () => {
     setEmailStep("initiate");
+    setEmailOtpError("");
+    setEmailOtpLockUntil(null);
+    confirmEmailForm.setValue("otp", "");
   };
 
   const memberSinceDate = user?.joinAt
@@ -975,14 +1032,43 @@ const ProfilePage = memo(() => {
                       <Label htmlFor="emailOtp">
                         {t("profile.verificationCode")}
                       </Label>
-                      <Input
-                        id="emailOtp"
-                        placeholder={t("profile.enterCode")}
-                        {...confirmEmailForm.register("otp")}
-                      />
+                      <div className="flex justify-start">
+                        <InputOTP
+                          maxLength={6}
+                          value={emailOtpValue}
+                          onChange={(value) => {
+                            confirmEmailForm.setValue("otp", value, {
+                              shouldDirty: true,
+                              shouldTouch: true,
+                              shouldValidate: true,
+                            });
+                            if (emailOtpError) setEmailOtpError("");
+                          }}
+                          disabled={emailOtpBlocked}
+                        >
+                          <InputOTPGroup>
+                            {[0, 1, 2, 3, 4, 5].map((i) => (
+                              <InputOTPSlot key={i} index={i} />
+                            ))}
+                          </InputOTPGroup>
+                        </InputOTP>
+                      </div>
                       {confirmEmailForm.formState.errors.otp && (
                         <p className="text-sm text-destructive">
                           {confirmEmailForm.formState.errors.otp.message}
+                        </p>
+                      )}
+                      {emailOtpError && (
+                        <p className="text-sm text-destructive">{emailOtpError}</p>
+                      )}
+                      {emailOtpBlocked && (
+                        <p className="text-xs text-muted-foreground">
+                          Try again in {Math.floor(emailOtpRemainingSeconds / 60)
+                            .toString()
+                            .padStart(2, "0")}
+                          :{(emailOtpRemainingSeconds % 60)
+                            .toString()
+                            .padStart(2, "0")}
                         </p>
                       )}
                     </div>
@@ -994,7 +1080,14 @@ const ProfilePage = memo(() => {
                       >
                         {t("common.cancel")}
                       </Button>
-                      <Button type="submit" disabled={confirmEmail.isPending}>
+                      <Button
+                        type="submit"
+                        disabled={
+                          confirmEmail.isPending ||
+                          emailOtpBlocked ||
+                          emailOtpValue.length < 6
+                        }
+                      >
                         {confirmEmail.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         ) : null}
