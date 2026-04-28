@@ -9,7 +9,7 @@
  * Example: id 10  → "dG0x"   (changes with SALT)
  *          id 42  → "dG0z"
  */
-
+// 
 const SALT = 0x4d4b; // 'MK' — change this to rotate all existing encoded URLs
 
 /** Encode a numeric id into a URL-safe opaque string. */
