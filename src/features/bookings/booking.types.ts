@@ -67,6 +67,12 @@ export interface TenantBookingDetails {
   checkOutDate: string;
   totalDays: number;
   status: string;
+  /** Price for one night of accommodation */
+  pricePerNight?: number;
+  /** Accommodation subtotal before platform fee */
+  basePrice?: number;
+  /** Platform service fee */
+  platformFee?: number;
   /** Full cost = commissionPaid + amountToPayToOwner */
   totalPrice: number;
   /** Amount paid online via Stripe (platform fee only) — returned only when payment is completed */
@@ -81,6 +87,8 @@ export interface OwnerBookingDetails {
   id: number;
   propertyId: number;
   propertyName: string;
+  propertyMainImage?: string | null;
+  propertyImages?: { id: number; imageUrl: string }[];
   tenantName: string | null;
   tenantImage: string | null;
   tenantPhoneNumber: string | null;

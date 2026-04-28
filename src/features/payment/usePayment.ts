@@ -1,21 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createPaymentIntent, payBooking, scanQrCode } from "./payment.service";
-import type { MockPaymentData, ScanQrRequest } from "./payment.types";
+import { createPaymentIntent, scanQrCode } from "./payment.service";
+import type { ScanQrRequest } from "./payment.types";
 import { showApiErrorToast } from "@/lib/apiError";
 import { showSuccessMessage } from "@/lib/appMessage";
 
-/** Tenant: create a Stripe payment intent for a booking */
+/** Tenant: initiate Paymob payment for a booking */
 export const useCreatePaymentIntent = () => {
   return useMutation({
     mutationFn: (bookingId: number) => createPaymentIntent(bookingId),
-    onError: (error) => showApiErrorToast(error),
-  });
-};
-
-/** Tenant: temporary mocked payment completion (test mode) */
-export const useMockPayBooking = () => {
-  return useMutation<MockPaymentData, Error, number>({
-    mutationFn: (bookingId: number) => payBooking(bookingId),
     onError: (error) => showApiErrorToast(error),
   });
 };

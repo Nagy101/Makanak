@@ -38,8 +38,6 @@ import {
   User,
   ShieldCheck,
   Banknote,
-  CheckCircle2,
-  AlertCircle,
   AlertTriangle,
 } from "lucide-react";
 import type {
@@ -114,6 +112,84 @@ const LoadingSkeleton = () => (
   </div>
 );
 
+const PropertyImageGallery = memo(
+  ({
+    propertyName,
+    propertyMainImage,
+    propertyImages,
+  }: {
+    propertyName: string;
+    propertyMainImage?: string | null;
+    propertyImages?: { id: number; imageUrl: string }[];
+  }) => {
+    const [activeImage, setActiveImage] = useState(toUrl(propertyMainImage));
+
+    useEffect(() => {
+      setActiveImage(toUrl(propertyMainImage));
+    }, [propertyMainImage]);
+
+    const galleryImages = useMemo(() => {
+      const images = [
+        toUrl(propertyMainImage),
+        ...(propertyImages ?? []).map((image) => toUrl(image.imageUrl)),
+      ];
+
+      return images.filter((image, index) => images.indexOf(image) === index);
+    }, [propertyMainImage, propertyImages]);
+
+    const hasGallery = galleryImages.length > 1;
+
+    return (
+      <div className="space-y-3">
+        <div className="rounded-lg overflow-hidden bg-muted aspect-video">
+          <img
+            src={activeImage}
+            alt={propertyName}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "/placeholder.svg";
+            }}
+          />
+        </div>
+
+        {hasGallery && (
+          <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
+            {galleryImages.map((image, index) => {
+              const isActive = image === activeImage;
+
+              return (
+                <button
+                  key={`${image}-${index}`}
+                  type="button"
+                  onClick={() => setActiveImage(image)}
+                  aria-label={`${propertyName} image ${index + 1}`}
+                  className={`h-16 w-20 shrink-0 overflow-hidden rounded-md transition ${
+                    isActive
+                      ? "ring-2 ring-blue-500"
+                      : "opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <img
+                    src={image}
+                    alt={`${propertyName} thumbnail ${index + 1}`}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/placeholder.svg";
+                    }}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  },
+);
+PropertyImageGallery.displayName = "PropertyImageGallery";
+
 // ── Tenant Content ──────────────────────────────────────────────────────────
 
 interface TenantContentProps {
@@ -125,9 +201,6 @@ interface TenantContentProps {
   isCancelling: boolean;
 }
 
-/** Platform fee percentage charged online (10 %) */
-const PLATFORM_FEE_RATE = 0.1;
-
 const TenantBookingContent = memo(
   ({
     booking,
@@ -138,22 +211,6 @@ const TenantBookingContent = memo(
     isCancelling,
   }: TenantContentProps) => {
     const { t } = useTranslation();
-    const [activeImage, setActiveImage] = useState(
-      toUrl(booking.propertyMainImage),
-    );
-
-    useEffect(() => {
-      setActiveImage(toUrl(booking.propertyMainImage));
-    }, [booking.propertyMainImage]);
-
-    const galleryImages = useMemo(() => {
-      const images = [
-        toUrl(booking.propertyMainImage),
-        ...(booking.propertyImages ?? []).map((image) => toUrl(image.imageUrl)),
-      ];
-
-      return images.filter((image, index) => images.indexOf(image) === index);
-    }, [booking.propertyMainImage, booking.propertyImages]);
 
     const canCancel = ["PendingOwnerApproval", "PendingPayment"].includes(
       booking.status,
@@ -163,74 +220,24 @@ const TenantBookingContent = memo(
       !!booking.checkInQrCode &&
       ["PaymentReceived", "CheckedIn"].includes(booking.status);
 
-    /**
-     * When the API omits commissionPaid / amountToPayToOwner (post-payment
-     * statuses), derive them from totalPrice using the fixed 10 % platform fee.
-     */
-    const isPostPayment = [
-      "PaymentReceived",
-      "CheckedIn",
-      "Completed",
-    ].includes(booking.status);
-    const derivedCommission =
-      booking.commissionPaid != null
-        ? booking.commissionPaid
-        : isPostPayment
-          ? Math.round(booking.totalPrice * PLATFORM_FEE_RATE)
-          : null;
-    const derivedOwnerAmount =
-      booking.amountToPayToOwner != null
-        ? booking.amountToPayToOwner
-        : derivedCommission != null
-          ? booking.totalPrice - derivedCommission
-          : null;
+    const platformFee =
+      booking.platformFee ?? booking.commissionPaid ?? 0;
+    const basePrice =
+      booking.basePrice ??
+      booking.amountToPayToOwner ??
+      Math.max(booking.totalPrice - platformFee, 0);
+    const pricePerNight =
+      booking.pricePerNight ??
+      (booking.totalDays > 0 ? basePrice / booking.totalDays : basePrice);
 
     return (
       <div className="space-y-5 py-2">
         {/* Property gallery */}
-        <div className="space-y-3">
-          <div className="rounded-lg overflow-hidden bg-muted aspect-video">
-            <img
-              src={activeImage}
-              alt={booking.propertyName}
-              className="h-full w-full object-cover"
-              loading="lazy"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "/placeholder.svg";
-              }}
-            />
-          </div>
-
-          <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
-            {galleryImages.map((image, index) => {
-              const isActive = image === activeImage;
-
-              return (
-                <button
-                  key={`${image}-${index}`}
-                  type="button"
-                  onClick={() => setActiveImage(image)}
-                  aria-label={`${booking.propertyName} image ${index + 1}`}
-                  className={`h-16 w-20 shrink-0 overflow-hidden rounded-md transition ${
-                    isActive
-                      ? "ring-2 ring-blue-500"
-                      : "opacity-70 hover:opacity-100"
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${booking.propertyName} thumbnail ${index + 1}`}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/placeholder.svg";
-                    }}
-                  />
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <PropertyImageGallery
+          propertyName={booking.propertyName}
+          propertyMainImage={booking.propertyMainImage}
+          propertyImages={booking.propertyImages}
+        />
 
         {/* Title + status */}
         <div className="flex items-start justify-between gap-2">
@@ -270,122 +277,41 @@ const TenantBookingContent = memo(
 
         <Separator />
 
-        {/* Pricing — full transparent breakdown for tenant */}
+        {/* Pricing — transparent invoice-style breakdown for tenant */}
         <div>
           <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
             {t("bookings.costBreakdown")}
           </p>
-
-          {/* Post-payment breakdown */}
-          {isPostPayment ? (
-            <div className="rounded-lg border bg-secondary/30 p-3 space-y-3 text-sm">
-              {/* Platform fee row — paid online */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground flex items-center gap-1">
-                    <CreditCard className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                    {t("bookings.platformFee")}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {t("bookings.paidOnline")}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-green-600 dark:text-green-400">
-                    {derivedCommission != null
-                      ? `${derivedCommission.toLocaleString()} EGP`
-                      : "—"}
-                  </p>
-                  <span className="text-xs text-green-600 dark:text-green-400 flex items-center justify-end gap-0.5">
-                    <CheckCircle2 className="h-3 w-3" />{" "}
-                    {t("bookings.paidLabel")}
-                  </span>
-                </div>
+          <div className="rounded-lg border bg-secondary/30 p-3 space-y-3 text-sm">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-medium text-foreground">
+                  Accommodation ({pricePerNight.toLocaleString()} EGP x {booking.totalDays} {booking.totalDays === 1 ? t("common.night") : t("common.nights")})
+                </p>
               </div>
-
-              {/* Cash-to-owner row */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground flex items-center gap-1">
-                    <Banknote className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                    {t("bookings.ownerPayment")}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {t("bookings.payInCash")}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-amber-600 dark:text-amber-400">
-                    {derivedOwnerAmount != null
-                      ? `${derivedOwnerAmount.toLocaleString()} EGP`
-                      : "—"}
-                  </p>
-                  <span className="text-xs text-amber-600 dark:text-amber-400">
-                    {t("bookings.cashAtArrival")}
-                  </span>
-                </div>
-              </div>
-
-              <Separator className="my-0.5" />
-
-              <div className="flex justify-between font-bold text-foreground text-base">
-                <span>{t("bookings.totalCost")}</span>
-                <span>{booking.totalPrice.toLocaleString()} EGP</span>
-              </div>
-            </div>
-          ) : (
-            /* Pre-payment: show breakdown if available, otherwise just total */
-            <div className="rounded-lg border bg-secondary/30 p-3 space-y-3 text-sm">
-              {booking.commissionPaid != null &&
-                booking.amountToPayToOwner != null && (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-foreground">
-                          {t("bookings.platformFee")}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {t("bookings.payNowOnline")}
-                        </p>
-                      </div>
-                      <p className="font-semibold text-foreground">
-                        {booking.commissionPaid.toLocaleString()} EGP
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-foreground">
-                          {t("bookings.ownerPayment")}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {t("bookings.cashToOwner")}
-                        </p>
-                      </div>
-                      <p className="font-semibold text-amber-600 dark:text-amber-400">
-                        {booking.amountToPayToOwner.toLocaleString()} EGP
-                      </p>
-                    </div>
-                    <Separator className="my-0.5" />
-                  </>
-                )}
-              <div className="flex justify-between font-bold text-foreground text-base">
-                <span>{t("bookings.totalCost")}</span>
-                <span>{booking.totalPrice.toLocaleString()} EGP</span>
-              </div>
-            </div>
-          )}
-
-          {/* Cash reminder banner — shown after payment with derived owner amount */}
-          {isPostPayment && derivedOwnerAmount != null && (
-            <div className="mt-2 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 px-3 py-2.5 text-sm">
-              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-amber-800 dark:text-amber-300">
-                {t("bookings.rememberCash", {
-                  amount: derivedOwnerAmount.toLocaleString(),
-                })}
+              <p className="font-semibold text-foreground">
+                {basePrice.toLocaleString()} EGP
               </p>
             </div>
-          )}
+
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-medium text-foreground">
+                  Service Fee (Platform Fee)
+                </p>
+              </div>
+              <p className="font-semibold text-foreground">
+                {platformFee.toLocaleString()} EGP
+              </p>
+            </div>
+
+            <Separator className="my-0.5" />
+
+            <div className="flex justify-between font-bold text-foreground text-base">
+              <span>{t("bookings.totalCost")}</span>
+              <span>{booking.totalPrice.toLocaleString()} EGP</span>
+            </div>
+          </div>
         </div>
 
         {/* Special requests */}
@@ -481,9 +407,11 @@ const TenantBookingContent = memo(
               className="gap-1"
             >
               <CreditCard className="h-4 w-4" />
-              {booking.commissionPaid != null
+              {booking.platformFee != null || booking.commissionPaid != null
                 ? t("bookings.payPlatformFee", {
-                    amount: booking.commissionPaid.toLocaleString(),
+                    amount: (
+                      booking.platformFee ?? booking.commissionPaid
+                    )!.toLocaleString(),
                   })
                 : t("bookings.payNow")}
             </Button>
@@ -531,6 +459,12 @@ const OwnerBookingContent = memo(
 
     return (
       <div className="space-y-5 py-2">
+        <PropertyImageGallery
+          propertyName={booking.propertyName}
+          propertyMainImage={booking.propertyMainImage}
+          propertyImages={booking.propertyImages}
+        />
+
         {/* Title + status */}
         <div className="flex items-start justify-between gap-2">
           <div>

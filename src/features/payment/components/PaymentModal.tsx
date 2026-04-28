@@ -32,48 +32,6 @@ const PaymentModal = memo(
       });
     }, [qc, onOpenChange, navigate]);
 
-    // TODO: Uncomment this block when the real payment gateway is integrated.
-    // Stripe publishable key — safe to store in client code
-    // const STRIPE_PK = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
-    // const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
-    // const mutation = useCreatePaymentIntent();
-    //
-    // // Trigger payment intent creation when modal opens
-    // useEffect(() => {
-    //   if (open && bookingId && !mutation.data && !mutation.isPending) {
-    //     mutation.mutate(bookingId);
-    //   }
-    //   // Reset when modal closes
-    //   if (!open) {
-    //     mutation.reset();
-    //   }
-    //   // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [open, bookingId]);
-    //
-    // const handleSuccess = useCallback(() => {
-    //   qc.invalidateQueries({ queryKey: ["bookings"] });
-    //   setTimeout(() => onOpenChange(false), 2000);
-    // }, [qc, onOpenChange]);
-    //
-    // const intentData = mutation.data?.isSuccess ? mutation.data.data : null;
-    //
-    // const stripeOptions = useMemo(
-    //   () =>
-    //     intentData?.clientSecret
-    //       ? {
-    //           clientSecret: intentData.clientSecret,
-    //           appearance: {
-    //             theme: "stripe" as const,
-    //             variables: {
-    //               colorPrimary: "hsl(210 75% 42%)",
-    //               borderRadius: "0.75rem",
-    //             },
-    //           },
-    //         }
-    //       : null,
-    //   [intentData?.clientSecret],
-    // );
-
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
