@@ -6,10 +6,9 @@ import { useCreatePaymentIntent } from "../usePayment";
 
 interface CheckoutFormProps {
   bookingId: number;
-  onSuccess: (bookingId: number) => void;
 }
 
-const CheckoutForm = memo(({ bookingId, onSuccess }: CheckoutFormProps) => {
+const CheckoutForm = memo(({ bookingId }: CheckoutFormProps) => {
   const { t } = useTranslation();
   const payMutation = useCreatePaymentIntent();
   const [loading, setLoading] = useState(false);
@@ -23,6 +22,13 @@ const CheckoutForm = memo(({ bookingId, onSuccess }: CheckoutFormProps) => {
       setError(null);
 
       try {
+        const paymobPublicKey = import.meta.env.VITE_PAYMOB_PUBLIC_KEY?.trim();
+
+        if (!paymobPublicKey) {
+          setError(t("payment.missingPublicKey"));
+          return;
+        }
+
         const result = await payMutation.mutateAsync(bookingId);
         if (!result.isSuccess) {
           setError(result.message || t("payment.failedToInitialize"));
@@ -35,16 +41,16 @@ const CheckoutForm = memo(({ bookingId, onSuccess }: CheckoutFormProps) => {
           return;
         }
 
-        onSuccess(bookingId);
-        window.location.href =
-          `https://accept.paymob.com/unifiedcheckout/?publicKey=egy_pk_test_NQh8T4eVZW5NUJaIHtE3PCem3FohzNPq&clientSecret=${clientSecret}`;
+        window.location.assign(
+          `https://accept.paymob.com/unifiedcheckout/?publicKey=${encodeURIComponent(paymobPublicKey)}&clientSecret=${encodeURIComponent(clientSecret)}`,
+        );
       } catch {
         setError(t("payment.failedToInitialize"));
       } finally {
         setLoading(false);
       }
     },
-    [bookingId, onSuccess, payMutation, t],
+    [bookingId, payMutation, t],
   );
 
   return (

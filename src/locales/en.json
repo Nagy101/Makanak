@@ -803,7 +803,21 @@
     "initializingPayment": "Initializing secure payment…",
     "totalAmount": "Total: {{amount}} EGP",
     "stripeNotConfigured": "Stripe is not configured. Please set VITE_STRIPE_PUBLISHABLE_KEY.",
+    "missingPublicKey": "Payment is not configured. Please set VITE_PAYMOB_PUBLIC_KEY.",
     "failedToInitialize": "Failed to initialize payment. Please try again."
+  },
+
+  "paymentStatus": {
+    "successTitle": "Payment completed",
+    "successDescription": "Your Paymob payment was completed successfully.",
+    "failureTitle": "Payment failed",
+    "failureDescription": "We could not confirm the payment from Paymob.",
+    "pendingTitle": "Payment status pending",
+    "pendingDescription": "Your payment is still being processed or the redirect did not include a final status.",
+    "bookingId": "Booking ID",
+    "intentId": "Payment Intent ID",
+    "backToBookings": "Back to my bookings",
+    "browseProperties": "Browse properties"
   },
 
   "notifications": {

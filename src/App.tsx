@@ -23,6 +23,9 @@ const ShippingPolicyPage = lazy(() => import("./pages/ShippingPolicyPage"));
 const ReturnPolicyPage = lazy(() => import("./pages/ReturnPolicyPage"));
 const AboutUsPage = lazy(() => import("./pages/AboutUsPage"));
 const ContactUsPage = lazy(() => import("./pages/ContactUsPage"));
+const PaymentStatusPage = lazy(
+  () => import("./features/payment/pages/PaymentStatusPage"),
+);
 
 // Lazy load auth pages for better code splitting
 const HomePage = lazy(() => import("./pages/HomePage.tsx"));
@@ -249,6 +252,14 @@ const RouterContent = () => {
         element={
           <Suspense fallback={<PageLoadingFallback />}>
             <ContactUsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/payment-status"
+        element={
+          <Suspense fallback={<PageLoadingFallback />}>
+            <PaymentStatusPage />
           </Suspense>
         }
       />
