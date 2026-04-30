@@ -803,7 +803,21 @@
     "initializingPayment": "جاري تهيئة الدفع الآمن…",
     "totalAmount": "الإجمالي: {{amount}} ج.م",
     "stripeNotConfigured": "لم يتم تكوين Stripe. يرجى تعيين VITE_STRIPE_PUBLISHABLE_KEY.",
+    "missingPublicKey": "الدفع غير مُعدّ بعد. يرجى تعيين VITE_PAYMOB_PUBLIC_KEY.",
     "failedToInitialize": "فشل تهيئة الدفع. يرجى المحاولة مرة أخرى."
+  },
+
+  "paymentStatus": {
+    "successTitle": "تم إتمام الدفع",
+    "successDescription": "تمت عملية الدفع عبر Paymob بنجاح.",
+    "failureTitle": "فشل الدفع",
+    "failureDescription": "لم نتمكن من تأكيد عملية الدفع من Paymob.",
+    "pendingTitle": "حالة الدفع قيد المراجعة",
+    "pendingDescription": "لا تزال عملية الدفع قيد المعالجة أو أن إعادة التوجيه لم تتضمن الحالة النهائية.",
+    "bookingId": "رقم الحجز",
+    "intentId": "رقم عملية الدفع",
+    "backToBookings": "العودة إلى حجوزاتي",
+    "browseProperties": "تصفح العقارات"
   },
 
   "notifications": {

@@ -1,6 +1,5 @@
-import { memo, useCallback } from "react";
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +8,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import CheckoutForm from "./CheckoutForm";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface PaymentModalProps {
   bookingId: number | null;
@@ -20,17 +18,6 @@ interface PaymentModalProps {
 const PaymentModal = memo(
   ({ bookingId, open, onOpenChange }: PaymentModalProps) => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
-    const qc = useQueryClient();
-
-    const handleSuccess = useCallback((paidBookingId: number) => {
-      qc.invalidateQueries({ queryKey: ["bookings"] });
-      onOpenChange(false);
-      navigate("/my-bookings", {
-        replace: true,
-        state: { openBookingId: paidBookingId },
-      });
-    }, [qc, onOpenChange, navigate]);
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -43,7 +30,7 @@ const PaymentModal = memo(
           </DialogHeader>
 
           {bookingId ? (
-            <CheckoutForm bookingId={bookingId} onSuccess={handleSuccess} />
+            <CheckoutForm bookingId={bookingId} />
           ) : (
             <div className="py-8 text-center text-sm text-destructive">
               {t("payment.failedToInitialize")}
