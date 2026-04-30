@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
+  CalendarCheck,
   Users,
   Building2,
   AlertTriangle,
@@ -23,6 +24,12 @@ const NAV_ITEMS = [
     icon: LayoutDashboard,
     labelKey: "admin.sidebarDashboard",
     end: true,
+  },
+  {
+    to: "/admin/bookings",
+    icon: CalendarCheck,
+    labelKey: "admin.sidebarBookings",
+    end: false,
   },
   {
     to: "/admin/users",

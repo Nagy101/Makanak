@@ -98,3 +98,16 @@ export const getAdminPropertyById = (id: number) =>
       `/Property/admin/${id}`,
     )
     .then((r) => unwrapPayload(r.data));
+
+// ── Refund Handling (Admin) ──
+export const confirmRefund = (bookingId: number) =>
+  api
+    .post<AdminApiResponse<string>>(`/Payment/refund/${bookingId}/confirm`)
+    .then((r) => r.data);
+
+export const rejectRefund = (bookingId: number, reason: string) =>
+  api
+    .post<AdminApiResponse<string>>(`/Payment/refund/${bookingId}/reject`, {
+      reason,
+    })
+    .then((r) => r.data);
