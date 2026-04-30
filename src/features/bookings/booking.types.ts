@@ -5,6 +5,8 @@ export const BookingStatus = {
   PendingPayment: 'PendingPayment',
   PaymentFailed: 'PaymentFailed',
   PaymentReceived: 'PaymentReceived',
+  RefundRequested: 'RefundRequested',
+  Refunded: 'Refunded',
   Cancelled: 'Cancelled',
   CheckedIn: 'CheckedIn',
   Completed: 'Completed',
@@ -103,6 +105,31 @@ export interface OwnerBookingDetails {
   /** Cash the owner will receive from the tenant upon arrival */
   amountToPayToOwner: number;
   specialRequests: string | null;
+}
+
+// ── Admin Booking Details (GET /api/Booking/admin/{id}) ──
+export interface AdminBookingDetails {
+  id: number;
+  status: string;
+  checkInDate: string;
+  checkOutDate: string;
+  createdAt: string;
+  totalPrice: number;
+  commissionPaid: number;
+  transactionId: string | null;
+  isRefunded: boolean;
+  refundedAmount: number;
+  cancellationReason: string | null;
+  propertyId: number;
+  propertyTitle: string;
+  propertyMainImage: string | null;
+  propertyImages?: { id: number; imageUrl: string }[];
+  tenantId: string;
+  tenantName: string;
+  tenantPhoneNumber: string | null;
+  ownerId: string;
+  ownerName: string;
+  ownerPhoneNumber: string | null;
 }
 
 // ── Paginated Data ──

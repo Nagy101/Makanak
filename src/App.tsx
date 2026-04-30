@@ -51,6 +51,9 @@ const AdminLoginPage = lazy(
 const AdminDashboardPage = lazy(
   () => import("./features/admin/pages/AdminDashboardPage"),
 );
+const AdminBookingsPage = lazy(
+  () => import("./features/bookings/pages/AdminBookingsPage"),
+);
 const AdminUsersPage = lazy(
   () => import("./features/admin/pages/AdminUsersPage"),
 );
@@ -295,6 +298,14 @@ const RouterContent = () => {
           element={
             <Suspense fallback={<PageLoadingFallback />}>
               <AdminDashboardPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="bookings"
+          element={
+            <Suspense fallback={<PageLoadingFallback />}>
+              <AdminBookingsPage />
             </Suspense>
           }
         />

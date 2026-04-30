@@ -7,6 +7,7 @@ import type {
   AdminPropertySearchParams,
 } from "./admin.types";
 import { showApiErrorToast } from "@/lib/apiError";
+import { showSuccessMessage } from "@/lib/appMessage";
 
 // ── Users ──
 export function useAdminUsers(params: AdminUserSearchParams) {
@@ -100,5 +101,43 @@ export function useAdminPropertyDetails(propertyId: number | null) {
     queryFn: () => adminService.getAdminPropertyById(propertyId!),
     enabled: !!propertyId,
     staleTime: 60 * 1000,
+  });
+}
+
+// ── Refund Handling (Admin) ──
+export function useConfirmRefund() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (bookingId: number) => adminService.confirmRefund(bookingId),
+    onSuccess: (res, bookingId) => {
+      showSuccessMessage(res.message || "Refund confirmed.");
+      qc.invalidateQueries({ queryKey: ["bookings"] });
+      qc.invalidateQueries({ queryKey: ["bookings", "detail", "tenant", bookingId] });
+      qc.invalidateQueries({ queryKey: ["bookings", "detail", "owner", bookingId] });
+      qc.invalidateQueries({ queryKey: ["bookings", "detail", "admin", bookingId] });
+    },
+    onError: (error) => showApiErrorToast(error),
+  });
+}
+
+export function useRejectRefund() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ bookingId, reason }: { bookingId: number; reason: string }) =>
+      adminService.rejectRefund(bookingId, reason),
+    onSuccess: (res, variables) => {
+      showSuccessMessage(res.message || "Refund rejected.");
+      qc.invalidateQueries({ queryKey: ["bookings"] });
+      qc.invalidateQueries({
+        queryKey: ["bookings", "detail", "tenant", variables.bookingId],
+      });
+      qc.invalidateQueries({
+        queryKey: ["bookings", "detail", "owner", variables.bookingId],
+      });
+      qc.invalidateQueries({
+        queryKey: ["bookings", "detail", "admin", variables.bookingId],
+      });
+    },
+    onError: (error) => showApiErrorToast(error),
   });
 }

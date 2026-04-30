@@ -29,6 +29,14 @@ const statusConfig: Record<string, { labelKey: string; classes: string }> = {
     labelKey: "bookings.confirmed",
     classes: "bg-primary/10 text-primary border-primary/30",
   },
+  RefundRequested: {
+    labelKey: "bookings.refundRequested",
+    classes: "bg-warning/10 text-warning border-warning/30",
+  },
+  Refunded: {
+    labelKey: "bookings.refunded",
+    classes: "bg-muted text-muted-foreground border-border",
+  },
   Cancelled: {
     labelKey: "bookings.cancelled",
     classes: "bg-muted text-muted-foreground border-border",

@@ -6,6 +6,7 @@ import type {
   Booking,
   TenantBookingDetails,
   OwnerBookingDetails,
+  AdminBookingDetails,
   PaginatedData,
   CreateBookingRequest,
   UpdateBookingStatusRequest,
@@ -54,9 +55,21 @@ export const getIncomingBookings = (params: BookingListParams) =>
     })
     .then((r) => r.data.data);
 
+// ── Admin Bookings (GET /api/Booking/admin/all) ──
+export const getAdminBookings = (params: BookingListParams) =>
+  api
+    .get<BookingApiResponse<PaginatedData<Booking>>>("/admin/all", { params })
+    .then((r) => r.data.data);
+
+// ── Admin Booking Details (GET /api/Booking/admin/{id}) ──
+export const getAdminBookingDetails = (id: number) =>
+  api
+    .get<BookingApiResponse<AdminBookingDetails>>(`/admin/${id}`)
+    .then((r) => r.data);
+
 // ── Cancel Booking ──
 export const cancelBooking = (id: number) =>
-  api.put<BookingApiResponse<string>>(`/${id}/cancel`).then((r) => r.data);
+  api.post<BookingApiResponse<string>>(`/${id}/cancel`).then((r) => r.data);
 
 // ── Update Booking Status (Owner) ──
 export const updateBookingStatus = (

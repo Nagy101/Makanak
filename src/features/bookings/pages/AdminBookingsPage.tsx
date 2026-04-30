@@ -1,9 +1,13 @@
-﻿import { useCallback, useMemo, useState, lazy, Suspense } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useIncomingBookings } from "../useBookings";
+import { useAdminBookings } from "../useBookings";
 import BookingStatusBadge from "../components/BookingStatusBadge";
 import BookingDetailsModal from "../components/BookingDetailsModal";
-import type { BookingStatusType, BookingListParams } from "../booking.types";
+import type {
+  BookingListParams,
+  BookingStatusType,
+  BookingSortType,
+} from "../booking.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,10 +28,6 @@ import {
 } from "@/components/ui/table";
 import { Search, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
-
-const CreateDisputeModal = lazy(
-  () => import("@/features/disputes/components/CreateDisputeModal"),
-);
 
 const STATUS_OPTIONS: { labelKey: string; value: BookingStatusType | "All" }[] =
   [
@@ -57,25 +57,23 @@ const PAGE_SIZE = 10;
 const toUrl = (path: string | null | undefined) =>
   !path ? "/placeholder.svg" : path.startsWith("http") ? path : `/${path}`;
 
-export default function OwnerIncomingBookingsPage() {
+export default function AdminBookingsPage() {
   const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<BookingStatusType | "All">(
     "All",
   );
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const [pageIndex, setPageIndex] = useState(1);
   const [sort, setSort] = useState("DateCreatedDesc");
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(
     null,
   );
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [disputeBookingId, setDisputeBookingId] = useState<number | null>(null);
-  const [disputeOpen, setDisputeOpen] = useState(false);
 
   const handleSearch = useCallback(() => {
     setSearch(searchInput);
-    setPage(1);
+    setPageIndex(1);
   }, [searchInput]);
 
   const handleSearchKeyDown = useCallback(
@@ -92,45 +90,44 @@ export default function OwnerIncomingBookingsPage() {
           ? undefined
           : (statusFilter as BookingStatusType),
       Search: search || undefined,
-      PageIndex: page,
+      PageIndex: Math.max(1, pageIndex),
       PageSize: PAGE_SIZE,
-      Sort: sort as any,
+      Sort: sort as BookingSortType,
     }),
-    [statusFilter, search, page, sort],
+    [statusFilter, search, pageIndex, sort],
   );
 
-  const { data, isLoading } = useIncomingBookings(params);
+  const { data, isLoading } = useAdminBookings(params);
 
-  const handleView = useCallback((id: number) => {
+  const handleOpen = useCallback((id: number) => {
     setSelectedBookingId(id);
     setDetailsOpen(true);
   }, []);
 
-  const handleDispute = useCallback((id: number) => {
-    setDisputeBookingId(id);
-    setDetailsOpen(false); // close details modal first
-    setDisputeOpen(true);
-  }, []);
-
-  const totalPages = data ? Math.ceil(data.totalCount / PAGE_SIZE) : 0;
+  const totalPages = data ? Math.ceil(data.totalCount / data.pageSize) : 0;
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">
-        {t("bookings.incomingBookings")}
-      </h1>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t("admin.sidebarBookings")}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            All bookings visible to administrators.
+          </p>
+        </div>
+      </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Status dropdown */}
+      <div className="flex flex-col gap-3 lg:flex-row">
         <Select
           value={statusFilter}
           onValueChange={(v) => {
             setStatusFilter(v as BookingStatusType | "All");
-            setPage(1);
+            setPageIndex(1);
           }}
         >
-          <SelectTrigger className="w-full sm:w-52">
+          <SelectTrigger className="w-full lg:w-52">
             <SelectValue placeholder={t("bookings.filterByStatus")} />
           </SelectTrigger>
           <SelectContent>
@@ -142,15 +139,14 @@ export default function OwnerIncomingBookingsPage() {
           </SelectContent>
         </Select>
 
-        {/* Sort dropdown */}
         <Select
           value={sort}
           onValueChange={(v) => {
             setSort(v);
-            setPage(1);
+            setPageIndex(1);
           }}
         >
-          <SelectTrigger className="w-full sm:w-44">
+          <SelectTrigger className="w-full lg:w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -162,7 +158,6 @@ export default function OwnerIncomingBookingsPage() {
           </SelectContent>
         </Select>
 
-        {/* Search */}
         <div className="relative flex-1 flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -184,19 +179,16 @@ export default function OwnerIncomingBookingsPage() {
         </div>
       </div>
 
-      {/* Table */}
       {isLoading ? (
         <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-14 w-full rounded-lg" />
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} className="h-14 w-full rounded-lg" />
           ))}
         </div>
       ) : !data?.data.length ? (
         <div className="text-center py-20 text-muted-foreground">
-          <p className="text-lg font-medium">
-            {t("bookings.noIncomingBookings")}
-          </p>
-          <p className="text-sm mt-1">{t("bookings.noIncomingBookingsHint")}</p>
+          <p className="text-lg font-medium">No bookings found</p>
+          <p className="text-sm mt-1">Try adjusting the filters.</p>
         </div>
       ) : (
         <div className="rounded-lg border bg-card overflow-x-auto">
@@ -207,18 +199,18 @@ export default function OwnerIncomingBookingsPage() {
                 <TableHead>{t("bookings.tenant")}</TableHead>
                 <TableHead>{t("properties.checkIn")}</TableHead>
                 <TableHead>{t("properties.checkOut")}</TableHead>
-                <TableHead>{t("bookings.nights")}</TableHead>
-                <TableHead>{t("bookings.total")}</TableHead>
-                <TableHead>{t("bookings.ownerPayout")}</TableHead>
                 <TableHead>{t("bookings.status")}</TableHead>
-                <TableHead className="text-right">
-                  {t("bookings.actions")}
-                </TableHead>
+                <TableHead>{t("bookings.total")}</TableHead>
+                <TableHead className="text-right">{t("bookings.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.data.map((booking) => (
-                <TableRow key={booking.id}>
+                <TableRow
+                  key={booking.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleOpen(booking.id)}
+                >
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <img
@@ -229,11 +221,10 @@ export default function OwnerIncomingBookingsPage() {
                         width={56}
                         height={40}
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "/placeholder.svg";
+                          (e.target as HTMLImageElement).src = "/placeholder.svg";
                         }}
                       />
-                      <span className="font-medium text-foreground line-clamp-1 max-w-[140px]">
+                      <span className="font-medium text-foreground line-clamp-1 max-w-[180px]">
                         {booking.propertyName}
                       </span>
                     </div>
@@ -248,8 +239,7 @@ export default function OwnerIncomingBookingsPage() {
                         width={28}
                         height={28}
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "/placeholder.svg";
+                          (e.target as HTMLImageElement).src = "/placeholder.svg";
                         }}
                       />
                       <span className="text-sm">{booking.tenantName}</span>
@@ -261,25 +251,14 @@ export default function OwnerIncomingBookingsPage() {
                   <TableCell className="text-sm whitespace-nowrap">
                     {format(new Date(booking.checkOutDate), "MMM dd, yyyy")}
                   </TableCell>
-                  <TableCell className="text-sm text-center">
-                    {booking.totalDays}
+                  <TableCell>
+                    <BookingStatusBadge status={booking.status} />
                   </TableCell>
                   <TableCell className="font-semibold text-primary whitespace-nowrap">
                     {booking.totalPrice.toLocaleString()} {t("common.egp")}
                   </TableCell>
-                  <TableCell className="text-sm whitespace-nowrap">
-                    {booking.amountToPayToOwner.toLocaleString()}{" "}
-                    {t("common.egp")}
-                  </TableCell>
-                  <TableCell>
-                    <BookingStatusBadge status={booking.status} />
-                  </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleView(booking.id)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => handleOpen(booking.id)}>
                       <Eye className="h-4 w-4 mr-1" /> {t("common.view")}
                     </Button>
                   </TableCell>
@@ -290,25 +269,24 @@ export default function OwnerIncomingBookingsPage() {
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1}
+            onClick={() => setPageIndex((p) => Math.max(1, p - 1))}
+            disabled={pageIndex <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm text-muted-foreground">
-            {t("bookings.pageOf", { page, total: totalPages })}
+            {t("bookings.pageOf", { page: pageIndex, total: totalPages })}
           </span>
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
+            onClick={() => setPageIndex((p) => Math.min(totalPages, p + 1))}
+            disabled={pageIndex >= totalPages}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -319,20 +297,8 @@ export default function OwnerIncomingBookingsPage() {
         bookingId={selectedBookingId}
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
-        role="owner"
-        onDispute={handleDispute}
+        role="admin"
       />
-
-      {disputeBookingId && (
-        <Suspense fallback={null}>
-          <CreateDisputeModal
-            bookingId={disputeBookingId}
-            open={disputeOpen}
-            onOpenChange={setDisputeOpen}
-            role="owner"
-          />
-        </Suspense>
-      )}
     </div>
   );
 }

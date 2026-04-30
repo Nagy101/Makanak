@@ -3,8 +3,10 @@ import {
   createBooking,
   getTenantBookingDetails,
   getOwnerBookingDetails,
+  getAdminBookingDetails,
   getMyBookings,
   getIncomingBookings,
+  getAdminBookings,
   cancelBooking,
   updateBookingStatus,
 } from "./booking.service";
@@ -32,6 +34,18 @@ export const useIncomingBookings = (params: BookingListParams) =>
     placeholderData: (prev) => prev,
   });
 
+// ── Admin: All Bookings ──
+export const useAdminBookings = (params: BookingListParams) =>
+  useQuery({
+    queryKey: ["bookings", "admin", params] as const,
+    queryFn: () =>
+      getAdminBookings({
+        ...params,
+        PageIndex: Math.max(1, params.PageIndex ?? 1),
+      }),
+    placeholderData: (prev) => prev,
+  });
+
 // ── Tenant: Booking Details ──
 export const useTenantBookingDetails = (id: number | null) =>
   useQuery({
@@ -46,6 +60,15 @@ export const useOwnerBookingDetails = (id: number | null) =>
   useQuery({
     queryKey: ["bookings", "detail", "owner", id] as const,
     queryFn: () => getOwnerBookingDetails(id!),
+    enabled: id !== null && id > 0,
+    select: (d) => d.data,
+  });
+
+// ── Admin: Booking Details ──
+export const useAdminBookingDetails = (id: number | null) =>
+  useQuery({
+    queryKey: ["bookings", "detail", "admin", id] as const,
+    queryFn: () => getAdminBookingDetails(id!),
     enabled: id !== null && id > 0,
     select: (d) => d.data,
   });
@@ -67,9 +90,11 @@ export const useCancelBooking = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => cancelBooking(id),
-    onSuccess: (res) => {
+    onSuccess: (res, id) => {
       showSuccessMessage(res.message || "messages.bookingCancelled");
       qc.invalidateQueries({ queryKey: ["bookings"] });
+      qc.invalidateQueries({ queryKey: ["bookings", "detail", "tenant", id] });
+      qc.invalidateQueries({ queryKey: ["bookings", "detail", "owner", id] });
     },
     onError: (error) => showApiErrorToast(error),
   });

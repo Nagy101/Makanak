@@ -37,7 +37,7 @@ const CheckoutForm = memo(({ bookingId, onSuccess }: CheckoutFormProps) => {
 
         onSuccess(bookingId);
         window.location.href =
-          `https://accept.paymob.com/unifiedcheckout/?tenant_secret=${clientSecret}`;
+          `https://accept.paymob.com/unifiedcheckout/?publicKey=egy_pk_test_NQh8T4eVZW5NUJaIHtE3PCem3FohzNPq&clientSecret=${clientSecret}`;
       } catch {
         setError(t("payment.failedToInitialize"));
       } finally {

@@ -17,14 +17,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { encodeId } from "@/lib/idEncoder";
+import { useAuthStore } from "@/features/auth/store/authStore";
+import { useConfirmRefund, useRejectRefund } from "@/features/admin/useAdmin";
 import {
   useTenantBookingDetails,
   useOwnerBookingDetails,
+  useAdminBookingDetails,
   useCancelBooking,
   useUpdateBookingStatus,
 } from "../useBookings";
@@ -39,16 +53,26 @@ import {
   ShieldCheck,
   Banknote,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import type {
   BookingStatusType,
   TenantBookingDetails,
   OwnerBookingDetails,
+  AdminBookingDetails,
 } from "../booking.types";
 
 const TenantQRCodeDisplay = lazy(
   () => import("@/features/checkin/components/TenantQRCodeDisplay"),
 );
+
+const CANCEL_HIDDEN_STATUSES = new Set([
+  "Cancelled",
+  "RefundRequested",
+  "Refunded",
+  "Completed",
+  "CheckedIn",
+]);
 
 /** Normalise relative backend paths to absolute URLs */
 const toUrl = (path: string | null | undefined) =>
@@ -212,9 +236,7 @@ const TenantBookingContent = memo(
   }: TenantContentProps) => {
     const { t } = useTranslation();
 
-    const canCancel = ["PendingOwnerApproval", "PendingPayment"].includes(
-      booking.status,
-    );
+    const canCancel = !CANCEL_HIDDEN_STATUSES.has(booking.status);
     const canPay = booking.status === "PendingPayment";
     const showQr =
       !!booking.checkInQrCode &&
@@ -636,13 +658,126 @@ const OwnerBookingContent = memo(
 );
 OwnerBookingContent.displayName = "OwnerBookingContent";
 
+interface AdminContentProps {
+  booking: AdminBookingDetails;
+}
+
+const AdminBookingContent = memo(({ booking }: AdminContentProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="space-y-5 py-2">
+      <PropertyImageGallery
+        propertyName={booking.propertyTitle}
+        propertyMainImage={booking.propertyMainImage}
+        propertyImages={booking.propertyImages}
+      />
+
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">
+            {booking.propertyTitle}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {t("bookings.ref")} {encodeId(booking.id)}
+          </p>
+        </div>
+        <BookingStatusBadge status={booking.status} />
+      </div>
+
+      <Separator />
+
+      <div>
+        <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+          {t("bookings.stay")}
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+          <InfoRow
+            label={t("bookings.checkIn")}
+            value={format(new Date(booking.checkInDate), "MMM dd, yyyy")}
+          />
+          <InfoRow
+            label={t("bookings.checkOut")}
+            value={format(new Date(booking.checkOutDate), "MMM dd, yyyy")}
+          />
+          <InfoRow
+            label="Created At"
+            value={format(new Date(booking.createdAt), "MMM dd, yyyy")}
+          />
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
+        <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+          Financials
+        </p>
+        <div className="rounded-lg border bg-secondary/30 p-4 space-y-3 text-sm">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <InfoRow
+              label={t("bookings.totalCost")}
+              value={`${booking.totalPrice.toLocaleString()} EGP`}
+            />
+            <InfoRow
+              label={t("bookings.platformFee")}
+              value={`${booking.commissionPaid.toLocaleString()} EGP`}
+            />
+            <InfoRow
+              label="Transaction ID"
+              value={booking.transactionId || "-"}
+            />
+            <InfoRow
+              label="Refunded"
+              value={booking.isRefunded ? "Yes" : "No"}
+            />
+            <InfoRow
+              label="Refunded Amount"
+              value={`${booking.refundedAmount.toLocaleString()} EGP`}
+            />
+            <InfoRow
+              label="Cancellation Reason"
+              value={booking.cancellationReason || "-"}
+            />
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
+        <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+          Parties
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border bg-secondary/30 p-4 space-y-1.5">
+            <p className="text-xs uppercase text-muted-foreground">Tenant</p>
+            <p className="font-semibold text-foreground">{booking.tenantName}</p>
+            <p className="text-sm text-muted-foreground">
+              {booking.tenantPhoneNumber || "-"}
+            </p>
+          </div>
+          <div className="rounded-lg border bg-secondary/30 p-4 space-y-1.5">
+            <p className="text-xs uppercase text-muted-foreground">Owner</p>
+            <p className="font-semibold text-foreground">{booking.ownerName}</p>
+            <p className="text-sm text-muted-foreground">
+              {booking.ownerPhoneNumber || "-"}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+AdminBookingContent.displayName = "AdminBookingContent";
+
 // ── Modal shell ─────────────────────────────────────────────────────────────
 
 interface BookingDetailsModalProps {
   bookingId: number | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  role: "tenant" | "owner";
+  role: "tenant" | "owner" | "admin";
   onPayNow?: (bookingId: number) => void;
   /** Owner only — triggered when "Open Dispute" is clicked inside the modal */
   onDispute?: (bookingId: number) => void;
@@ -659,6 +794,13 @@ const BookingDetailsModal = memo(
   }: BookingDetailsModalProps) => {
     const { t } = useTranslation();
     const activeId = open ? bookingId : null;
+    const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+    const [refundConfirmOpen, setRefundConfirmOpen] = useState(false);
+    const [refundRejectOpen, setRefundRejectOpen] = useState(false);
+    const [refundRejectReason, setRefundRejectReason] = useState("");
+    const user = useAuthStore((s) => s.user);
+    const userRole = (user?.role || user?.userType || "").toLowerCase();
+    const isAdmin = userRole === "admin" || userRole === "administrator";
 
     // Both hooks are always called (React hook rules).
     // Only the one matching `role` is enabled — the other receives null.
@@ -666,16 +808,20 @@ const BookingDetailsModal = memo(
       useTenantBookingDetails(role === "tenant" ? activeId : null);
     const { data: ownerBooking, isLoading: ownerLoading } =
       useOwnerBookingDetails(role === "owner" ? activeId : null);
+    const { data: adminBooking, isLoading: adminLoading } =
+      useAdminBookingDetails(role === "admin" ? activeId : null);
 
     const cancelMutation = useCancelBooking();
     const updateStatusMutation = useUpdateBookingStatus();
+    const confirmRefundMutation = useConfirmRefund();
+    const rejectRefundMutation = useRejectRefund();
 
-    const handleCancel = useCallback(() => {
+    const handleCancelConfirm = useCallback(() => {
       if (!bookingId) return;
       cancelMutation.mutate(bookingId, {
-        onSuccess: () => onOpenChange(false),
+        onSuccess: () => setCancelConfirmOpen(false),
       });
-    }, [bookingId, cancelMutation, onOpenChange]);
+    }, [bookingId, cancelMutation]);
 
     const handleStatusUpdate = useCallback(
       (status: BookingStatusType) => {
@@ -688,43 +834,227 @@ const BookingDetailsModal = memo(
       [bookingId, updateStatusMutation, onOpenChange],
     );
 
-    const isLoading = tenantLoading || ownerLoading;
+    const isLoading = tenantLoading || ownerLoading || adminLoading;
+    const activeStatus =
+      role === "admin"
+        ? adminBooking?.status
+        : role === "owner"
+        ? ownerBooking?.status
+        : role === "tenant"
+          ? tenantBooking?.status
+          : ownerBooking?.status ?? tenantBooking?.status;
+    const canManageRefund = isAdmin && activeStatus === "RefundRequested";
+    const isRejectDisabled =
+      !refundRejectReason.trim() || rejectRefundMutation.isPending;
+
+    const handleConfirmRefund = useCallback(() => {
+      if (!bookingId) return;
+      confirmRefundMutation.mutate(bookingId, {
+        onSuccess: () => setRefundConfirmOpen(false),
+      });
+    }, [bookingId, confirmRefundMutation]);
+
+    const handleRejectRefund = useCallback(() => {
+      if (!bookingId || !refundRejectReason.trim()) return;
+      rejectRefundMutation.mutate(
+        { bookingId, reason: refundRejectReason.trim() },
+        {
+          onSuccess: () => {
+            setRefundRejectOpen(false);
+            setRefundRejectReason("");
+          },
+        },
+      );
+    }, [bookingId, refundRejectReason, rejectRefundMutation]);
 
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{t("bookings.bookingDetails")}</DialogTitle>
-          </DialogHeader>
+      <>
+        <Dialog
+          open={open}
+          onOpenChange={(nextOpen) => {
+            onOpenChange(nextOpen);
+            if (!nextOpen) setCancelConfirmOpen(false);
+          }}
+        >
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{t("bookings.bookingDetails")}</DialogTitle>
+            </DialogHeader>
 
-          <ModalErrorBoundary>
-            {isLoading ? (
-              <LoadingSkeleton />
-            ) : role === "tenant" && tenantBooking ? (
-              <TenantBookingContent
-                booking={tenantBooking}
-                bookingId={bookingId!}
-                onCancel={handleCancel}
-                onPay={onPayNow}
-                onClose={() => onOpenChange(false)}
-                isCancelling={cancelMutation.isPending}
-              />
-            ) : role === "owner" && ownerBooking ? (
-              <OwnerBookingContent
-                booking={ownerBooking}
-                bookingId={bookingId!}
-                onStatusUpdate={handleStatusUpdate}
-                isUpdating={updateStatusMutation.isPending}
-                onDispute={onDispute}
-              />
-            ) : (
-              <p className="py-8 text-center text-muted-foreground">
-                {t("bookings.bookingNotFound")}
-              </p>
-            )}
-          </ModalErrorBoundary>
-        </DialogContent>
-      </Dialog>
+            <ModalErrorBoundary>
+              {isLoading ? (
+                <LoadingSkeleton />
+              ) : (
+                <>
+                  {role === "tenant" && tenantBooking ? (
+                    <TenantBookingContent
+                      booking={tenantBooking}
+                      bookingId={bookingId!}
+                      onCancel={() => setCancelConfirmOpen(true)}
+                      onPay={onPayNow}
+                      onClose={() => onOpenChange(false)}
+                      isCancelling={cancelMutation.isPending}
+                    />
+                  ) : role === "owner" && ownerBooking ? (
+                    <OwnerBookingContent
+                      booking={ownerBooking}
+                      bookingId={bookingId!}
+                      onStatusUpdate={handleStatusUpdate}
+                      isUpdating={updateStatusMutation.isPending}
+                      onDispute={onDispute}
+                    />
+                  ) : role === "admin" && adminBooking ? (
+                    <AdminBookingContent booking={adminBooking} />
+                  ) : (
+                    <p className="py-8 text-center text-muted-foreground">
+                      {t("bookings.bookingNotFound")}
+                    </p>
+                  )}
+
+                  {canManageRefund && (
+                    <div className="mt-4 rounded-lg border bg-secondary/30 p-4">
+                      <p className="text-sm font-semibold text-foreground mb-3">
+                        Refund Requested
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        <Button
+                          variant="outline"
+                          onClick={() => setRefundRejectOpen(true)}
+                        >
+                          Reject Refund
+                        </Button>
+                        <Button
+                          onClick={() => setRefundConfirmOpen(true)}
+                        >
+                          Confirm Refund
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </ModalErrorBoundary>
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog
+          open={cancelConfirmOpen}
+          onOpenChange={setCancelConfirmOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to cancel this booking? The platform's
+                cancellation and refund policy will be applied.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleCancelConfirm();
+                }}
+                disabled={cancelMutation.isPending}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {cancelMutation.isPending ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Confirm Cancel
+                  </span>
+                ) : (
+                  "Confirm Cancel"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog
+          open={refundConfirmOpen}
+          onOpenChange={setRefundConfirmOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Refund</AlertDialogTitle>
+              <AlertDialogDescription>
+                Have you successfully processed the manual refund via the
+                payment gateway dashboard? This action will finalize the refund
+                in our system and notify the tenant.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleConfirmRefund();
+                }}
+                disabled={confirmRefundMutation.isPending}
+              >
+                {confirmRefundMutation.isPending ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Confirm Refund
+                  </span>
+                ) : (
+                  "Confirm Refund"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <Dialog
+          open={refundRejectOpen}
+          onOpenChange={(nextOpen) => {
+            setRefundRejectOpen(nextOpen);
+            if (!nextOpen && !rejectRefundMutation.isPending) {
+              setRefundRejectReason("");
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Reject Refund</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Rejection Reason
+                </label>
+                <Textarea
+                  value={refundRejectReason}
+                  onChange={(e) => setRefundRejectReason(e.target.value)}
+                  placeholder="Provide a reason for rejecting this refund"
+                  rows={4}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setRefundRejectOpen(false)}
+                  disabled={rejectRefundMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleRejectRefund}
+                  disabled={isRejectDisabled}
+                >
+                  {rejectRefundMutation.isPending ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Reject Refund
+                    </span>
+                  ) : (
+                    "Reject Refund"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   },
 );

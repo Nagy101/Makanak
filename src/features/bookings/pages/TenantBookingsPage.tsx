@@ -39,8 +39,19 @@ import {
   CreditCard,
   AlertTriangle,
   Star,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const PaymentModal = lazy(
   () => import("@/features/payment/components/PaymentModal"),
@@ -63,6 +74,8 @@ const STATUS_OPTIONS: { labelKey: string; value: BookingStatusType | "All" }[] =
     { labelKey: "bookings.pendingPayment", value: "PendingPayment" },
     { labelKey: "bookings.paymentFailed", value: "PaymentFailed" },
     { labelKey: "bookings.confirmed", value: "PaymentReceived" },
+    { labelKey: "bookings.refundRequested", value: "RefundRequested" },
+    { labelKey: "bookings.refunded", value: "Refunded" },
     { labelKey: "bookings.checkedIn", value: "CheckedIn" },
     { labelKey: "bookings.completed", value: "Completed" },
     { labelKey: "bookings.cancelled", value: "Cancelled" },
@@ -77,6 +90,13 @@ const SORT_OPTIONS = [
 ];
 
 const PAGE_SIZE = 8;
+const CANCEL_HIDDEN_STATUSES = new Set([
+  "Cancelled",
+  "RefundRequested",
+  "Refunded",
+  "Completed",
+  "CheckedIn",
+]);
 
 /** Normalize relative backend image paths to absolute frontend URLs */
 const toUrl = (path: string | null | undefined) =>
@@ -111,9 +131,7 @@ const BookingCard = memo(
     isCancelling: boolean;
   }) => {
     const { t } = useTranslation();
-    const canCancel = ["PendingOwnerApproval", "PendingPayment"].includes(
-      booking.status,
-    );
+    const canCancel = !CANCEL_HIDDEN_STATUSES.has(booking.status);
     const canPay = booking.status === "PendingPayment";
     const canDispute = ["PaymentReceived", "CheckedIn", "Completed"].includes(
       booking.status,
@@ -249,6 +267,8 @@ export default function TenantBookingsPage() {
   const [payOpen, setPayOpen] = useState(false);
   const [disputeBookingId, setDisputeBookingId] = useState<number | null>(null);
   const [disputeOpen, setDisputeOpen] = useState(false);
+  const [cancelTargetId, setCancelTargetId] = useState<number | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<{
     bookingId: number;
     propertyId: number;
@@ -289,10 +309,21 @@ export default function TenantBookingsPage() {
 
   const handleCancel = useCallback(
     (id: number) => {
-      cancelMutation.mutate(id);
+      setCancelTargetId(id);
+      setCancelOpen(true);
     },
-    [cancelMutation],
+    [],
   );
+
+  const handleConfirmCancel = useCallback(() => {
+    if (!cancelTargetId) return;
+    cancelMutation.mutate(cancelTargetId, {
+      onSuccess: () => {
+        setCancelOpen(false);
+        setCancelTargetId(null);
+      },
+    });
+  }, [cancelMutation, cancelTargetId]);
 
   const handlePay = useCallback((id: number) => {
     setPayBookingId(id);
@@ -469,6 +500,43 @@ export default function TenantBookingsPage() {
           />
         </Suspense>
       )}
+
+      <AlertDialog
+        open={cancelOpen}
+        onOpenChange={(nextOpen) => {
+          setCancelOpen(nextOpen);
+          if (!nextOpen) setCancelTargetId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this booking? The platform's
+              cancellation and refund policy will be applied.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                handleConfirmCancel();
+              }}
+              disabled={cancelMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelMutation.isPending ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Confirm Cancel
+                </span>
+              ) : (
+                "Confirm Cancel"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
