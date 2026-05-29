@@ -2,8 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Suspense, lazy, useEffect } from "react";
+import ReactGA from "react-ga4";
 import { useTranslation } from "react-i18next";
 import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
@@ -174,6 +175,22 @@ const RootRoute = () => {
 
 // Component inside Router to use navigation hooks
 const RouterContent = () => {
+  const location = useLocation();
+  const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+
+  useEffect(() => {
+    if (!gaId) return;
+    ReactGA.initialize(gaId);
+  }, [gaId]);
+
+  useEffect(() => {
+    if (!gaId) return;
+    ReactGA.send({
+      hitType: "pageview",
+      page: location.pathname + location.search,
+    });
+  }, [gaId, location]);
+
   // Monitor banned user status (needs to be inside Router)
   useBannedUserCheck();
   // Hydrate user profile from token on every page load / refresh
