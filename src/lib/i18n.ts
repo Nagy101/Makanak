@@ -20,7 +20,8 @@ i18n
       en: { translation: en },
       ar: { translation: ar },
     },
-    fallbackLng: "en",
+    lng: "ar",
+    fallbackLng: "ar",
     supportedLngs: ["en", "ar"],
     interpolation: { escapeValue: false },
     detection: {
@@ -31,7 +32,7 @@ i18n
   });
 
 // Apply direction on init + every change
-applyDirection(i18n.language ?? "en");
+applyDirection(i18n.language ?? "ar");
 i18n.on("languageChanged", applyDirection);
 
 export default i18n;

@@ -5,7 +5,6 @@
     "propertiesTitle": "Browse Properties — Makanak",
     "propertiesDescription": "Search and filter verified rental properties across Egypt on Makanak."
   },
-
   "common": {
     "search": "Search",
     "loading": "Loading...",
@@ -35,7 +34,6 @@
     "nights": "nights",
     "reviews": "Reviews"
   },
-
   "messages": {
     "accountBannedContactSupport": "Your account has been banned. Please contact support.",
     "invalidEmailOrPassword": "Invalid email or password.",
@@ -66,7 +64,6 @@
     "unexpectedError": "An unexpected error occurred.",
     "fileTooLarge": "\"{{fileName}}\" is too large. Maximum allowed size is {{limitMB}} MB."
   },
-
   "nav": {
     "browseProperties": "Browse Properties",
     "myBookings": "My Bookings",
@@ -79,13 +76,15 @@
     "admin": "Admin",
     "owner": "Owner",
     "tenant": "Tenant",
-    "language": "Language"
+    "language": "Language",
+    "aboutUs": "About Us",
+    "contactUs": "Contact Us",
+    "aboutUsTour": "Discover how we guarantee a 100% safe experience.. Start here!"
   },
-
   "home": {
     "heroBadge": "Egypt's Premier Real Estate Platform",
-    "heroTitle": "Find your perfect place\nto call home",
-    "heroSubtitle": "Discover thousands of verified properties across Egypt — apartments, chalets, villas and more.",
+    "heroTitle": "Rent your home or resort directly from the owner.. Safely and without brokers",
+    "heroSubtitle": "Discover thousands of verified properties, contact the owner, and pay securely.",
     "searchPlaceholder": "Search by location, title, or property type...",
     "statsProperties": "Properties",
     "statsGovernorates": "Governorates",
@@ -105,12 +104,12 @@
     "howItWorksBadge": "Simple & Fast",
     "howItWorksTitle": "How Makanak Works",
     "howItWorksSubtitle": "Book your perfect property in three easy steps.",
-    "step1Title": "Search & Discover",
-    "step1Desc": "Browse thousands of verified properties by location, dates, guests, and budget.",
-    "step2Title": "Choose & Book",
-    "step2Desc": "Select your perfect stay, check availability, and confirm your booking securely.",
-    "step3Title": "Move In & Enjoy",
-    "step3Desc": "Check in with ease, enjoy your stay, and leave a review for future guests.",
+    "step1Title": "1. Verify Identity",
+    "step1Desc": "Upload your ID for trust & security.",
+    "step2Title": "2. Book a Property",
+    "step2Desc": "Select dates and wait for owner approval.",
+    "step3Title": "3. Pay Booking Earnest Money",
+    "step3Desc": "Pay the booking earnest money online to reveal details.",
     "ownerCtaTitle": "Have a property?\nList it with Makanak today",
     "ownerCtaSubtitle": "Join thousands of property owners earning through Makanak. Full listing control, instant bookings, and dedicated owner support — all in one platform.",
     "getStartedAsOwner": "Get Started as Owner",
@@ -128,9 +127,14 @@
     "footerOwnerSignIn": "Owner Sign In",
     "footerOwnerDashboard": "Owner Dashboard",
     "footerCopyright": "© {{year}} Makanak. All rights reserved.",
-    "footerBuiltWith": "Built with ♥ in Egypt"
+    "footerBuiltWith": "Built with ♥ in Egypt",
+    "step4Title": "4. Meet, Scan QR & Pay Rent",
+    "step4Desc": "Scan the secure QR code upon arrival and pay rent in cash.",
+    "quickAction1": "🔥 Chalets for Sale",
+    "quickAction2": "🏢 Apartments for Rent",
+    "quickAction3": "🏖️ Summer Resorts",
+    "marketingBadge": "We are here to help you.. not to exploit you! 🤝"
   },
-
   "footer": {
     "brand": "Egypt's trusted platform for finding and listing properties. Transparent, fast, and reliable.",
     "address": "Building 47, Street 9, 3rd Floor, Office 32, Maadi, Cairo, Egypt",
@@ -152,7 +156,6 @@
     "copyright": "© {{year}} Makanak. All rights reserved.",
     "builtWith": "Built with ♥ in Egypt"
   },
-
   "about": {
     "pageTitle": "About Us",
     "heroTitle": "About Makanak",
@@ -169,9 +172,24 @@
     "featureDisputeTitle": "Dispute Resolution",
     "featureDisputeDesc": "Our dedicated dispute resolution team is here to mediate and resolve any issues between tenants and owners quickly and fairly.",
     "featureBookingTitle": "Seamless Booking",
-    "featureBookingDesc": "From search to check-in, our streamlined booking flow makes it easy to find, reserve, and enjoy your perfect property."
+    "featureBookingDesc": "From search to check-in, our streamlined booking flow makes it easy to find, reserve, and enjoy your perfect property.",
+    "coreValueTitle": "Absolute Security for Both Parties",
+    "coreValueDesc": "We mandate ID verification to ensure a safe environment for both owners and tenants.",
+    "tenantLifecycleTitle": "The Tenant Lifecycle",
+    "tenantStep1": "Search & Find",
+    "tenantStep2": "Request Booking",
+    "tenantStep3": "Owner Approves",
+    "tenantStep4": "Pay Booking Earnest Money",
+    "tenantStep5": "Get Owner Details & QR Code",
+    "tenantStep6": "Meet Owner, Scan QR, & Pay Rent (Cash)",
+    "ownerLifecycleTitle": "The Owner Lifecycle",
+    "ownerStep1": "List Property",
+    "ownerStep2": "Receive Verified Requests",
+    "ownerStep3": "Approve Booking",
+    "ownerStep4": "Wait for Earnest Money Confirmation",
+    "ownerStep5": "Meet Tenant, Scan QR, & Receive Cash",
+    "termsLink": "Read our Terms, Conditions, and Refund Policy"
   },
-
   "contact": {
     "pageTitle": "Contact Us",
     "heroTitle": "Get in Touch",
@@ -197,7 +215,6 @@
     "messageRequired": "Message is required",
     "sendMessage": "Send Message"
   },
-
   "index": {
     "welcomeTo": "Welcome to",
     "makanak": "Makanak",
@@ -214,7 +231,6 @@
     "addProperty": "Add Property",
     "incomingBookings": "Incoming Bookings"
   },
-
   "auth": {
     "welcomeBackTitle": "Welcome back",
     "signInSubtitle": "Sign in to your Makanak account",
@@ -284,7 +300,6 @@
     "pwStrengthMedium": "Medium",
     "pwStrengthStrong": "Strong"
   },
-
   "properties": {
     "title": "Properties",
     "propertiesFound": "{{count}} property found",
@@ -335,7 +350,6 @@
     "rating": "rating",
     "view": "View"
   },
-
   "bookings": {
     "title": "My Bookings",
     "incomingBookings": "Incoming Bookings",
@@ -383,7 +397,7 @@
     "totalNights": "Total Nights",
     "costBreakdown": "Cost Breakdown",
     "platformFee": "Platform Fee",
-    "paidOnline": "Paid online via card \u2714",
+    "paidOnline": "Paid online via card ✔",
     "paidLabel": "Paid",
     "ownerPayment": "Owner Payment",
     "payInCash": "Pay in cash directly to owner at arrival",
@@ -396,7 +410,7 @@
     "checkinInfo": "Check-in Info",
     "viewExactLocation": "View Exact Location",
     "cancelBooking": "Cancel Booking",
-    "payPlatformFee": "Pay Platform Fee \u2014 {{amount}} EGP",
+    "payPlatformFee": "Pay Platform Fee — {{amount}} EGP",
     "qrAlreadyScanned": "QR already scanned",
     "expectedPayment": "Expected Payment",
     "cashFromTenant": "Cash from tenant at check-in",
@@ -421,7 +435,6 @@
     "wontBeChargedYet": "You won't be charged yet",
     "filterByStatus": "Filter by status"
   },
-
   "disputes": {
     "title": "My Disputes",
     "allStatuses": "All Statuses",
@@ -456,17 +469,15 @@
     "resolved": "Resolved",
     "provideReasoning": "Provide your reasoning...",
     "submitDecision": "Submit Decision",
-    "loadingReasons": "Loading reasons\u2026",
+    "loadingReasons": "Loading reasons…",
     "selectReason": "Select a reason",
     "describeIssue": "Describe the issue..."
   },
-
   "notFound": {
     "title": "404",
     "heading": "Page not found",
     "description": "The page you're looking for doesn't exist or has been moved."
   },
-
   "owner": {
     "addProperty": "Add Property",
     "editProperty": "Edit Property",
@@ -547,7 +558,6 @@
     "sidebarMyAccount": "My Account",
     "ownerDashboard": "Owner Dashboard"
   },
-
   "admin": {
     "dashboard": "Analytics Dashboard",
     "dashboardSubtitle": "Real-time overview of the Makanak platform",
@@ -679,7 +689,6 @@
     "confirmStrikeDesc": "Are you sure you want to issue a strike to this user? 3 strikes will result in a ban.",
     "confirmStrikeAction": "Yes, Issue Strike"
   },
-
   "profile": {
     "title": "Profile",
     "personalInfo": "Personal Information",
@@ -744,13 +753,11 @@
     "newPassword": "New Password",
     "updatePassword": "Update Password"
   },
-
   "language": {
     "title": "Choose Language",
     "english": "English",
     "arabic": "العربية"
   },
-
   "checkin": {
     "qrCheckinScanner": "QR Check-in Scanner",
     "scanTenantQr": "Scan a tenant's QR code to confirm their check-in.",
@@ -773,7 +780,6 @@
     "cameraAccessDenied": "Camera access denied. Please allow camera permissions or use the image upload option below.",
     "cameraNotAvailable": "Camera not available. Use the image upload option instead."
   },
-
   "reviews": {
     "leaveReview": "Leave a Review",
     "shareExperience": "Share your experience to help other guests.",
@@ -793,7 +799,6 @@
     "reviewCount_other": "{{count}} reviews",
     "deleteReview": "Delete review"
   },
-
   "payment": {
     "paymentSuccessful": "Payment Successful!",
     "bookingConfirmed": "Your booking has been confirmed.",
@@ -806,7 +811,6 @@
     "missingPublicKey": "Payment is not configured. Please set VITE_PAYMOB_PUBLIC_KEY.",
     "failedToInitialize": "Failed to initialize payment. Please try again."
   },
-
   "paymentStatus": {
     "successTitle": "Payment completed",
     "successDescription": "Your Paymob payment was completed successfully.",
@@ -819,19 +823,16 @@
     "backToBookings": "Back to my bookings",
     "browseProperties": "Browse properties"
   },
-
   "notifications": {
     "title": "Notifications",
     "all": "All",
     "unread": "Unread",
     "noNotifications": "No notifications"
   },
-
   "guards": {
     "pleaseLogIn": "Please log in to access this page.",
     "accessDenied": "Access denied. Only property owners can access this page."
   },
-
   "legal": {
     "agreeToTerms": "I agree to the <termsLink>Terms & Conditions</termsLink> and <privacyLink>Privacy Policy</privacyLink>.",
     "mustAgree": "You must agree to the Terms & Conditions and Privacy Policy.",
@@ -925,5 +926,8 @@
     "section14P2": "Data Protection: We use advanced electronic protection protocols and SSL encryption to ensure no unauthorized party can access user data.",
     "section14P3": "No Data Trading: We are fully committed to not selling, renting, or sharing user data with any third party for marketing or other purposes.",
     "section14P4": "Conditional Data Sharing: This is our golden rule — contact data between the owner and tenant is only shared after the successful completion of the deposit payment to ensure seriousness and privacy."
+  },
+  "whatsapp": {
+    "needHelp": "Need help? We are here!"
   }
 }

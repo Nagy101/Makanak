@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Building2, LogOut, Menu, User } from "lucide-react";
@@ -32,6 +32,22 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
   const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
   const location = useLocation();
+  const isHomePage = location.pathname === "/";
+  const [showTour, setShowTour] = useState(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isHomePage) {
+      timer = setTimeout(() => setShowTour(true), 4500);
+    } else {
+      setShowTour(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isHomePage]);
+
+  const dismissTour = () => {
+    setShowTour(false);
+  };
   const logout = useLogout();
   const token = useAuthStore((s) => s.token);
 
@@ -72,18 +88,20 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
     );
 
   // Role-based nav items
+  const baseNavItems: NavItem[] = [
+    { label: t("nav.browseProperties"), href: "/properties", exact: true },
+    { label: t("nav.aboutUs", "About Us"), href: "/about", exact: true },
+    { label: t("nav.contactUs", "Contact Us"), href: "/contact", exact: true },
+  ];
+
   const navItems: NavItem[] = !isAuthenticated
-    ? [{ label: t("nav.browseProperties"), href: "/properties", exact: true }]
+    ? baseNavItems
     : isAdmin
-      ? [{ label: t("nav.adminDashboard"), href: "/admin", exact: false }]
+      ? [{ label: t("nav.adminDashboard"), href: "/admin", exact: false }, ...baseNavItems]
       : isOwner
-        ? [{ label: t("nav.ownerDashboard"), href: "/owner", exact: false }]
+        ? [{ label: t("nav.ownerDashboard"), href: "/owner", exact: false }, ...baseNavItems]
         : [
-            {
-              label: t("nav.browseProperties"),
-              href: "/properties",
-              exact: true,
-            },
+            ...baseNavItems,
             { label: t("nav.myBookings"), href: "/my-bookings", exact: true },
             { label: t("nav.myDisputes"), href: "/my-disputes", exact: true },
           ];
@@ -94,12 +112,50 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
   };
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-30 border-b border-border/50 bg-background/80 backdrop-blur-xl shadow-panel",
-        className,
+    <>
+      {/* Tour Overlay */}
+      {showTour && (
+        <div 
+          className="fixed inset-0 z-[40] bg-black/60 backdrop-blur-sm cursor-pointer animate-in fade-in duration-500"
+          onClick={dismissTour}
+        />
       )}
-    >
+
+      {/* Mini Top-Bar */}
+      <div className="bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white py-1.5 px-4 z-40 relative border-b border-white/10">
+        <div className="container mx-auto flex justify-between items-center text-xs sm:text-sm">
+          <div className="flex-1 flex justify-center md:justify-start overflow-hidden">
+            <span className="font-medium tracking-wide animate-pulse inline-block truncate">
+              تابعنا على منصات التواصل لمعرفة أحدث الأخبار 
+            </span>
+          </div>
+          <div className="hidden md:flex items-center gap-4 shrink-0">
+            <a href="https://www.facebook.com/share/1bLdoCZpwf/" target="_blank" rel="noopener noreferrer" className="hover:text-[#1877F2] hover:scale-110 transition-all" aria-label="Facebook">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/>
+              </svg>
+            </a>
+            <a href="https://www.instagram.com/findmakanak?igsh=ZDgycjh3MTN2MXdv" target="_blank" rel="noopener noreferrer" className="hover:text-[#E1306C] hover:scale-110 transition-all" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+              </svg>
+            </a>
+            <a href="https://www.tiktok.com/@findmakanak?_r=1&_t=ZS-97IDBruF0xZ" target="_blank" rel="noopener noreferrer" className="hover:text-gray-300 hover:scale-110 transition-all" aria-label="TikTok">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <header
+        className={cn(
+          "sticky top-0 z-30 border-b border-border/50 bg-background/80 backdrop-blur-xl shadow-panel",
+          showTour ? "relative z-[45]" : "",
+          className,
+        )}
+      >
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 gap-4">
         {/* Logo */}
         <Link to="/" className="flex items-center shrink-0 group">
@@ -112,15 +168,53 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
 
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-0.5 flex-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={linkClass(item.href, item.exact)}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const isAboutUs = item.href === "/about";
+            const isSpotlighted = showTour && isAboutUs;
+
+            return (
+              <div key={item.href} className={cn("relative", isSpotlighted && "z-[50]")}>
+                <Link
+                  to={item.href}
+                  onClick={() => {
+                    if (isSpotlighted) dismissTour();
+                  }}
+                  className={cn(
+                    linkClass(item.href, item.exact),
+                    isSpotlighted && "bg-primary text-primary-foreground shadow-[0_0_20px_rgba(30,58,138,0.8)] ring-4 ring-primary/30"
+                  )}
+                >
+                  {item.label}
+                </Link>
+
+                {isSpotlighted && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-5 w-64 max-w-[85vw] animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="relative bg-gradient-to-r from-primary to-accent text-white p-4 rounded-2xl shadow-2xl animate-bounce" style={{ animationDuration: '2s' }}>
+                      {/* Triangle pointer */}
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-primary transform rotate-45" />
+                      
+                      {/* X Button */}
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          dismissTour();
+                        }}
+                        className="absolute top-1 right-1 p-2 rounded-full hover:bg-white/30 transition-colors"
+                        aria-label="Close spotlight"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+
+                      <p className="text-sm font-bold text-center leading-relaxed drop-shadow-sm mt-1 px-2">
+                        {t("nav.aboutUsTour")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </nav>
 
         {/* Right side actions */}
@@ -260,7 +354,8 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
           )}
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 });
 
