@@ -16,7 +16,7 @@
  *   • Governorate store: atomic selector (s => s.governorates)
  */
 
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -33,6 +33,7 @@ import {
   ShieldCheck,
   CreditCard,
   Headphones,
+  QrCode,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,6 +44,34 @@ import { useLookupStore } from "@/features/lookup";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useLocalizedField } from "@/hooks/useLocalizedField";
 import Footer from "@/components/Footer";
+
+// ─────────────────────────────────────────────────────────────
+// Typewriter Component
+// ─────────────────────────────────────────────────────────────
+const Typewriter = memo(function Typewriter({ text }: { text: string }) {
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    setDisplayedText("");
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        setDisplayedText(text.substring(0, i + 1));
+        i++;
+      } else {
+        clearInterval(timer);
+      }
+    }, 40); // typing speed
+    return () => clearInterval(timer);
+  }, [text]);
+
+  return (
+    <>
+      {displayedText}
+      <span className="animate-pulse border-r-4 border-white ml-1" style={{ display: 'inline-block', height: '1em', verticalAlign: 'middle' }}></span>
+    </>
+  );
+});
 
 // ─────────────────────────────────────────────────────────────
 // Hero Section — memoised, no internal navigation handler calls
@@ -81,17 +110,38 @@ const HeroSection = memo(function HeroSection({
 
       {/* Content */}
       <div className="relative z-10 mx-auto w-full max-w-4xl px-4 text-center text-white">
+        {/* Style for the custom subtle float animation */}
+        <style>{`
+          @keyframes subtle-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+          }
+          .animate-subtle-float {
+            animation: subtle-float 3s ease-in-out infinite;
+          }
+        `}</style>
+
         {/* Pill badge */}
-        <div className="mb-5 flex justify-center animate-fade-in-down">
+        <div className="mb-4 flex justify-center animate-fade-in-down">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-4 py-1.5 text-sm font-medium backdrop-blur-sm text-white">
             <Star className="h-4 w-4 fill-white text-white" />
             {t("home.heroBadge")}
           </span>
         </div>
 
+        {/* Marketing Badge */}
+        <div className="mb-6 flex justify-center animate-subtle-float">
+          <div className="relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-primary/80 to-accent/80 border border-white/20 backdrop-blur-md shadow-lg animate-pulse hover:animate-none" style={{ animationDuration: '2.5s' }}>
+            <span className="text-sm font-bold text-white drop-shadow-md tracking-wide">
+              {t("home.marketingBadge")}
+            </span>
+            <div className="absolute inset-0 rounded-full bg-white/5 animate-ping opacity-20" style={{ animationDuration: '3s' }}></div>
+          </div>
+        </div>
+
         {/* Headline */}
-        <h1 className="mb-6 text-4xl font-bold leading-tight drop-shadow-xl sm:text-5xl md:text-6xl animate-fade-in-up whitespace-pre-line">
-          {t("home.heroTitle")}
+        <h1 className="mb-6 text-4xl font-bold leading-tight drop-shadow-xl sm:text-5xl md:text-6xl whitespace-pre-line min-h-[100px] sm:min-h-[120px]">
+          <Typewriter text={t("home.heroTitle")} />
         </h1>
 
         <p className="mx-auto mb-10 max-w-2xl text-lg text-white/90 drop-shadow md:text-xl animate-fade-in-up">
@@ -99,7 +149,7 @@ const HeroSection = memo(function HeroSection({
         </p>
 
         {/* Search bar */}
-        <div className="mx-auto max-w-2xl rounded-2xl bg-white dark:bg-[rgb(19,23,32)]/90 border border-black/10 dark:border-white/10 p-3 shadow-2xl backdrop-blur-md">
+        <div className="mx-auto max-w-2xl rounded-2xl bg-white dark:bg-[rgb(19,23,32)]/90 border border-black/10 dark:border-white/10 p-3 shadow-2xl backdrop-blur-md animate-fade-in-up" style={{ animationDelay: '100ms' }}>
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="flex flex-1 items-center gap-3 rounded-xl border border-border bg-gray-50 dark:bg-secondary/50 px-4 py-3">
               <MapPin className="h-5 w-5 shrink-0 text-primary" />
@@ -115,12 +165,29 @@ const HeroSection = memo(function HeroSection({
             </div>
             <Button
               onClick={handleSubmit}
-              className="h-12 w-full shrink-0 rounded-xl px-8 text-base font-semibold sm:w-auto shadow-glow-sm hover:shadow-glow transition-premium"
+              className="h-12 w-full shrink-0 rounded-xl px-8 text-base font-semibold sm:w-auto shadow-glow-sm hover:shadow-glow transition-premium animate-pulse hover:animate-none"
             >
               <Search className="mr-2 h-4 w-4" />
               {t("common.search")}
             </Button>
           </div>
+        </div>
+
+        {/* Quick Action Pills */}
+        <div className="mt-8 flex flex-wrap justify-center gap-3 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          {[
+            { key: "quickAction1", query: "شاليهات" },
+            { key: "quickAction2", query: "شقق" },
+            { key: "quickAction3", query: "مصايف" },
+          ].map(({ key, query }) => (
+            <Link
+              key={key}
+              to={`/properties?Search=${encodeURIComponent(query)}`}
+              className="px-5 py-2.5 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 backdrop-blur-md shadow-[0_4px_15px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-1 hover:scale-105 font-semibold text-white text-sm"
+            >
+              {t(`home.${key}`)}
+            </Link>
+          ))}
         </div>
 
         {/* Trust badges */}
@@ -228,7 +295,7 @@ const GovernorateCard = memo(function GovernorateCard({
 // ─────────────────────────────────────────────────────────────
 const STEPS_KEYS = [
   {
-    icon: Search,
+    icon: ShieldCheck,
     number: 1,
     titleKey: "home.step1Title",
     descKey: "home.step1Desc",
@@ -240,10 +307,16 @@ const STEPS_KEYS = [
     descKey: "home.step2Desc",
   },
   {
-    icon: CheckCircle,
+    icon: CreditCard,
     number: 3,
     titleKey: "home.step3Title",
     descKey: "home.step3Desc",
+  },
+  {
+    icon: QrCode,
+    number: 4,
+    titleKey: "home.step4Title",
+    descKey: "home.step4Desc",
   },
 ] as const;
 
@@ -272,7 +345,7 @@ const HowItWorksSection = memo(function HowItWorksSection() {
         </div>
 
         {/* Steps */}
-        <div className="relative grid grid-cols-1 gap-12 sm:grid-cols-3 sm:gap-6">
+        <div className="relative grid grid-cols-1 gap-12 sm:grid-cols-4 sm:gap-6">
           {/* Connector line — desktop only */}
           <div
             aria-hidden="true"
@@ -399,6 +472,9 @@ export default function HomePage() {
       {/* ── Hero ───────────────────────────────────────────── */}
       <HeroSection onSearch={handleHeroSearch} />
 
+      {/* ── How It Works ────────────────────────────────── */}
+      <HowItWorksSection />
+
       {/* ── Browse by Governorate — GRAY ───────────────── */}
       {displayedGovernorates.length > 0 && (
         <section
@@ -483,9 +559,6 @@ export default function HomePage() {
           )}
         </div>
       </section>
-
-      {/* ── How It Works ────────────────────────────────── */}
-      <HowItWorksSection />
 
       {/* ── Owner CTA — WHITE ────────────────────────── */}
       {!isAuthenticated && (
