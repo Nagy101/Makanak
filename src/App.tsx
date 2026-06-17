@@ -16,7 +16,7 @@ import { useAllLookups } from "@/features/lookup";
 import { useBannedUserCheck, useProfile } from "@/features/auth/hooks/useAuth";
 import NotFound from "./pages/NotFound";
 import { showApiErrorToast } from "@/lib/apiError";
-
+import WhatsAppButton from './components/WhatsAppButton';
 // Lazy load legal & static pages
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
@@ -461,6 +461,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <AppContent />
+          <WhatsAppButton />
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>
