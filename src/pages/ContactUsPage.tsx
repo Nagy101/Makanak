@@ -66,7 +66,7 @@ export default function ContactUsPage() {
             href="https://www.facebook.com/share/1bLdoCZpwf/" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 p-6 shadow-sm hover:shadow-[0_0_20px_rgba(24,119,242,0.2)] hover:border-[#1877F2]/50 hover:-translate-y-1 transition-all duration-300"
+            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 p-6 shadow-sm hover:shadow-[0_0_20px_rgba(24,119,242,0.2)] hover:border-[#1877F2]/50 hover:-translate-y-1 active:scale-95 transition-all duration-300"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-[#1877F2]/0 to-[#1877F2]/0 group-hover:from-[#1877F2]/5 group-hover:to-transparent transition-colors duration-500" />
             <div className="relative z-10 flex flex-col items-center text-center gap-4">
@@ -87,7 +87,7 @@ export default function ContactUsPage() {
             href="https://www.instagram.com/findmakanak?igsh=ZDgycjh3MTN2MXdv" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 p-6 shadow-sm hover:shadow-[0_0_20px_rgba(225,48,108,0.2)] hover:border-[#E1306C]/50 hover:-translate-y-1 transition-all duration-300"
+            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 p-6 shadow-sm hover:shadow-[0_0_20px_rgba(225,48,108,0.2)] hover:border-[#E1306C]/50 hover:-translate-y-1 active:scale-95 transition-all duration-300"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-[#E1306C]/0 to-[#F56040]/0 group-hover:from-[#E1306C]/5 group-hover:to-[#F56040]/5 transition-colors duration-500" />
             <div className="relative z-10 flex flex-col items-center text-center gap-4">
@@ -108,7 +108,7 @@ export default function ContactUsPage() {
             href="https://www.tiktok.com/@findmakanak?_r=1&_t=ZS-97IDBruF0xZ" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 p-6 shadow-sm hover:shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:border-black/50 dark:hover:border-white/50 hover:-translate-y-1 transition-all duration-300"
+            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 p-6 shadow-sm hover:shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:border-black/50 dark:hover:border-white/50 hover:-translate-y-1 active:scale-95 transition-all duration-300"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-black/0 to-black/0 dark:from-white/0 dark:to-white/0 group-hover:from-black/5 dark:group-hover:from-white/5 transition-colors duration-500" />
             <div className="relative z-10 flex flex-col items-center text-center gap-4">
@@ -129,7 +129,7 @@ export default function ContactUsPage() {
             href="https://wa.me/201068057499" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 p-6 shadow-sm hover:shadow-[0_0_20px_rgba(37,211,102,0.2)] hover:border-[#25D366]/50 hover:-translate-y-1 transition-all duration-300"
+            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 p-6 shadow-sm hover:shadow-[0_0_20px_rgba(37,211,102,0.2)] hover:border-[#25D366]/50 hover:-translate-y-1 active:scale-95 transition-all duration-300"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-[#25D366]/0 to-[#25D366]/0 group-hover:from-[#25D366]/5 group-hover:to-transparent transition-colors duration-500" />
             <div className="relative z-10 flex flex-col items-center text-center gap-4">

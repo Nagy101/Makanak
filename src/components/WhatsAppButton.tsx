@@ -7,40 +7,37 @@ const WhatsAppButton: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
-    const dismissed = localStorage.getItem('whatsapp_tooltip_dismissed');
-    if (!dismissed) {
-      // Small delay before showing tooltip to catch user attention
-      const timer = setTimeout(() => {
-        setShowTooltip(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+    // Sequence Step 3: WhatsApp Tooltip
+    // ALWAYS SHOW - Removed localStorage check
+    const timer = setTimeout(() => {
+      setShowTooltip(true);
+    }, 13000);
+    return () => clearTimeout(timer);
   }, []);
 
   const dismissTooltip = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setShowTooltip(false);
-    localStorage.setItem('whatsapp_tooltip_dismissed', 'true');
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-3">
       {/* Tooltip */}
       {showTooltip && (
-        <div className="relative flex items-center gap-2 bg-white dark:bg-card px-4 py-3 rounded-2xl shadow-xl border border-black/5 dark:border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <p className="text-sm font-semibold text-foreground">
-            {t('whatsapp.needHelp', 'Need help? We are here!')}
+        <div className="relative flex items-center gap-3 bg-white dark:bg-card px-4 py-3 rounded-2xl shadow-xl border border-black/5 dark:border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <p className="text-sm font-bold text-foreground whitespace-nowrap">
+            تواصل معنا الان
           </p>
           <button
             onClick={dismissTooltip}
-            className="p-1 rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-colors shrink-0"
             aria-label="Dismiss tooltip"
           >
             <X className="h-4 w-4" />
           </button>
-          {/* Triangle pointer */}
-          <div className="absolute -bottom-2 right-6 w-4 h-4 bg-white dark:bg-card border-b border-r border-black/5 dark:border-white/10 transform rotate-45"></div>
+          {/* Triangle pointer centered */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-card border-b border-r border-black/5 dark:border-white/10 transform rotate-45"></div>
         </div>
       )}
 

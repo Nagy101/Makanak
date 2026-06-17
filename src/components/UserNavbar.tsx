@@ -38,7 +38,12 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isHomePage) {
-      timer = setTimeout(() => setShowTour(true), 4500);
+      timer = setTimeout(() => {
+        setShowTour(true);
+        if (window.innerWidth < 768) {
+          setSheetOpen(true);
+        }
+      }, 7000); // Sequence Step 2: Spotlight appears after Welcome Toast (6.5s)
     } else {
       setShowTour(false);
     }
@@ -126,10 +131,10 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
         <div className="container mx-auto flex justify-between items-center text-xs sm:text-sm">
           <div className="flex-1 flex justify-center md:justify-start overflow-hidden">
             <span className="font-medium tracking-wide animate-pulse inline-block truncate">
-              تابعنا على منصات التواصل لمعرفة أحدث الأخبار 
+              تابعنا على منصات التواصل لمعرفة أخر الاخبار 
             </span>
           </div>
-          <div className="hidden md:flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-3 md:gap-4 shrink-0">
             <a href="https://www.facebook.com/share/1bLdoCZpwf/" target="_blank" rel="noopener noreferrer" className="hover:text-[#1877F2] hover:scale-110 transition-all" aria-label="Facebook">
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
                 <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/>
@@ -265,58 +270,111 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                 <LogOut className="h-4 w-4" />
                 <span className="hidden lg:inline">{t("common.logout")}</span>
               </Button>
+            </>
+          ) : (
+            <div className="hidden md:flex items-center gap-1.5">
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/login">{t("common.signIn")}</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link to="/register">{t("common.signUp")}</Link>
+              </Button>
+            </div>
+          )}
 
-              {/* Mobile hamburger */}
-              <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="md:hidden">
-                    <Menu className="h-5 w-5" />
-                    <span className="sr-only">{t("nav.openMenu")}</span>
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-72 p-0">
-                  <SheetHeader className="p-4 border-b">
-                    <SheetTitle asChild>
-                      <div className="flex items-center gap-3">
-                        {userAvatar ? (
-                          <img
-                            src={userAvatar}
-                            alt={userName}
-                            className="h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-primary/20"
-                          />
-                        ) : (
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                            {userInitials}
-                          </div>
-                        )}
-                        <div className="text-left min-w-0">
-                          <p className="text-sm font-semibold truncate">
-                            {userName || t("common.profile")}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {userRoleLabel}
-                          </p>
+          {/* Mobile hamburger - Moved OUTSIDE isAuthenticated so all users see it! */}
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden ml-1">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">{t("nav.openMenu")}</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72 p-0">
+              <SheetHeader className="p-4 border-b">
+                <SheetTitle asChild>
+                  {isAuthenticated ? (
+                    <div className="flex items-center gap-3">
+                      {userAvatar ? (
+                        <img
+                          src={userAvatar}
+                          alt={userName}
+                          className="h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-primary/20"
+                        />
+                      ) : (
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                          {userInitials}
                         </div>
+                      )}
+                      <div className="text-left min-w-0">
+                        <p className="text-sm font-semibold truncate">
+                          {userName || t("common.profile")}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {userRoleLabel}
+                        </p>
                       </div>
-                    </SheetTitle>
-                  </SheetHeader>
-                  <nav className="p-3 space-y-1">
-                    {navItems.map((item) => (
+                    </div>
+                  ) : (
+                    <div className="text-left">
+                      <p className="text-sm font-semibold">{t("nav.menu", "القائمة")}</p>
+                    </div>
+                  )}
+                </SheetTitle>
+              </SheetHeader>
+              <nav className="p-3 space-y-1">
+                {navItems.map((item) => {
+                  const isAboutUs = item.href === "/about";
+                  const isSpotlighted = showTour && isAboutUs;
+
+                  return (
+                    <div key={item.href} className="relative">
                       <Link
-                        key={item.href}
                         to={item.href}
-                        onClick={() => setSheetOpen(false)}
+                        onClick={() => {
+                          if (isSpotlighted) dismissTour();
+                          setSheetOpen(false);
+                        }}
                         className={cn(
                           "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                           isActive(item.href, item.exact)
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:bg-primary hover:text-primary-foreground",
+                          isSpotlighted && "bg-primary text-primary-foreground shadow-[0_0_20px_rgba(30,58,138,0.8)] ring-4 ring-primary/30 relative z-[60]"
                         )}
                       >
                         {item.label}
                       </Link>
-                    ))}
-                    <Separator className="my-2" />
+
+                      {isSpotlighted && (
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[250px] z-[70] animate-in fade-in slide-in-from-top-2 duration-500">
+                          <div className="relative bg-gradient-to-r from-primary to-accent text-white p-4 rounded-2xl shadow-2xl animate-bounce" style={{ animationDuration: '2s' }}>
+                            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-primary transform rotate-45" />
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                dismissTour();
+                              }}
+                              className="absolute top-1 right-1 p-2 rounded-full hover:bg-white/30 transition-colors"
+                              aria-label="Close spotlight"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                            <p className="text-sm font-bold text-center leading-relaxed drop-shadow-sm mt-1 px-2">
+                              {t("nav.aboutUsTour")}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                
+                <Separator className="my-2" />
+                
+                {isAuthenticated ? (
+                  <>
                     <Link
                       to="/profile"
                       onClick={() => setSheetOpen(false)}
@@ -338,20 +396,20 @@ const UserNavbar = memo(({ className = "" }: UserNavbarProps) => {
                       <LogOut className="h-4 w-4" />
                       {t("common.logout")}
                     </button>
-                  </nav>
-                </SheetContent>
-              </Sheet>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/login">{t("common.signIn")}</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link to="/register">{t("common.signUp")}</Link>
-              </Button>
-            </>
-          )}
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-2 pt-2">
+                    <Button asChild onClick={() => setSheetOpen(false)}>
+                      <Link to="/login">{t("common.signIn")}</Link>
+                    </Button>
+                    <Button asChild onClick={() => setSheetOpen(false)}>
+                      <Link to="/register">{t("common.signUp")}</Link>
+                    </Button>
+                  </div>
+                )}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
       </header>

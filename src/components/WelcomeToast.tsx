@@ -6,41 +6,35 @@ export default function WelcomeToast() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Check if we've shown it this session
-    const hasSeenToast = sessionStorage.getItem("hasSeenWelcomeToast");
-    
-    if (!hasSeenToast) {
-      // Small delay before showing
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, 1000);
+    // ALWAYS SHOW - Removed sessionStorage check
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 500);
 
-      // Auto dismiss after 4 seconds (1s delay + 4s = 5s total)
-      const dismissTimer = setTimeout(() => {
-        dismissToast();
-      }, 5000);
+    // Auto dismiss after 6 seconds
+    const dismissTimer = setTimeout(() => {
+      dismissToast();
+    }, 6500);
 
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(dismissTimer);
-      };
-    }
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(dismissTimer);
+    };
   }, []);
 
   const dismissToast = () => {
     setIsVisible(false);
-    sessionStorage.setItem("hasSeenWelcomeToast", "true");
   };
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.95 }}
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="fixed bottom-6 left-4 md:left-6 z-[100] w-[calc(100%-2rem)] md:w-[400px] max-w-[90vw]"
+          className="fixed top-24 md:top-auto md:bottom-6 left-4 right-4 md:right-auto md:left-6 z-[9999] w-auto md:w-[400px] max-w-[90vw] mx-auto md:mx-0"
         >
           <div className="relative overflow-hidden bg-white dark:bg-slate-900 border border-border shadow-2xl rounded-2xl p-4 flex items-start gap-4">
             {/* Glossy highlight */}
